@@ -1,18 +1,16 @@
-import { 
-  users, categories, products, cartItems, orders, orderItems,
-  type User, type InsertUser, 
-  type Category, type InsertCategory,
-  type Product, type InsertProduct,
-  type CartItem, type InsertCartItem,
-  type ProductSearchParams, type ProductInput,
-  type Order, type InsertOrder, type OrderInput, type OrderSearchParams,
-  type OrderItem, type InsertOrderItem
-} from "@shared/schema";
-import { randomUUID } from "crypto";
 import session from "express-session";
-import createMemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
+import { pool, db } from "./db";
+import {
+  User, InsertUser, Category, InsertCategory, Product, InsertProduct, 
+  ProductInput, CartItem, InsertCartItem, ProductSearchParams, Order, 
+  OrderInput, OrderItem, OrderSearchParams,
+  users, categories, products, cartItems, orders, orderItems
+} from "@shared/schema";
+import { and, eq, like, between, desc, asc, sql, isNull, gte, lte } from "drizzle-orm";
 
-// Interface for storage operations
+const PostgresSessionStore = connectPg(session);
+
 export interface IStorage {
   // Session Store
   sessionStore: session.Store;
@@ -60,422 +58,214 @@ export interface IStorage {
   getOrderItemsWithProducts(orderId: number): Promise<(OrderItem & { product?: Product })[]>;
 }
 
-// In-memory storage implementation
-export class MemStorage implements IStorage {
+export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
-  private users: Map<number, User>;
-  private categories: Map<number, Category>;
-  private products: Map<number, Product>;
-  private cartItems: Map<number, CartItem>;
-  
-  // IDs for auto-increment
-  private currentUserId: number;
-  private currentCategoryId: number;
-  private currentProductId: number;
-  private currentCartItemId: number;
   
   constructor() {
-    // Инициализируем хранилище сессий
-    const MemoryStore = createMemoryStore(session);
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000 // Очистка истекших сессий каждые 24 часа
-    });
-    
-    this.users = new Map();
-    this.categories = new Map();
-    this.products = new Map();
-    this.cartItems = new Map();
-    
-    this.currentUserId = 1;
-    this.currentCategoryId = 1;
-    this.currentProductId = 1;
-    this.currentCartItemId = 1;
-    
-    // Initialize with admin user
-    this.createUser({
-      username: "admin",
-      email: "admin@eps.ru",
-      password: "admin",
-      isAdmin: true
-    });
-    
-    // Initialize with some categories
-    this.seedCategories();
-  }
-  
-  // Seed initial categories
-  private seedCategories() {
-    const initialCategories: InsertCategory[] = [
-      {
-        name: "Электростанции дизельные",
-        slug: "diesel-power-stations",
-        description: "Дизельные генераторы для обеспечения автономного электроснабжения",
-        icon: "power"
-      },
-      {
-        name: "Электроинструмент",
-        slug: "power-tools",
-        description: "Профессиональные электрические инструменты",
-        icon: "drill"
-      },
-      {
-        name: "Мотобуры",
-        slug: "motor-drills",
-        description: "Мотобуры для сверления отверстий в грунте",
-        icon: "drill"
-      },
-      {
-        name: "Сварочные аппараты",
-        slug: "welding-machines",
-        description: "Промышленные сварочные аппараты различных типов",
-        icon: "flash"
-      },
-      {
-        name: "Садовая техника",
-        slug: "garden-equipment",
-        description: "Оборудование для сада и ландшафтных работ",
-        icon: "tree"
-      },
-      {
-        name: "Электростанции бензиновые",
-        slug: "petrol-power-stations",
-        description: "Бензиновые генераторы для автономного электроснабжения",
-        icon: "power"
-      },
-      {
-        name: "Строительное оборудование",
-        slug: "construction-equipment",
-        description: "Техника для строительных и дорожных работ",
-        icon: "construction"
-      },
-      {
-        name: "Измерительная техника",
-        slug: "measuring-tools",
-        description: "Точные измерительные приборы и инструменты",
-        icon: "ruler-combined"
-      },
-      {
-        name: "Компрессоры",
-        slug: "compressors",
-        description: "Воздушные компрессоры различной мощности",
-        icon: "gauge"
-      },
-      {
-        name: "Станки",
-        slug: "machine-tools",
-        description: "Промышленные станки для обработки материалов",
-        icon: "cog"
-      },
-      {
-        name: "Пушки тепловые",
-        slug: "heat-guns",
-        description: "Тепловые пушки для обогрева помещений",
-        icon: "fire"
-      },
-      {
-        name: "Насосы",
-        slug: "pumps", 
-        description: "Насосное оборудование различных типов",
-        icon: "droplet"
-      },
-      {
-        name: "Двигатели",
-        slug: "engines",
-        description: "Двигатели внутреннего сгорания",
-        icon: "activity"
-      },
-      {
-        name: "Пусковые устройства",
-        slug: "starting-devices",
-        description: "Пусковые и зарядные устройства для автомобилей",
-        icon: "battery-charging"
-      },
-      {
-        name: "Снегоуборочные машины",
-        slug: "snow-removal-machines",
-        description: "Техника для уборки снега",
-        icon: "cloud-snow"
-      },
-      {
-        name: "Мойки",
-        slug: "washers",
-        description: "Моечное оборудование высокого давления",
-        icon: "droplet"
-      },
-      {
-        name: "Мотопомпы",
-        slug: "motor-pumps",
-        description: "Мотопомпы для перекачивания воды",
-        icon: "activity"
-      },
-      {
-        name: "Стабилизаторы напряжения",
-        slug: "voltage-stabilizers",
-        description: "Стабилизаторы для защиты электрооборудования",
-        icon: "zap"
-      },
-      {
-        name: "Лазерные уровни",
-        slug: "laser-levels",
-        description: "Лазерные измерительные приборы",
-        icon: "crosshair"
-      }
-    ];
-    
-    initialCategories.forEach(category => {
-      this.createCategory(category);
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true,
+      tableName: 'sessions',
     });
   }
   
   // User operations
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const result = await db.select().from(users).where(eq(users.id, id));
+    return result.length > 0 ? result[0] : undefined;
   }
   
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username
-    );
+    const result = await db.select().from(users).where(eq(users.username, username));
+    return result.length > 0 ? result[0] : undefined;
   }
   
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const createdAt = new Date();
-    const user: User = { 
-      ...insertUser, 
-      id, 
-      isAdmin: insertUser.isAdmin || false,
-      createdAt
-    };
-    this.users.set(id, user);
-    return user;
+  async createUser(user: InsertUser): Promise<User> {
+    const result = await db.insert(users).values(user).returning();
+    return result[0];
   }
   
   // Category operations
   async getAllCategories(): Promise<Category[]> {
-    return Array.from(this.categories.values());
+    return await db.select().from(categories).orderBy(categories.name);
   }
   
   async getCategoryById(id: number): Promise<Category | undefined> {
-    return this.categories.get(id);
+    const result = await db.select().from(categories).where(eq(categories.id, id));
+    return result.length > 0 ? result[0] : undefined;
   }
   
   async getCategoryBySlug(slug: string): Promise<Category | undefined> {
-    return Array.from(this.categories.values()).find(
-      (category) => category.slug === slug
-    );
+    const result = await db.select().from(categories).where(eq(categories.slug, slug));
+    return result.length > 0 ? result[0] : undefined;
   }
   
-  async createCategory(insertCategory: InsertCategory): Promise<Category> {
-    const id = this.currentCategoryId++;
-    const category: Category = { ...insertCategory, id, productCount: 0 };
-    this.categories.set(id, category);
-    return category;
+  async createCategory(category: InsertCategory): Promise<Category> {
+    const result = await db.insert(categories).values(category).returning();
+    return result[0];
   }
   
   async updateCategory(id: number, updateData: Partial<InsertCategory>): Promise<Category | undefined> {
-    const category = this.categories.get(id);
-    if (!category) return undefined;
-    
-    const updatedCategory = { ...category, ...updateData };
-    this.categories.set(id, updatedCategory);
-    return updatedCategory;
+    const result = await db.update(categories)
+      .set(updateData)
+      .where(eq(categories.id, id))
+      .returning();
+    return result.length > 0 ? result[0] : undefined;
   }
   
   async deleteCategory(id: number): Promise<boolean> {
-    // Check if category has products
-    const hasProducts = Array.from(this.products.values()).some(
-      (product) => product.categoryId === id
-    );
+    // Проверяем, есть ли товары в этой категории
+    const productsCount = await db.select({ count: sql<number>`count(*)` })
+      .from(products)
+      .where(eq(products.categoryId, id));
     
-    if (hasProducts) {
+    if (productsCount[0].count > 0) {
       return false;
     }
     
-    return this.categories.delete(id);
+    const result = await db.delete(categories).where(eq(categories.id, id)).returning();
+    return result.length > 0;
   }
   
   // Product operations
   async getAllProducts(): Promise<Product[]> {
-    return Array.from(this.products.values());
+    return await db.select().from(products);
   }
   
   async getProductById(id: number): Promise<Product | undefined> {
-    return this.products.get(id);
+    const result = await db.select().from(products).where(eq(products.id, id));
+    return result.length > 0 ? result[0] : undefined;
   }
   
   async getProductBySlug(slug: string): Promise<Product | undefined> {
-    return Array.from(this.products.values()).find(
-      (product) => product.slug === slug
-    );
+    const result = await db.select().from(products).where(eq(products.slug, slug));
+    return result.length > 0 ? result[0] : undefined;
   }
   
   async getProductsByCategoryId(categoryId: number): Promise<Product[]> {
-    return Array.from(this.products.values()).filter(
-      (product) => product.categoryId === categoryId && product.isActive
-    );
+    return await db.select().from(products).where(eq(products.categoryId, categoryId));
   }
   
   async searchProducts(params: ProductSearchParams): Promise<{ products: Product[], total: number }> {
-    let filtered = Array.from(this.products.values()).filter(product => product.isActive);
+    let query = db.select().from(products);
     
-    // Apply filters
+    // Фильтр по поисковому запросу
     if (params.query) {
-      const query = params.query.toLowerCase();
-      filtered = filtered.filter(product => 
-        product.name.toLowerCase().includes(query) || 
-        (product.description && product.description.toLowerCase().includes(query))
+      query = query.where(
+        sql`(${products.name} ILIKE ${'%' + params.query + '%'} OR ${products.description} ILIKE ${'%' + params.query + '%'})`
       );
     }
     
+    // Фильтр по категории
     if (params.categoryId) {
-      filtered = filtered.filter(product => product.categoryId === params.categoryId);
+      query = query.where(eq(products.categoryId, params.categoryId));
     }
     
-    if (params.minPrice !== undefined) {
-      filtered = filtered.filter(product => Number(product.price) >= params.minPrice!);
+    // Фильтр по цене
+    if (params.minPrice !== undefined && params.maxPrice !== undefined) {
+      query = query.where(
+        and(
+          gte(products.price, params.minPrice),
+          lte(products.price, params.maxPrice)
+        )
+      );
+    } else if (params.minPrice !== undefined) {
+      query = query.where(gte(products.price, params.minPrice));
+    } else if (params.maxPrice !== undefined) {
+      query = query.where(lte(products.price, params.maxPrice));
     }
     
-    if (params.maxPrice !== undefined) {
-      filtered = filtered.filter(product => Number(product.price) <= params.maxPrice!);
-    }
+    // Подсчет общего количества товаров для пагинации
+    const countResult = await db.select({ count: sql<number>`count(*)` })
+      .from(products)
+      .where(query.where);
     
-    // Apply sorting
+    const total = countResult[0]?.count || 0;
+    
+    // Сортировка
     if (params.sort) {
       switch (params.sort) {
-        case 'price-low':
-          filtered.sort((a, b) => Number(a.price) - Number(b.price));
+        case "price-low":
+          query = query.orderBy(asc(products.price));
           break;
-        case 'price-high':
-          filtered.sort((a, b) => Number(b.price) - Number(a.price));
+        case "price-high":
+          query = query.orderBy(desc(products.price));
           break;
-        case 'newest':
-          filtered.sort((a, b) => 
-            new Date(b.createdAt || Date.now()).getTime() - 
-            new Date(a.createdAt || Date.now()).getTime()
-          );
+        case "newest":
+          query = query.orderBy(desc(products.id));
           break;
-        case 'popular':
-          filtered.sort((a, b) => Number(b.rating) - Number(a.rating));
+        case "popular":
+          // Предполагаем, что популярные в топе
+          query = query.orderBy(desc(products.isFeatured), desc(products.id));
           break;
-        case 'featured':
+        case "featured":
         default:
-          filtered.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
+          query = query.orderBy(desc(products.isFeatured), asc(products.name));
           break;
       }
     }
     
-    const total = filtered.length;
+    // Пагинация
+    const offset = (params.page - 1) * params.limit;
+    query = query.limit(params.limit).offset(offset);
     
-    // Apply pagination
-    const page = params.page || 1;
-    const limit = params.limit || 12;
-    const start = (page - 1) * limit;
-    const end = page * limit;
-    
-    const paginatedProducts = filtered.slice(start, end);
+    const productsResult = await query;
     
     return {
-      products: paginatedProducts,
+      products: productsResult,
       total
     };
   }
   
   async getFeaturedProducts(): Promise<Product[]> {
-    return Array.from(this.products.values()).filter(
-      (product) => product.isFeatured && product.isActive
-    );
+    return await db.select().from(products).where(eq(products.isFeatured, true));
   }
   
   async createProduct(productInput: ProductInput): Promise<Product> {
-    const id = this.currentProductId++;
-    const createdAt = new Date();
-    
-    // Преобразуем числовые данные в строковые для хранения
+    // Оптимизация: преобразуем ProductInput в InsertProduct
     const insertProduct: InsertProduct = {
-      ...productInput,
-      // Преобразуем число в строку с двумя десятичными знаками
-      price: productInput.price.toString(),
-      // Обрабатываем опциональную цену
-      originalPrice: productInput.originalPrice ? productInput.originalPrice.toString() : null,
+      sku: productInput.sku,
+      name: productInput.name,
+      slug: productInput.slug,
+      description: productInput.description || null,
+      shortDescription: productInput.shortDescription || null,
+      price: productInput.price,
+      originalPrice: productInput.originalPrice || null,
+      imageUrl: productInput.imageUrl || null,
+      stock: productInput.stock || null,
+      categoryId: productInput.categoryId,
+      isActive: productInput.isActive ?? true,
+      isFeatured: productInput.isFeatured ?? false,
+      tag: productInput.tag || null,
     };
     
-    console.log("Преобразованные данные товара для хранения:", insertProduct);
-    
-    const product: Product = { 
-      ...insertProduct, 
-      id, 
-      rating: 0, 
-      reviewCount: 0,
-      createdAt 
-    };
-    
-    this.products.set(id, product);
-    
-    // Update category product count
-    const category = this.categories.get(product.categoryId);
-    if (category) {
-      this.categories.set(category.id, {
-        ...category,
-        productCount: category.productCount ? category.productCount + 1 : 1
-      });
-    }
-    
-    return product;
+    const result = await db.insert(products).values(insertProduct).returning();
+    return result[0];
   }
   
-  async updateProduct(id: number, updateInput: Partial<ProductInput>): Promise<Product | undefined> {
-    // Преобразуем числовые данные в строки для обновления
-    const updateData: Partial<InsertProduct> = {
-      ...updateInput,
-      price: updateInput.price !== undefined ? updateInput.price.toString() : undefined,
-      originalPrice: updateInput.originalPrice !== undefined 
-        ? (updateInput.originalPrice === null ? null : updateInput.originalPrice.toString()) 
-        : undefined,
+  async updateProduct(id: number, updateData: Partial<ProductInput>): Promise<Product | undefined> {
+    // Преобразовать ProductInput в структуру для БД
+    const updateValues: Partial<InsertProduct> = { 
+      ...updateData,
+      description: updateData.description ?? undefined,
+      shortDescription: updateData.shortDescription ?? undefined,
+      originalPrice: updateData.originalPrice ?? undefined,
+      imageUrl: updateData.imageUrl ?? undefined,
+      stock: updateData.stock ?? undefined,
+      tag: updateData.tag ?? undefined
     };
-    const product = this.products.get(id);
-    if (!product) return undefined;
     
-    // Handle category change to update product counts
-    if (updateData.categoryId && updateData.categoryId !== product.categoryId) {
-      // Decrement old category count
-      const oldCategory = this.categories.get(product.categoryId);
-      if (oldCategory && oldCategory.productCount) {
-        this.categories.set(oldCategory.id, {
-          ...oldCategory,
-          productCount: oldCategory.productCount - 1
-        });
-      }
-      
-      // Increment new category count
-      const newCategory = this.categories.get(updateData.categoryId);
-      if (newCategory) {
-        this.categories.set(newCategory.id, {
-          ...newCategory,
-          productCount: newCategory.productCount ? newCategory.productCount + 1 : 1
-        });
-      }
-    }
+    const result = await db.update(products)
+      .set(updateValues)
+      .where(eq(products.id, id))
+      .returning();
     
-    const updatedProduct = { ...product, ...updateData };
-    this.products.set(id, updatedProduct);
-    return updatedProduct;
+    return result.length > 0 ? result[0] : undefined;
   }
   
   async deleteProduct(id: number): Promise<boolean> {
-    const product = this.products.get(id);
-    if (!product) return false;
-    
-    // Update category product count
-    const category = this.categories.get(product.categoryId);
-    if (category && category.productCount) {
-      this.categories.set(category.id, {
-        ...category,
-        productCount: category.productCount - 1
-      });
-    }
-    
-    return this.products.delete(id);
+    const result = await db.delete(products).where(eq(products.id, id)).returning();
+    return result.length > 0;
   }
   
   async bulkImportProducts(productsToImport: InsertProduct[]): Promise<{ success: number, failed: number }> {
@@ -484,17 +274,21 @@ export class MemStorage implements IStorage {
     
     for (const productData of productsToImport) {
       try {
-        // Преобразуем InsertProduct в ProductInput
+        // Преобразовать в формат, подходящий для createProduct
         const productInput: ProductInput = {
-          ...productData,
-          price: typeof productData.price === 'string' ? parseFloat(productData.price) : 0,
-          originalPrice: productData.originalPrice && typeof productData.originalPrice === 'string' 
-            ? parseFloat(productData.originalPrice) 
-            : null,
-          stock: typeof productData.stock === 'number' ? productData.stock : 0,
-          categoryId: typeof productData.categoryId === 'number' ? productData.categoryId : 1,
-          isActive: typeof productData.isActive === 'boolean' ? productData.isActive : true,
-          isFeatured: typeof productData.isFeatured === 'boolean' ? productData.isFeatured : false,
+          sku: productData.sku,
+          name: productData.name,
+          slug: productData.slug,
+          description: productData.description || null,
+          shortDescription: productData.shortDescription || null,
+          price: productData.price,
+          originalPrice: productData.originalPrice || null,
+          imageUrl: productData.imageUrl || null,
+          stock: productData.stock || null,
+          categoryId: productData.categoryId,
+          isActive: productData.isActive ?? true,
+          isFeatured: productData.isFeatured ?? false,
+          tag: productData.tag || null,
         };
         
         await this.createProduct(productInput);
@@ -510,244 +304,249 @@ export class MemStorage implements IStorage {
   
   // Cart operations
   async getCartItems(cartId: string): Promise<CartItem[]> {
-    return Array.from(this.cartItems.values()).filter(
-      (item) => item.cartId === cartId
-    );
+    return await db.select().from(cartItems).where(eq(cartItems.cartId, cartId));
   }
   
   async getCartItemWithProduct(cartId: string): Promise<(CartItem & { product: Product })[]> {
-    const items = await this.getCartItems(cartId);
-    return items
-      .map(item => {
-        const product = this.products.get(item.productId);
-        if (!product) return null;
-        
-        return {
-          ...item,
-          product
-        };
-      })
-      .filter(item => item !== null) as (CartItem & { product: Product })[];
+    const result = await db.select({
+      id: cartItems.id,
+      cartId: cartItems.cartId,
+      productId: cartItems.productId,
+      quantity: cartItems.quantity,
+      addedAt: cartItems.addedAt,
+      product: products
+    })
+    .from(cartItems)
+    .where(eq(cartItems.cartId, cartId))
+    .innerJoin(products, eq(cartItems.productId, products.id));
+    
+    return result;
   }
   
   async addToCart(insertCartItem: InsertCartItem): Promise<CartItem> {
-    // Check if product exists and is in stock
-    const product = this.products.get(insertCartItem.productId);
-    if (!product || !product.isActive) {
-      throw new Error("Product not available");
+    // Проверяем, существует ли уже такой товар в корзине
+    const existingItem = await db.select()
+      .from(cartItems)
+      .where(
+        and(
+          eq(cartItems.cartId, insertCartItem.cartId),
+          eq(cartItems.productId, insertCartItem.productId)
+        )
+      );
+    
+    if (existingItem.length > 0) {
+      // Если товар уже в корзине, обновим его количество
+      const newQuantity = existingItem[0].quantity + (insertCartItem.quantity || 1);
+      const result = await db.update(cartItems)
+        .set({ quantity: newQuantity })
+        .where(eq(cartItems.id, existingItem[0].id))
+        .returning();
+      
+      return result[0];
     }
     
-    // Check if this product is already in the cart
-    const existingItem = Array.from(this.cartItems.values()).find(
-      item => item.cartId === insertCartItem.cartId && item.productId === insertCartItem.productId
-    );
+    // Иначе добавим новый товар в корзину
+    const validatedItem = {
+      ...insertCartItem,
+      quantity: insertCartItem.quantity || 1, // Если количество не указано, установим 1
+      addedAt: new Date()
+    };
     
-    if (existingItem) {
-      // Update quantity instead of adding new item
-      return this.updateCartItemQuantity(
-        existingItem.id, 
-        existingItem.quantity + insertCartItem.quantity
-      ) as Promise<CartItem>;
-    }
-    
-    const id = this.currentCartItemId++;
-    const addedAt = new Date();
-    
-    const cartItem: CartItem = { ...insertCartItem, id, addedAt };
-    this.cartItems.set(id, cartItem);
-    
-    return cartItem;
+    const result = await db.insert(cartItems).values(validatedItem).returning();
+    return result[0];
   }
   
   async updateCartItemQuantity(id: number, quantity: number): Promise<CartItem | undefined> {
-    const cartItem = this.cartItems.get(id);
-    if (!cartItem) return undefined;
+    const result = await db.update(cartItems)
+      .set({ quantity })
+      .where(eq(cartItems.id, id))
+      .returning();
     
-    // Ensure quantity is valid
-    const validQuantity = Math.max(1, quantity);
-    
-    const updatedItem = { ...cartItem, quantity: validQuantity };
-    this.cartItems.set(id, updatedItem);
-    
-    return updatedItem;
+    return result.length > 0 ? result[0] : undefined;
   }
   
   async removeFromCart(id: number): Promise<boolean> {
-    return this.cartItems.delete(id);
+    const result = await db.delete(cartItems)
+      .where(eq(cartItems.id, id))
+      .returning();
+    
+    return result.length > 0;
   }
   
   async clearCart(cartId: string): Promise<boolean> {
-    const cartItems = Array.from(this.cartItems.values()).filter(
-      item => item.cartId === cartId
-    );
+    const result = await db.delete(cartItems)
+      .where(eq(cartItems.cartId, cartId))
+      .returning();
     
-    for (const item of cartItems) {
-      this.cartItems.delete(item.id);
-    }
-    
-    return true;
+    return true; // Даже если корзина пуста, считаем операцию успешной
   }
   
   // Order operations
-  private orders: Map<number, Order> = new Map();
-  private orderItems: Map<number, OrderItem> = new Map();
-  private currentOrderId: number = 1;
-  private currentOrderItemId: number = 1;
-  
   async createOrder(orderInput: OrderInput, cartItems: (CartItem & { product: Product })[]): Promise<Order> {
-    // Calculate total
-    const totalAmount = cartItems.reduce((total, item) => {
-      return total + (Number(item.product.price) * item.quantity);
-    }, 0);
+    // Рассчитаем общую сумму заказа
+    const totalAmount = cartItems.reduce(
+      (sum, item) => sum + item.quantity * Number(item.product.price),
+      0
+    );
     
-    // Create order
-    const orderId = this.currentOrderId++;
-    const now = new Date();
-    
-    const order: Order = {
-      id: orderId,
-      userId: null, // Для гостевого заказа
-      customerName: orderInput.customerName,
-      customerEmail: orderInput.customerEmail,
-      customerPhone: orderInput.customerPhone,
-      address: orderInput.address,
-      city: orderInput.city,
-      postalCode: orderInput.postalCode,
-      status: "pending",
-      totalAmount: totalAmount.toString(),
-      paymentMethod: orderInput.paymentMethod,
-      paymentStatus: "не оплачен",
-      notes: orderInput.notes,
-      createdAt: now,
-      updatedAt: now,
-    };
-    
-    this.orders.set(orderId, order);
-    
-    // Create order items
-    for (const item of cartItems) {
-      const orderItemId = this.currentOrderItemId++;
-      const totalPrice = Number(item.product.price) * item.quantity;
-      
-      const orderItem: OrderItem = {
-        id: orderItemId,
-        orderId,
-        productId: item.productId,
-        productName: item.product.name,
-        productPrice: item.product.price,
-        quantity: item.quantity,
-        totalPrice: totalPrice.toString(),
+    // Создаем заказ в транзакции
+    // Note: для PostgreSQL используем транзакции
+    const orderResult = await db.transaction(async (tx) => {
+      // 1. Создаем основную запись заказа
+      const orderData = {
+        userId: null, // TODO: Добавить поддержку userId для авторизованных пользователей
+        customerName: orderInput.customerName,
+        customerEmail: orderInput.customerEmail,
+        customerPhone: orderInput.customerPhone,
+        address: orderInput.address,
+        city: orderInput.city,
+        postalCode: orderInput.postalCode,
+        paymentMethod: orderInput.paymentMethod,
+        paymentStatus: "pending",
+        totalAmount,
+        status: "pending",
+        notes: orderInput.notes || null,
+        createdAt: new Date()
       };
       
-      this.orderItems.set(orderItemId, orderItem);
-    }
+      const [order] = await tx.insert(orders).values(orderData).returning();
+      
+      // 2. Добавляем элементы заказа
+      for (const item of cartItems) {
+        const orderItemData = {
+          orderId: order.id,
+          productId: item.product.id,
+          productName: item.product.name,
+          productPrice: parseFloat(item.product.price.toString()),
+          quantity: item.quantity,
+          totalPrice: item.quantity * parseFloat(item.product.price.toString())
+        };
+        
+        await tx.insert(orderItems).values(orderItemData);
+      }
+      
+      return order;
+    });
     
-    // Очистить корзину после создания заказа
+    // 3. Очищаем корзину после создания заказа
     await this.clearCart(orderInput.cartId);
     
-    return order;
+    return orderResult;
   }
   
   async getOrderById(id: number): Promise<(Order & { items: (OrderItem & { product?: Product })[] }) | undefined> {
-    const order = this.orders.get(id);
-    if (!order) return undefined;
+    const orderResult = await db.select().from(orders).where(eq(orders.id, id));
     
-    const items = await this.getOrderItemsWithProducts(id);
+    if (orderResult.length === 0) {
+      return undefined;
+    }
+    
+    const order = orderResult[0];
+    
+    // Получаем элементы заказа с информацией о товарах
+    const orderItemsWithProduct = await db.select({
+      orderItem: orderItems,
+      product: products
+    })
+    .from(orderItems)
+    .where(eq(orderItems.orderId, id))
+    .leftJoin(products, eq(orderItems.productId, products.id));
+    
+    const items = orderItemsWithProduct.map(row => ({
+      ...row.orderItem,
+      product: row.product
+    }));
     
     return {
       ...order,
-      items,
+      items
     };
   }
   
   async getAllOrders(): Promise<Order[]> {
-    return Array.from(this.orders.values());
+    return await db.select().from(orders).orderBy(desc(orders.createdAt));
   }
   
   async searchOrders(params: OrderSearchParams): Promise<{ orders: Order[], total: number }> {
-    let filtered = Array.from(this.orders.values());
+    let query = db.select().from(orders);
     
-    // Apply filters
+    // Фильтр по поисковому запросу
     if (params.query) {
-      const query = params.query.toLowerCase();
-      filtered = filtered.filter(order => 
-        order.customerName.toLowerCase().includes(query) ||
-        order.customerEmail.toLowerCase().includes(query) ||
-        order.customerPhone.includes(query)
+      query = query.where(
+        sql`(${orders.customerName} ILIKE ${'%' + params.query + '%'} OR 
+             ${orders.customerEmail} ILIKE ${'%' + params.query + '%'} OR 
+             ${orders.customerPhone} ILIKE ${'%' + params.query + '%'})`
       );
     }
     
+    // Фильтр по статусу
     if (params.status && params.status !== 'all') {
-      filtered = filtered.filter(order => order.status === params.status);
+      query = query.where(eq(orders.status, params.status));
     }
     
-    if (params.startDate) {
-      const startDate = new Date(params.startDate);
-      filtered = filtered.filter(order => 
-        new Date(order.createdAt || Date.now()) >= startDate
+    // Фильтр по датам
+    if (params.startDate && params.endDate) {
+      query = query.where(
+        and(
+          gte(orders.createdAt, new Date(params.startDate)),
+          lte(orders.createdAt, new Date(params.endDate))
+        )
       );
+    } else if (params.startDate) {
+      query = query.where(gte(orders.createdAt, new Date(params.startDate)));
+    } else if (params.endDate) {
+      query = query.where(lte(orders.createdAt, new Date(params.endDate)));
     }
     
-    if (params.endDate) {
-      const endDate = new Date(params.endDate);
-      filtered = filtered.filter(order => 
-        new Date(order.createdAt || Date.now()) <= endDate
-      );
-    }
+    // Подсчет общего количества заказов
+    const countResult = await db.select({ count: sql<number>`count(*)` })
+      .from(orders)
+      .where(query.where);
     
-    // Sort by date, newest first
-    filtered.sort((a, b) => 
-      new Date(b.createdAt || Date.now()).getTime() - 
-      new Date(a.createdAt || Date.now()).getTime()
-    );
+    const total = countResult[0]?.count || 0;
     
-    const total = filtered.length;
+    // Сортировка по дате создания (новые в начале)
+    query = query.orderBy(desc(orders.createdAt));
     
-    // Apply pagination
-    const page = params.page || 1;
-    const limit = params.limit || 10;
-    const start = (page - 1) * limit;
-    const end = page * limit;
+    // Пагинация
+    const offset = (params.page - 1) * params.limit;
+    query = query.limit(params.limit).offset(offset);
     
-    const paginatedOrders = filtered.slice(start, end);
+    const ordersResult = await query;
     
     return {
-      orders: paginatedOrders,
+      orders: ordersResult,
       total
     };
   }
   
   async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
-    const order = this.orders.get(id);
-    if (!order) return undefined;
+    const result = await db.update(orders)
+      .set({ status })
+      .where(eq(orders.id, id))
+      .returning();
     
-    const updatedOrder = { 
-      ...order, 
-      status,
-      updatedAt: new Date(),
-    };
-    
-    this.orders.set(id, updatedOrder);
-    return updatedOrder;
+    return result.length > 0 ? result[0] : undefined;
   }
   
   async getOrderItems(orderId: number): Promise<OrderItem[]> {
-    return Array.from(this.orderItems.values()).filter(
-      item => item.orderId === orderId
-    );
+    return await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
   }
   
   async getOrderItemsWithProducts(orderId: number): Promise<(OrderItem & { product?: Product })[]> {
-    const items = await this.getOrderItems(orderId);
+    const result = await db.select({
+      orderItem: orderItems,
+      product: products
+    })
+    .from(orderItems)
+    .where(eq(orderItems.orderId, orderId))
+    .leftJoin(products, eq(orderItems.productId, products.id));
     
-    return items.map(item => {
-      const product = this.products.get(item.productId);
-      return {
-        ...item,
-        product,
-      };
-    });
+    return result.map(row => ({
+      ...row.orderItem,
+      product: row.product
+    }));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
