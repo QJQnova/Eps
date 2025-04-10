@@ -2,6 +2,9 @@ import { Switch, Route, useLocation } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/lib/protected-route";
+import { CartProvider } from "@/lib/cart";
 
 // Layout Components
 import Header from "@/components/layout/header";
@@ -16,6 +19,7 @@ import Checkout from "@/pages/checkout";
 import OrderComplete from "@/pages/order-complete";
 import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
+import AuthPage from "@/pages/auth-page";
 
 // Admin Pages
 import AdminDashboard from "@/pages/admin/dashboard";
@@ -41,17 +45,20 @@ function Router() {
           <Route path="/product/:slug" component={ProductDetails} />
           <Route path="/category/:slug" component={Category} />
           <Route path="/cart" component={Cart} />
-          <Route path="/checkout" component={Checkout} />
-          <Route path="/order-complete/:id" component={OrderComplete} />
-          <Route path="/profile" component={Profile} />
+          <Route path="/auth" component={AuthPage} />
+          
+          {/* Protected Routes (требуют авторизации) */}
+          <ProtectedRoute path="/checkout" component={Checkout} />
+          <ProtectedRoute path="/order-complete/:id" component={OrderComplete} />
+          <ProtectedRoute path="/profile" component={Profile} />
           
           {/* Admin Routes */}
-          <Route path="/admin" component={AdminDashboard} />
-          <Route path="/admin/products" component={ProductManagement} />
-          <Route path="/admin/products/create" component={ProductFormPage} />
-          <Route path="/admin/products/edit/:id" component={ProductFormPage} />
-          <Route path="/admin/import" component={BulkImport} />
-          <Route path="/admin/categories" component={CategoryManagement} />
+          <ProtectedRoute path="/admin" component={AdminDashboard} />
+          <ProtectedRoute path="/admin/products" component={ProductManagement} />
+          <ProtectedRoute path="/admin/products/create" component={ProductFormPage} />
+          <ProtectedRoute path="/admin/products/edit/:id" component={ProductFormPage} />
+          <ProtectedRoute path="/admin/import" component={BulkImport} />
+          <ProtectedRoute path="/admin/categories" component={CategoryManagement} />
           
           {/* Fallback to 404 */}
           <Route component={NotFound} />
@@ -66,8 +73,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <AuthProvider>
+        <CartProvider>
+          <Router />
+          <Toaster />
+        </CartProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
