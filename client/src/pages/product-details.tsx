@@ -150,7 +150,17 @@ export default function ProductDetails() {
         </div>
 
         {/* Product Info */}
-        <div>
+        <div className="relative">
+          {/* Promotional Banner */}
+          <div className="absolute right-0 top-0 w-1/3 h-auto hidden md:block">
+            <div 
+              className="w-full h-auto rounded-lg p-3 bg-gradient-to-r from-orange-500 to-red-500 text-white"
+            >
+              <h3 className="text-sm font-bold mb-1">Профессиональные инструменты</h3>
+              <p className="text-xs">Для любых задач</p>
+            </div>
+          </div>
+          
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
           
           <div className="flex items-center mb-4">
