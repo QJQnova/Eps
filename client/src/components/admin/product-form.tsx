@@ -29,11 +29,32 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Product, Category, insertProductSchema } from "@shared/schema";
 
-// Расширяем схему для валидации формы
-const productFormSchema = insertProductSchema.extend({
+// Форма подтверждения успешного действия
+const SuccessMessage = ({ message, onClose }: { message: string; onClose: () => void }) => (
+  <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+    <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+      <h3 className="text-lg font-semibold mb-2">Успешно!</h3>
+      <p className="mb-4">{message}</p>
+      <div className="flex justify-end">
+        <Button onClick={onClose}>Закрыть</Button>
+      </div>
+    </div>
+  </div>
+);
+
+// Расширенная схема для формы
+const productFormSchema = z.object({
+  name: z.string().min(2, "Название должно содержать не менее 2 символов"),
+  slug: z.string().min(2, "URL должен содержать не менее 2 символов"),
+  description: z.string().optional(),
+  shortDescription: z.string().optional(),
   price: z.coerce.number().min(0, "Цена должна быть больше или равна 0"),
   originalPrice: z.coerce.number().min(0, "Цена должна быть больше или равна 0").optional().nullable(),
   stock: z.coerce.number().min(0, "Количество должно быть положительным").optional().nullable(),
+  categoryId: z.coerce.number().min(1, "Выберите категорию"),
+  imageUrl: z.string().optional(),
+  isActive: z.boolean().default(true),
+  isFeatured: z.boolean().default(false),
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
@@ -44,6 +65,8 @@ interface ProductFormProps {
 
 export default function ProductForm({ productId }: ProductFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [_, navigate] = useLocation();
@@ -60,7 +83,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
     enabled: isEditing,
   });
 
-  // Инициализация формы
+  // Форма
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
@@ -75,105 +98,73 @@ export default function ProductForm({ productId }: ProductFormProps) {
       imageUrl: "",
       isActive: true,
       isFeatured: false,
-    },
+    }
   });
 
-  // Заполнение формы данными товара при редактировании
+  // Заполнение формы при редактировании
   useEffect(() => {
     if (productData && isEditing) {
-      const price = typeof productData.price === 'string' 
-        ? parseFloat(productData.price) 
-        : productData.price;
-        
-      const originalPrice = productData.originalPrice 
-        ? (typeof productData.originalPrice === 'string' 
-          ? parseFloat(productData.originalPrice) 
-          : productData.originalPrice)
-        : null;
-        
-      const stock = productData.stock 
-        ? (typeof productData.stock === 'string'
-          ? parseInt(productData.stock, 10)
-          : productData.stock)
-        : 0;
-      
       form.reset({
         name: productData.name,
         slug: productData.slug,
         description: productData.description || "",
         shortDescription: productData.shortDescription || "",
-        price: price,
-        originalPrice: originalPrice,
-        stock: stock,
+        price: typeof productData.price === 'string' ? parseFloat(productData.price) : productData.price,
+        originalPrice: productData.originalPrice !== null ? 
+          (typeof productData.originalPrice === 'string' ? parseFloat(productData.originalPrice) : productData.originalPrice) : null,
+        stock: productData.stock !== null ?
+          (typeof productData.stock === 'string' ? parseInt(productData.stock, 10) : productData.stock) : 0,
         categoryId: productData.categoryId,
         imageUrl: productData.imageUrl || "",
-        isActive: productData.isActive,
-        isFeatured: productData.isFeatured,
+        isActive: !!productData.isActive,
+        isFeatured: !!productData.isFeatured,
       });
     }
   }, [productData, form, isEditing]);
 
-  // Мутация для создания/обновления товара
-  const productMutation = useMutation({
-    mutationFn: async (data: ProductFormValues) => {
-      console.log("MutationFn вызван с данными:", data);
-      try {
-        if (isEditing && productId) {
-          console.log("Отправка PATCH запроса:", `/api/products/${productId}`);
-          const response = await apiRequest("PATCH", `/api/products/${productId}`, data);
-          console.log("Получен ответ:", response);
-          return response;
-        } else {
-          console.log("Отправка POST запроса:", `/api/products`);
-          const response = await apiRequest("POST", "/api/products", data);
-          console.log("Получен ответ:", response);
-          return response;
-        }
-      } catch (err) {
-        console.error("Ошибка в mutationFn:", err);
-        throw err;
+  // Обработка формы
+  const onSubmit = async (data: ProductFormValues) => {
+    console.log("Отправка формы:", data);
+    setIsSubmitting(true);
+    
+    try {
+      // Выполняем запрос напрямую вместо использования mutation
+      if (isEditing && productId) {
+        console.log(`Отправка PATCH запроса на /api/products/${productId}`);
+        const result = await apiRequest("PATCH", `/api/products/${productId}`, data);
+        console.log("Результат обновления товара:", result);
+        
+        setSuccessMessage("Товар успешно обновлен");
+        queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+        setSuccess(true);
+      } else {
+        console.log("Отправка POST запроса на /api/products");
+        const result = await apiRequest("POST", "/api/products", data);
+        console.log("Результат создания товара:", result);
+        
+        setSuccessMessage("Товар успешно создан");
+        queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+        setSuccess(true);
       }
-    },
-    onSuccess: (data) => {
-      console.log("onSuccess вызван с данными:", data);
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      toast({
-        title: isEditing ? "Товар обновлен" : "Товар создан",
-        description: isEditing
-          ? "Товар был успешно обновлен."
-          : "Новый товар был успешно создан.",
-      });
-      navigate("/admin/products");
-    },
-    onError: (error) => {
-      console.error("onError вызван с ошибкой:", error);
+    } catch (error) {
+      console.error("Ошибка при сохранении товара:", error);
       toast({
         title: "Ошибка",
         description: `Не удалось ${isEditing ? "обновить" : "создать"} товар: ${error}`,
         variant: "destructive",
       });
+    } finally {
       setIsSubmitting(false);
-    }
-  });
-
-  // Обработка отправки формы
-  const onSubmit = (data: ProductFormValues) => {
-    console.log("Отправка формы:", data);
-    try {
-      setIsSubmitting(true);
-      productMutation.mutate(data);
-    } catch (error) {
-      console.error("Ошибка при отправке формы:", error);
-      setIsSubmitting(false);
-      toast({
-        title: "Ошибка",
-        description: `Не удалось отправить форму: ${error}`,
-        variant: "destructive",
-      });
     }
   };
 
-  // Генерация slug из названия товара
+  // Обработка закрытия уведомления об успехе
+  const handleSuccessClose = () => {
+    setSuccess(false);
+    navigate("/admin/products");
+  };
+
+  // Генерация slug
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
@@ -191,7 +182,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
       });
   };
 
-  // Автоматическое обновление slug при изменении названия
+  // Обновление slug при изменении названия
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
     form.setValue("name", name);
@@ -205,82 +196,30 @@ export default function ProductForm({ productId }: ProductFormProps) {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Название товара</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Введите название товара"
-                      {...field}
-                      onChange={handleNameChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="slug"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL-адрес (slug)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="url-adres-tovara" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Используется в URL товара. Только латинские буквы, цифры и дефисы.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="categoryId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Категория</FormLabel>
-                  <Select
-                    value={field.value?.toString() || ""}
-                    onValueChange={(value) => field.onChange(Number(value))}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Выберите категорию" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id.toString()}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
+    <>
+      {success && (
+        <SuccessMessage 
+          message={successMessage} 
+          onClose={handleSuccessClose} 
+        />
+      )}
+    
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-6">
               <FormField
                 control={form.control}
-                name="price"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Цена (₽)</FormLabel>
+                    <FormLabel>Название товара</FormLabel>
                     <FormControl>
-                      <Input type="number" min="0" step="0.01" {...field} />
+                      <Input
+                        placeholder="Введите название товара"
+                        {...field}
+                        onChange={handleNameChange}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -289,15 +228,102 @@ export default function ProductForm({ productId }: ProductFormProps) {
 
               <FormField
                 control={form.control}
-                name="originalPrice"
+                name="slug"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Старая цена (₽)</FormLabel>
+                    <FormLabel>URL-адрес (slug)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="url-adres-tovara" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Используется в URL товара. Только латинские буквы, цифры и дефисы.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Категория</FormLabel>
+                    <Select
+                      value={field.value ? field.value.toString() : ""}
+                      onValueChange={(value) => field.onChange(parseInt(value, 10))}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите категорию" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id.toString()}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Цена (₽)</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" step="0.01" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="originalPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Старая цена (₽)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={field.value === null ? "" : field.value}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(value === "" ? null : Number(value));
+                          }}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Для отображения скидки (необязательно)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="stock"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Количество на складе</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
                         min="0"
-                        step="0.01"
+                        step="1"
                         value={field.value === null ? "" : field.value}
                         onChange={(e) => {
                           const value = e.target.value;
@@ -305,160 +331,137 @@ export default function ProductForm({ productId }: ProductFormProps) {
                         }}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Для отображения скидки (необязательно)
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="stock"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Количество на складе</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={field.value === null ? "" : field.value}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        field.onChange(value === "" ? null : Number(value));
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="space-y-6">
-            <FormField
-              control={form.control}
-              name="shortDescription"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Краткое описание</FormLabel>
-                  <FormControl>
-                    <Input value={field.value || ""} onChange={(e) => field.onChange(e.target.value)} />
-                  </FormControl>
-                  <FormDescription>
-                    Отображается в карточке товара (необязательно)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Полное описание</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Подробное описание товара"
-                      className="min-h-[120px]"
-                      value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="imageUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL изображения</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="https://example.com/image.jpg" 
-                      value={field.value || ""} 
-                      onChange={(e) => field.onChange(e.target.value)}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Ссылка на изображение товара (необязательно)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-4 pt-4">
+            <div className="space-y-6">
               <FormField
                 control={form.control}
-                name="isActive"
+                name="shortDescription"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                    <div className="space-y-0.5">
-                      <FormLabel>Активен</FormLabel>
-                      <FormDescription>
-                        Отображается в каталоге
-                      </FormDescription>
-                    </div>
+                  <FormItem>
+                    <FormLabel>Краткое описание</FormLabel>
                     <FormControl>
-                      <Switch
-                        checked={field.value === true}
-                        onCheckedChange={field.onChange}
+                      <Input 
+                        value={field.value || ""} 
+                        onChange={(e) => field.onChange(e.target.value)} 
                       />
                     </FormControl>
+                    <FormDescription>
+                      Отображается в карточке товара (необязательно)
+                    </FormDescription>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
               <FormField
                 control={form.control}
-                name="isFeatured"
+                name="description"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                    <div className="space-y-0.5">
-                      <FormLabel>Рекомендуемый</FormLabel>
-                      <FormDescription>
-                        Показывать на главной
-                      </FormDescription>
-                    </div>
+                  <FormItem>
+                    <FormLabel>Полное описание</FormLabel>
                     <FormControl>
-                      <Switch
-                        checked={field.value === true}
-                        onCheckedChange={field.onChange}
+                      <Textarea
+                        placeholder="Подробное описание товара"
+                        className="min-h-[120px]"
+                        value={field.value || ""}
+                        onChange={(e) => field.onChange(e.target.value)}
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="imageUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>URL изображения</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="https://example.com/image.jpg" 
+                        value={field.value || ""} 
+                        onChange={(e) => field.onChange(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Ссылка на изображение товара (необязательно)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4 pt-4">
+                <FormField
+                  control={form.control}
+                  name="isActive"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-0.5">
+                        <FormLabel>Активен</FormLabel>
+                        <FormDescription>
+                          Отображается в каталоге
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="isFeatured"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-0.5">
+                        <FormLabel>Рекомендуемый</FormLabel>
+                        <FormDescription>
+                          Показывать на главной
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex gap-4 justify-end">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate("/admin/products")}
-          >
-            Отмена
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting
-              ? "Сохранение..."
-              : isEditing
-                ? "Сохранить изменения"
-                : "Создать товар"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+          <div className="flex gap-4 justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate("/admin/products")}
+            >
+              Отмена
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting
+                ? "Сохранение..."
+                : isEditing
+                  ? "Сохранить изменения"
+                  : "Создать товар"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
   );
 }
