@@ -19,6 +19,7 @@ import AdminDashboard from "@/pages/admin/dashboard";
 import ProductManagement from "@/pages/admin/product-management";
 import BulkImport from "@/pages/admin/bulk-import";
 import ProductFormPage from "@/pages/admin/product-form-page";
+import CategoryManagement from "@/pages/admin/category-management";
 
 function Router() {
   const [location] = useLocation();
@@ -44,6 +45,7 @@ function Router() {
           <Route path="/admin/products/create" component={ProductFormPage} />
           <Route path="/admin/products/edit/:id" component={ProductFormPage} />
           <Route path="/admin/import" component={BulkImport} />
+          <Route path="/admin/categories" component={CategoryManagement} />
           
           {/* Fallback to 404 */}
           <Route component={NotFound} />
