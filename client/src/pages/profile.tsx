@@ -25,14 +25,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Package, Truck, User } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Package, Truck, User, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Profile() {
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -120,23 +121,38 @@ export default function Profile() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Имя пользователя</div>
-                    <div className="font-medium">Иван Иванов</div>
+                {!user ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-eps-orange" />
                   </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Email</div>
-                    <div className="font-medium">ivan@example.com</div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <div className="text-sm text-gray-500">Имя пользователя</div>
+                      <div className="font-medium">{user.username}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500">Email</div>
+                      <div className="font-medium">{user.email || "Не указан"}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500">Дата регистрации</div>
+                      <div className="font-medium">
+                        {new Date(user.createdAt || Date.now()).toLocaleDateString("ru-RU")}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Телефон</div>
-                    <div className="font-medium">+7 900 123-45-67</div>
-                  </div>
-                </div>
+                )}
               </CardContent>
               <CardFooter>
-                <Button variant="outline" className="w-full">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => toast({
+                    title: "Функция в разработке",
+                    description: "Редактирование профиля будет доступно в ближайшее время"
+                  })}
+                >
                   Редактировать профиль
                 </Button>
               </CardFooter>

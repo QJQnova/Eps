@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,15 +33,25 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState<string>("login");
-  const [, setLocation] = useLocation();
+  
+  // Проверяем URL-параметры для определения начальной вкладки
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    if (tab === "register") {
+      setActiveTab("register");
+    }
+  }, []);
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const { user, loginMutation, registerMutation } = useAuth();
 
-  // Если пользователь уже авторизован, перенаправляем на главную страницу
-  if (user) {
-    setLocation("/");
-    return null;
-  }
+  // Редирект, если пользователь уже авторизован
+  useEffect(() => {
+    if (user) {
+      setLocation("/");
+    }
+  }, [user, setLocation]);
 
   // Форма для входа
   const loginForm = useForm<LoginFormValues>({
