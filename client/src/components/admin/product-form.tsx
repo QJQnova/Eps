@@ -46,6 +46,7 @@ const SuccessMessage = ({ message, onClose }: { message: string; onClose: () => 
 const productFormSchema = z.object({
   name: z.string().min(2, "Название должно содержать не менее 2 символов"),
   slug: z.string().min(2, "URL должен содержать не менее 2 символов"),
+  sku: z.string().min(2, "Артикул должен содержать не менее 2 символов"),
   description: z.string().optional(),
   shortDescription: z.string().optional(),
   price: z.coerce.number().min(0, "Цена должна быть больше или равна 0"),
@@ -89,6 +90,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
     defaultValues: {
       name: "",
       slug: "",
+      sku: "",
       description: "",
       shortDescription: "",
       price: 0,
@@ -107,6 +109,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
       form.reset({
         name: productData.name,
         slug: productData.slug,
+        sku: productData.sku,
         description: productData.description || "",
         shortDescription: productData.shortDescription || "",
         price: typeof productData.price === 'string' ? parseFloat(productData.price) : productData.price,
@@ -221,6 +224,23 @@ export default function ProductForm({ productId }: ProductFormProps) {
                         onChange={handleNameChange}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="sku"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Артикул</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Артикул товара" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Уникальный идентификатор товара
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
