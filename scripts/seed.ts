@@ -1,6 +1,6 @@
 // Скрипт для заполнения базы данных тестовыми данными
-import { db } from '../server/db.js';
-import { categories, products } from '../shared/schema.js';
+import { db } from '../server/db';
+import { categories, products } from '../shared/schema';
 import { eq, count } from 'drizzle-orm';
 
 async function seedDatabase() {
