@@ -79,7 +79,7 @@ export default function Header() {
             
             {/* Account & Cart */}
             <div className="flex items-center space-x-4">
-              <Link href="/account" className="text-gray-700 hover:text-eps-orange flex items-center">
+              <Link href="/profile" className="text-gray-700 hover:text-eps-orange flex items-center">
                 <User className="h-5 w-5" />
                 <span className="hidden md:inline ml-1">Профиль</span>
               </Link>
