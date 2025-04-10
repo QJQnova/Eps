@@ -131,10 +131,23 @@ export default function ProductForm({ productId }: ProductFormProps) {
     setIsSubmitting(true);
     
     try {
+      // Преобразуем числовые поля
+      const formattedData = {
+        ...data,
+        price: Number(data.price),
+        originalPrice: data.originalPrice ? Number(data.originalPrice) : null,
+        stock: data.stock ? Number(data.stock) : 0,
+        categoryId: Number(data.categoryId),
+        isActive: Boolean(data.isActive),
+        isFeatured: Boolean(data.isFeatured)
+      };
+      
+      console.log("Форматированные данные:", formattedData);
+      
       // Выполняем запрос напрямую вместо использования mutation
       if (isEditing && productId) {
         console.log(`Отправка PATCH запроса на /api/products/${productId}`);
-        const result = await apiRequest("PATCH", `/api/products/${productId}`, data);
+        const result = await apiRequest("PATCH", `/api/products/${productId}`, formattedData);
         console.log("Результат обновления товара:", result);
         
         setSuccessMessage("Товар успешно обновлен");
@@ -142,7 +155,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
         setSuccess(true);
       } else {
         console.log("Отправка POST запроса на /api/products");
-        const result = await apiRequest("POST", "/api/products", data);
+        const result = await apiRequest("POST", "/api/products", formattedData);
         console.log("Результат создания товара:", result);
         
         setSuccessMessage("Товар успешно создан");
