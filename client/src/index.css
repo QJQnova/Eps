@@ -3,11 +3,58 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --color-eps-orange: 25 95% 53%;
+    --color-eps-red: 0 91% 58%;
+    --color-eps-yellow: 43 96% 58%;
+  }
+
   * {
     @apply border-border;
   }
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .bg-eps-gradient {
+    background: linear-gradient(to right, hsl(var(--color-eps-orange)), hsl(var(--color-eps-red)));
+  }
+  
+  .text-eps-gradient {
+    background: linear-gradient(to right, hsl(var(--color-eps-orange)), hsl(var(--color-eps-red)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .border-eps-gradient {
+    border-image: linear-gradient(to right, hsl(var(--color-eps-orange)), hsl(var(--color-eps-red))) 1;
+  }
+  
+  .bg-eps-orange {
+    background-color: hsl(var(--color-eps-orange));
+  }
+  
+  .bg-eps-red {
+    background-color: hsl(var(--color-eps-red));
+  }
+  
+  .bg-eps-yellow {
+    background-color: hsl(var(--color-eps-yellow));
+  }
+  
+  .text-eps-orange {
+    color: hsl(var(--color-eps-orange));
+  }
+  
+  .text-eps-red {
+    color: hsl(var(--color-eps-red));
+  }
+  
+  .text-eps-yellow {
+    color: hsl(var(--color-eps-yellow));
   }
 }

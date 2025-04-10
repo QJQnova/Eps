@@ -39,12 +39,14 @@ export default function Header() {
   
   return (
     <header className="bg-white shadow-sm">
+      <div className="bg-eps-gradient h-2"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top Bar */}
-        <div className="flex items-center justify-between py-3 border-b border-gray-200">
+        <div className="flex items-center justify-between py-4 border-b border-gray-200">
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold text-primary">
-              ToolMaster
+            <Link href="/" className="flex items-center">
+              <span className="text-2xl font-extrabold text-eps-gradient">ЭПС</span>
+              <span className="ml-2 text-sm text-gray-500">Инструменты</span>
             </Link>
           </div>
           
@@ -53,7 +55,7 @@ export default function Header() {
             <form className="hidden sm:flex items-center relative w-64" onSubmit={handleSearch}>
               <Input 
                 type="text" 
-                placeholder="Search for tools..." 
+                placeholder="Поиск инструментов..." 
                 className="w-full py-2 px-4 pr-8 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -70,16 +72,16 @@ export default function Header() {
             
             {/* Account & Cart */}
             <div className="flex items-center space-x-4">
-              <Link href="/account" className="text-gray-700 hover:text-primary flex items-center">
+              <Link href="/account" className="text-gray-700 hover:text-eps-orange flex items-center">
                 <User className="h-5 w-5" />
-                <span className="hidden md:inline ml-1">Account</span>
+                <span className="hidden md:inline ml-1">Профиль</span>
               </Link>
               
-              <Link href="/cart" className="text-gray-700 hover:text-primary flex items-center relative">
+              <Link href="/cart" className="text-gray-700 hover:text-eps-orange flex items-center relative">
                 <ShoppingCart className="h-5 w-5" />
-                <span className="hidden md:inline ml-1">Cart</span>
+                <span className="hidden md:inline ml-1">Корзина</span>
                 {itemCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-primary text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                  <span className="absolute -top-2 -right-2 bg-eps-red text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                     {itemCount}
                   </span>
                 )}
@@ -90,7 +92,7 @@ export default function Header() {
             <Button
               variant="ghost" 
               size="icon"
-              className="sm:hidden text-gray-700 hover:text-primary"
+              className="sm:hidden text-gray-700 hover:text-eps-orange"
               onClick={toggleMobileMenu}
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -105,7 +107,7 @@ export default function Header() {
               <li key={category.id} className="group relative">
                 <Link 
                   href={`/category/${category.slug}`} 
-                  className="text-gray-700 hover:text-primary font-medium"
+                  className="text-gray-700 hover:text-eps-orange font-medium"
                 >
                   {category.name}
                 </Link>
@@ -114,17 +116,17 @@ export default function Header() {
             <li className="group relative">
               <Link 
                 href="/products" 
-                className="text-gray-700 hover:text-primary font-medium"
+                className="text-gray-700 hover:text-eps-orange font-medium"
               >
-                All Products
+                Все товары
               </Link>
             </li>
             <li className="group relative">
               <Link 
                 href="/admin" 
-                className="text-gray-700 hover:text-primary font-medium"
+                className="text-gray-700 hover:text-eps-orange font-medium"
               >
-                Admin
+                Администратор
               </Link>
             </li>
           </ul>
@@ -136,7 +138,7 @@ export default function Header() {
           <form className="flex items-center relative mb-4" onSubmit={handleSearch}>
             <Input 
               type="text" 
-              placeholder="Search for tools..." 
+              placeholder="Поиск инструментов..." 
               className="w-full py-2 px-4 pr-8 rounded-lg border border-gray-300"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -156,7 +158,7 @@ export default function Header() {
               <li key={category.id}>
                 <Link 
                   href={`/category/${category.slug}`} 
-                  className="text-gray-700 hover:text-primary font-medium block py-1"
+                  className="text-gray-700 hover:text-eps-orange font-medium block py-1"
                 >
                   {category.name}
                 </Link>
@@ -165,17 +167,17 @@ export default function Header() {
             <li>
               <Link 
                 href="/products" 
-                className="text-gray-700 hover:text-primary font-medium block py-1"
+                className="text-gray-700 hover:text-eps-orange font-medium block py-1"
               >
-                All Products
+                Все товары
               </Link>
             </li>
             <li>
               <Link 
                 href="/admin" 
-                className="text-gray-700 hover:text-primary font-medium block py-1"
+                className="text-gray-700 hover:text-eps-orange font-medium block py-1"
               >
-                Admin
+                Администратор
               </Link>
             </li>
           </ul>
