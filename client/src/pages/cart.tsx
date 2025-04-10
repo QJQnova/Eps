@@ -31,8 +31,8 @@ export default function Cart() {
   };
   
   // Calculate tax and shipping
-  const tax = subtotal * 0.1; // 10% tax
-  const shipping = subtotal > 75 ? 0 : 10; // Free shipping over $75
+  const tax = subtotal * 0.2; // 20% НДС
+  const shipping = subtotal > 7500 ? 0 : 500; // Бесплатная доставка при заказе от 7500₽
   const total = subtotal + tax + shipping;
   
   if (isLoading) {
@@ -40,8 +40,8 @@ export default function Cart() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center py-16">
           <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Loading your cart...</h2>
-          <p className="text-gray-500">Please wait while we fetch your cart information.</p>
+          <h2 className="text-2xl font-bold text-eps-gradient mb-2">Загрузка корзины...</h2>
+          <p className="text-gray-500">Пожалуйста, подождите, мы загружаем информацию о вашей корзине.</p>
         </div>
       </div>
     );
@@ -52,10 +52,10 @@ export default function Cart() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center py-16">
           <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
-          <p className="text-gray-500 mb-8">Looks like you haven't added any products to your cart yet.</p>
+          <h2 className="text-2xl font-bold text-eps-gradient mb-2">Ваша корзина пуста</h2>
+          <p className="text-gray-500 mb-8">Похоже, вы ещё не добавили товары в корзину.</p>
           <Button asChild>
-            <Link href="/">Continue Shopping</Link>
+            <Link href="/">Продолжить покупки</Link>
           </Button>
         </div>
       </div>
@@ -64,7 +64,7 @@ export default function Cart() {
   
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
+      <h1 className="text-3xl font-bold text-eps-gradient mb-8">Корзина</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}
@@ -72,14 +72,14 @@ export default function Cart() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-xl font-medium flex justify-between items-center">
-                <span>Cart Items ({itemCount})</span>
+                <span>Товары ({itemCount})</span>
                 <Button 
                   variant="ghost" 
                   className="text-gray-500 text-sm font-normal"
                   onClick={handleClearCart}
                   disabled={isClearingCart}
                 >
-                  Clear Cart
+                  Очистить корзину
                 </Button>
               </CardTitle>
             </CardHeader>
@@ -92,7 +92,7 @@ export default function Cart() {
               <Button variant="outline" className="w-full sm:w-auto" asChild>
                 <Link href="/">
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Continue Shopping
+                  Продолжить покупки
                 </Link>
               </Button>
             </CardFooter>
@@ -103,46 +103,46 @@ export default function Cart() {
         <div>
           <Card>
             <CardHeader>
-              <CardTitle className="text-xl font-medium">Order Summary</CardTitle>
+              <CardTitle className="text-xl font-medium">Информация о заказе</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between">
-                <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">${subtotal.toFixed(2)}</span>
+                <span className="text-gray-600">Сумма товаров</span>
+                <span className="font-medium">{subtotal.toFixed(0)} ₽</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Tax (10%)</span>
-                <span className="font-medium">${tax.toFixed(2)}</span>
+                <span className="text-gray-600">НДС (20%)</span>
+                <span className="font-medium">{tax.toFixed(0)} ₽</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Shipping</span>
+                <span className="text-gray-600">Доставка</span>
                 <span className="font-medium">
-                  {shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}
+                  {shipping === 0 ? 'Бесплатно' : `${shipping.toFixed(0)} ₽`}
                 </span>
               </div>
               <Separator />
               <div className="flex justify-between">
-                <span className="font-medium text-lg">Total</span>
-                <span className="font-bold text-lg">${total.toFixed(2)}</span>
+                <span className="font-medium text-lg">Итого</span>
+                <span className="font-bold text-lg">{total.toFixed(0)} ₽</span>
               </div>
               
               <Button className="w-full mt-6">
                 <CreditCard className="mr-2 h-4 w-4" />
-                Proceed to Checkout
+                Оформить заказ
               </Button>
             </CardContent>
             <CardFooter className="flex flex-col space-y-3 text-sm text-gray-500">
               <div className="flex items-center">
                 <Truck className="h-4 w-4 mr-2 text-primary" />
-                <span>Free shipping on orders over $75</span>
+                <span>Бесплатная доставка при заказе от 7500 ₽</span>
               </div>
               <div className="flex items-center">
                 <ShoppingBag className="h-4 w-4 mr-2 text-primary" />
-                <span>30-day easy returns</span>
+                <span>Возврат в течение 30 дней</span>
               </div>
               <div className="flex items-center">
                 <Shield className="h-4 w-4 mr-2 text-primary" />
-                <span>Secure payment processing</span>
+                <span>Безопасная оплата</span>
               </div>
             </CardFooter>
           </Card>
