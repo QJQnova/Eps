@@ -174,24 +174,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Product Routes
   app.get("/api/products", async (req, res) => {
     try {
-      const params = validateData(productSearchSchema, req.query);
+      // Создаем собственную схему поиска с преобразованием типов
+      const customSearchSchema = z.object({
+        categoryId: z.union([z.number(), z.string().transform(val => parseInt(val, 10))]).optional(),
+        query: z.string().optional(),
+        sort: z.enum(["featured", "price-low", "price-high", "newest", "popular"]).optional(),
+        minPrice: z.union([z.number(), z.string().transform(val => parseFloat(val))]).optional(),
+        maxPrice: z.union([z.number(), z.string().transform(val => parseFloat(val))]).optional(),
+        page: z.union([z.number(), z.string().transform(val => parseInt(val, 10))]).transform(val => val || 1),
+        limit: z.union([z.number(), z.string().transform(val => parseInt(val, 10))]).transform(val => val || 12)
+      });
+      
+      const params = customSearchSchema.parse(req.query);
+      console.log("Search params:", params);
+      
       const { products, total } = await storage.searchProducts(params);
       
-      const page = params.page || 1;
-      const limit = params.limit || 12;
-      const totalPages = Math.ceil(total / limit);
+      const totalPages = Math.ceil(total / params.limit);
       
       res.status(200).json({
         products,
         pagination: {
-          page,
-          limit,
+          page: params.page,
+          limit: params.limit,
           total,
           totalPages
         }
       });
     } catch (error: any) {
-      res.status(400).json({ message: error.message });
+      console.error("Error searching products:", error);
+      if (error instanceof z.ZodError) {
+        const errorMessages = error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+        res.status(400).json({ message: `Validation error: ${errorMessages}` });
+      } else {
+        res.status(400).json({ message: error.message });
+      }
     }
   });
 
@@ -248,20 +265,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Received product data:", req.body);
       
-      // Преобразуем числовые данные
-      const modifiedData = {
-        ...req.body,
-        price: typeof req.body.price === 'string' ? parseFloat(req.body.price) : req.body.price,
-        originalPrice: req.body.originalPrice ? 
-          (typeof req.body.originalPrice === 'string' ? parseFloat(req.body.originalPrice) : req.body.originalPrice) : null,
-        stock: req.body.stock ? 
-          (typeof req.body.stock === 'string' ? parseInt(req.body.stock, 10) : req.body.stock) : 0,
-        categoryId: typeof req.body.categoryId === 'string' ? parseInt(req.body.categoryId, 10) : req.body.categoryId,
-      };
-      
-      console.log("Modified product data:", modifiedData);
-      
-      const productData = validateData(insertProductSchema, modifiedData);
+      // Создаем собственную схему валидации с прямым преобразованием типов
+      const customProductSchema = z.object({
+        sku: z.string().min(1, "SKU is required"),
+        name: z.string().min(1, "Name is required"),
+        slug: z.string().min(1, "Slug is required"),
+        description: z.string().optional().nullable(),
+        shortDescription: z.string().optional().nullable(),
+        price: z.union([z.number(), z.string().transform(val => parseFloat(val))]).pipe(z.number().min(0)),
+        originalPrice: z.union([z.number(), z.string().transform(val => parseFloat(val)), z.null()]).optional().nullable(),
+        imageUrl: z.string().optional().nullable(),
+        stock: z.union([z.number(), z.string().transform(val => parseInt(val, 10)), z.null()]).pipe(z.number().min(0).optional().nullable()),
+        categoryId: z.union([z.number(), z.string().transform(val => parseInt(val, 10))]).pipe(z.number().min(1)),
+        isActive: z.union([z.boolean(), z.string().transform(val => val === "true")]).pipe(z.boolean().optional()).default(true),
+        isFeatured: z.union([z.boolean(), z.string().transform(val => val === "true")]).pipe(z.boolean().optional()).default(false),
+        tag: z.string().optional().nullable(),
+      });
+            
+      const productData = customProductSchema.parse(req.body);      
       console.log("Validated product data:", productData);
       
       const product = await storage.createProduct(productData);
@@ -270,7 +291,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(product);
     } catch (error: any) {
       console.error("Error creating product:", error);
-      res.status(400).json({ message: error.message });
+      if (error instanceof z.ZodError) {
+        const errorMessages = error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+        res.status(400).json({ message: `Validation error: ${errorMessages}` });
+      } else {
+        res.status(400).json({ message: error.message });
+      }
     }
   });
 
@@ -279,19 +305,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Received product update data:", req.body);
       const id = parseInt(req.params.id);
       
-      // Преобразуем числовые данные
-      const modifiedData = {
-        ...req.body,
-        price: req.body.price !== undefined ? 
-          (typeof req.body.price === 'string' ? parseFloat(req.body.price) : req.body.price) : undefined,
-        originalPrice: req.body.originalPrice !== undefined ? 
-          (typeof req.body.originalPrice === 'string' ? parseFloat(req.body.originalPrice) : req.body.originalPrice) : undefined,
-        stock: req.body.stock !== undefined ? 
-          (typeof req.body.stock === 'string' ? parseInt(req.body.stock, 10) : req.body.stock) : undefined,
-        categoryId: req.body.categoryId !== undefined ? 
-          (typeof req.body.categoryId === 'string' ? parseInt(req.body.categoryId, 10) : req.body.categoryId) : undefined,
-      };
+      // Создаем собственную схему валидации с прямым преобразованием типов
+      const customProductUpdateSchema = z.object({
+        sku: z.string().min(1, "SKU is required").optional(),
+        name: z.string().min(1, "Name is required").optional(),
+        slug: z.string().min(1, "Slug is required").optional(),
+        description: z.string().optional().nullable(),
+        shortDescription: z.string().optional().nullable(),
+        price: z.union([z.number(), z.string().transform(val => parseFloat(val))]).pipe(z.number().min(0)).optional(),
+        originalPrice: z.union([z.number(), z.string().transform(val => parseFloat(val)), z.null()]).optional().nullable(),
+        imageUrl: z.string().optional().nullable(),
+        stock: z.union([z.number(), z.string().transform(val => parseInt(val, 10)), z.null()]).pipe(z.number().min(0).optional()).optional(),
+        categoryId: z.union([z.number(), z.string().transform(val => parseInt(val, 10))]).pipe(z.number().min(1)).optional(),
+        isActive: z.union([z.boolean(), z.string().transform(val => val === "true")]).pipe(z.boolean()).optional(),
+        isFeatured: z.union([z.boolean(), z.string().transform(val => val === "true")]).pipe(z.boolean()).optional(),
+        tag: z.string().optional().nullable(),
+      });
       
+      const modifiedData = customProductUpdateSchema.parse(req.body);
       console.log("Modified product update data:", modifiedData);
       
       const product = await storage.updateProduct(id, modifiedData);
@@ -304,7 +335,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json(product);
     } catch (error: any) {
       console.error("Error updating product:", error);
-      res.status(400).json({ message: error.message });
+      if (error instanceof z.ZodError) {
+        const errorMessages = error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+        res.status(400).json({ message: `Validation error: ${errorMessages}` });
+      } else {
+        res.status(400).json({ message: error.message });
+      }
     }
   });
 

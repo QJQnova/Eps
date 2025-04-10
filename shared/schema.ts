@@ -95,6 +95,25 @@ export type Category = typeof categories.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Product = typeof products.$inferSelect;
 
+// Создаем типы с преобразованием для работы во фронтенде
+export const productInputSchema = z.object({
+  sku: z.string().min(1, "SKU обязателен"),
+  name: z.string().min(1, "Название обязательно"),
+  slug: z.string().min(1, "Slug обязателен"),
+  description: z.string().optional().nullable(),
+  shortDescription: z.string().optional().nullable(),
+  price: z.union([z.number(), z.string().transform(val => parseFloat(val))]).pipe(z.number().min(0)),
+  originalPrice: z.union([z.number(), z.string().transform(val => parseFloat(val)), z.null()]).optional().nullable(),
+  imageUrl: z.string().optional().nullable(),
+  stock: z.union([z.number(), z.string().transform(val => parseInt(val, 10)), z.null()]).pipe(z.number().min(0).optional().nullable()),
+  categoryId: z.union([z.number(), z.string().transform(val => parseInt(val, 10))]).pipe(z.number().min(1)),
+  isActive: z.union([z.boolean(), z.string().transform(val => val === "true")]).pipe(z.boolean()).default(true),
+  isFeatured: z.union([z.boolean(), z.string().transform(val => val === "true")]).pipe(z.boolean()).default(false),
+  tag: z.string().optional().nullable(),
+});
+
+export type ProductInput = z.infer<typeof productInputSchema>;
+
 export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
 export type CartItem = typeof cartItems.$inferSelect;
 

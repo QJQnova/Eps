@@ -30,8 +30,8 @@ export interface IStorage {
   getProductsByCategoryId(categoryId: number): Promise<Product[]>;
   searchProducts(params: ProductSearchParams): Promise<{ products: Product[], total: number }>;
   getFeaturedProducts(): Promise<Product[]>;
-  createProduct(product: InsertProduct): Promise<Product>;
-  updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product | undefined>;
+  createProduct(product: ProductInput): Promise<Product>;
+  updateProduct(id: number, product: Partial<ProductInput>): Promise<Product | undefined>;
   deleteProduct(id: number): Promise<boolean>;
   bulkImportProducts(products: InsertProduct[]): Promise<{ success: number, failed: number }>;
   
