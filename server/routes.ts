@@ -8,6 +8,7 @@ import {
   orderInputSchema, orderSearchSchema
 } from "@shared/schema";
 import { parseImportFile } from "./utils/file-parser";
+import { setupAuth } from "./auth";
 import multer from "multer";
 import fs from "fs/promises";
 import path from "path";
@@ -63,6 +64,9 @@ const validateData = <T>(schema: z.ZodType<T>, data: any): T => {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   await ensureTempDir();
+  
+  // Настройка авторизации
+  setupAuth(app);
 
   // User Routes
   app.post("/api/auth/register", async (req, res) => {
