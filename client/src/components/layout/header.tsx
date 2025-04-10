@@ -4,8 +4,15 @@ import { useQuery } from "@tanstack/react-query";
 import { useCart } from "@/lib/cart";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, User, ShoppingCart, Menu, X } from "lucide-react";
+import { Search, User, ShoppingCart, Menu, X, ChevronDown, Package } from "lucide-react";
 import { Category } from "@shared/schema";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -103,29 +110,47 @@ export default function Header() {
         {/* Main Navigation */}
         <nav className="hidden sm:flex py-3">
           <ul className="flex space-x-8">
-            {categories.map((category) => (
-              <li key={category.id} className="group relative">
-                <Link 
-                  href={`/category/${category.slug}`} 
-                  className="text-gray-700 hover:text-eps-orange font-medium"
-                >
-                  {category.name}
-                </Link>
-              </li>
-            ))}
             <li className="group relative">
-              <Link 
-                href="/products" 
-                className="text-gray-700 hover:text-eps-orange font-medium"
-              >
-                Все товары
-              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    className="flex items-center gap-1 text-gray-700 hover:text-eps-orange font-medium px-0 py-1 h-auto"
+                  >
+                    <Package className="h-4 w-4" />
+                    Товары
+                    <ChevronDown className="h-4 w-4 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56 max-h-[70vh] overflow-y-auto">
+                  {categories.map((category) => (
+                    <DropdownMenuItem key={category.id} asChild>
+                      <Link 
+                        href={`/category/${category.slug}`} 
+                        className="w-full cursor-pointer"
+                      >
+                        {category.name}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link 
+                      href="/products" 
+                      className="w-full cursor-pointer font-medium"
+                    >
+                      Все товары
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </li>
             <li className="group relative">
               <Link 
                 href="/admin" 
-                className="text-gray-700 hover:text-eps-orange font-medium"
+                className="text-gray-700 hover:text-eps-orange font-medium flex items-center"
               >
+                <User className="h-4 w-4 mr-1" />
                 Администратор
               </Link>
             </li>
@@ -154,29 +179,38 @@ export default function Header() {
           </form>
           
           <ul className="space-y-3">
-            {categories.map((category) => (
-              <li key={category.id}>
-                <Link 
-                  href={`/category/${category.slug}`} 
-                  className="text-gray-700 hover:text-eps-orange font-medium block py-1"
-                >
-                  {category.name}
-                </Link>
-              </li>
-            ))}
             <li>
-              <Link 
-                href="/products" 
-                className="text-gray-700 hover:text-eps-orange font-medium block py-1"
-              >
-                Все товары
-              </Link>
+              <div className="text-gray-800 font-medium flex items-center py-1">
+                <Package className="h-4 w-4 mr-2" />
+                Товары
+              </div>
+              <ul className="pl-6 mt-2 space-y-2">
+                {categories.map((category) => (
+                  <li key={category.id}>
+                    <Link 
+                      href={`/category/${category.slug}`} 
+                      className="text-gray-700 hover:text-eps-orange block py-1 text-sm"
+                    >
+                      {category.name}
+                    </Link>
+                  </li>
+                ))}
+                <li className="border-t border-gray-100 pt-2 mt-2">
+                  <Link 
+                    href="/products" 
+                    className="text-gray-700 hover:text-eps-orange font-medium block py-1"
+                  >
+                    Все товары
+                  </Link>
+                </li>
+              </ul>
             </li>
-            <li>
+            <li className="border-t border-gray-200 pt-2">
               <Link 
                 href="/admin" 
-                className="text-gray-700 hover:text-eps-orange font-medium block py-1"
+                className="text-gray-700 hover:text-eps-orange font-medium flex items-center py-1"
               >
+                <User className="h-4 w-4 mr-2" />
                 Администратор
               </Link>
             </li>
