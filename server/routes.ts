@@ -492,6 +492,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ message: error.message });
     }
   });
+  
+  // Маршрут для получения заказов пользователя
+  app.get("/api/orders/my-orders", async (req, res) => {
+    try {
+      // В реальном приложении здесь должно быть получение ID пользователя из сессии
+      // const userId = req.user.id;
+      
+      // Пока используем заглушку, возвращаем все заказы
+      const orders = await storage.getAllOrders();
+      
+      res.status(200).json({ 
+        orders: orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
 
   app.get("/api/orders", async (req, res) => {
     try {
@@ -564,6 +581,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json(order);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
+    }
+  });
+  
+  // Маршрут для получения заказов пользователя
+  app.get("/api/orders/my-orders", async (req, res) => {
+    try {
+      // В реальном приложении здесь должно быть получение ID пользователя из сессии
+      // const userId = req.user.id;
+      
+      // Пока используем заглушку, возвращаем все заказы
+      const orders = await storage.getAllOrders();
+      
+      res.status(200).json({ 
+        orders: orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
     }
   });
 

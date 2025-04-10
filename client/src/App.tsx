@@ -14,6 +14,7 @@ import Category from "@/pages/category";
 import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
 import OrderComplete from "@/pages/order-complete";
+import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 
 // Admin Pages
@@ -42,6 +43,7 @@ function Router() {
           <Route path="/cart" component={Cart} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/order-complete/:id" component={OrderComplete} />
+          <Route path="/profile" component={Profile} />
           
           {/* Admin Routes */}
           <Route path="/admin" component={AdminDashboard} />
