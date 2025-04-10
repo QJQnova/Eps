@@ -65,7 +65,7 @@ export default function AdminDashboard() {
   });
   
   // Update overview cards with real data
-  const activeProducts = products.filter(p => p.isActive).length;
+  const activeProducts = Array.isArray(products) ? products.filter(p => p.isActive === true).length : 0;
   const categoryCount = categories.length;
   
   // Updated cards
@@ -215,7 +215,7 @@ export default function AdminDashboard() {
                     <div 
                       className="bg-primary h-2.5 rounded-full" 
                       style={{ 
-                        width: `${Math.min(100, (category.productCount || 0) / (Math.max(...categories.map(c => c.productCount || 0)) || 1) * 100)}%` 
+                        width: `${Math.min(100, (category.productCount || 0) / (Math.max(...categories.map(c => (c.productCount || 0))) || 1) * 100)}%` 
                       }}
                     ></div>
                   </div>
