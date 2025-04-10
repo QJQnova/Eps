@@ -24,18 +24,23 @@ export async function apiRequest(
 
     await throwIfResNotOk(res);
     
-    // Для GET запросов автоматически преобразуем ответ в JSON
-    if (method === "GET") {
-      return res.json();
-    }
-    
-    // Для POST/PATCH/DELETE проверяем Content-Type и преобразуем если это JSON
+    // Для всех запросов автоматически преобразуем ответ в JSON, если есть Content-Type
     const contentType = res.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
       return res.json();
     }
     
-    return res;
+    // Для пустых ответов (204 No Content)
+    if (res.status === 204) {
+      return null;
+    }
+    
+    // Для всех остальных случаев возвращаем текст ответа
+    try {
+      return await res.text();
+    } catch (e) {
+      return null;
+    }
   } catch (error) {
     console.error(`API Request Error: ${method} ${url}`, error);
     throw error;

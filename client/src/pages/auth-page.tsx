@@ -89,7 +89,18 @@ export default function AuthPage() {
     
     registerMutation.mutate(registerData, {
       onSuccess: () => {
+        toast({
+          title: "Успешная регистрация",
+          description: `Аккаунт ${registerData.username} успешно создан!`,
+        });
         setLocation("/");
+      },
+      onError: (error) => {
+        toast({
+          title: "Ошибка регистрации",
+          description: error.message || "Не удалось зарегистрировать пользователя",
+          variant: "destructive",
+        });
       }
     });
   };
