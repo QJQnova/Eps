@@ -9,9 +9,14 @@ import {
   type OrderItem, type InsertOrderItem
 } from "@shared/schema";
 import { randomUUID } from "crypto";
+import session from "express-session";
+import createMemoryStore from "memorystore";
 
 // Interface for storage operations
 export interface IStorage {
+  // Session Store
+  sessionStore: session.Store;
+  
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -57,6 +62,7 @@ export interface IStorage {
 
 // In-memory storage implementation
 export class MemStorage implements IStorage {
+  sessionStore: session.Store;
   private users: Map<number, User>;
   private categories: Map<number, Category>;
   private products: Map<number, Product>;
@@ -69,6 +75,12 @@ export class MemStorage implements IStorage {
   private currentCartItemId: number;
   
   constructor() {
+    // Инициализируем хранилище сессий
+    const MemoryStore = createMemoryStore(session);
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000 // Очистка истекших сессий каждые 24 часа
+    });
+    
     this.users = new Map();
     this.categories = new Map();
     this.products = new Map();
@@ -82,6 +94,7 @@ export class MemStorage implements IStorage {
     // Initialize with admin user
     this.createUser({
       username: "admin",
+      email: "admin@eps.ru",
       password: "admin",
       isAdmin: true
     });
@@ -227,7 +240,13 @@ export class MemStorage implements IStorage {
   
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
+    const createdAt = new Date();
+    const user: User = { 
+      ...insertUser, 
+      id, 
+      isAdmin: insertUser.isAdmin || false,
+      createdAt
+    };
     this.users.set(id, user);
     return user;
   }
