@@ -116,13 +116,26 @@ export default function ProductForm({ productId }: ProductFormProps) {
   // Мутация для создания/обновления товара
   const productMutation = useMutation({
     mutationFn: async (data: ProductFormValues) => {
-      if (isEditing && productId) {
-        return apiRequest("PATCH", `/api/products/${productId}`, data);
-      } else {
-        return apiRequest("POST", "/api/products", data);
+      console.log("MutationFn вызван с данными:", data);
+      try {
+        if (isEditing && productId) {
+          console.log("Отправка PATCH запроса:", `/api/products/${productId}`);
+          const response = await apiRequest("PATCH", `/api/products/${productId}`, data);
+          console.log("Получен ответ:", response);
+          return response;
+        } else {
+          console.log("Отправка POST запроса:", `/api/products`);
+          const response = await apiRequest("POST", "/api/products", data);
+          console.log("Получен ответ:", response);
+          return response;
+        }
+      } catch (err) {
+        console.error("Ошибка в mutationFn:", err);
+        throw err;
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("onSuccess вызван с данными:", data);
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       toast({
         title: isEditing ? "Товар обновлен" : "Товар создан",
@@ -133,6 +146,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
       navigate("/admin/products");
     },
     onError: (error) => {
+      console.error("onError вызван с ошибкой:", error);
       toast({
         title: "Ошибка",
         description: `Не удалось ${isEditing ? "обновить" : "создать"} товар: ${error}`,
@@ -144,8 +158,19 @@ export default function ProductForm({ productId }: ProductFormProps) {
 
   // Обработка отправки формы
   const onSubmit = (data: ProductFormValues) => {
-    setIsSubmitting(true);
-    productMutation.mutate(data);
+    console.log("Отправка формы:", data);
+    try {
+      setIsSubmitting(true);
+      productMutation.mutate(data);
+    } catch (error) {
+      console.error("Ошибка при отправке формы:", error);
+      setIsSubmitting(false);
+      toast({
+        title: "Ошибка",
+        description: `Не удалось отправить форму: ${error}`,
+        variant: "destructive",
+      });
+    }
   };
 
   // Генерация slug из названия товара
