@@ -4,7 +4,7 @@ import {
   type Category, type InsertCategory,
   type Product, type InsertProduct,
   type CartItem, type InsertCartItem,
-  type ProductSearchParams
+  type ProductSearchParams, type ProductInput
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -357,9 +357,20 @@ export class MemStorage implements IStorage {
     );
   }
   
-  async createProduct(insertProduct: InsertProduct): Promise<Product> {
+  async createProduct(productInput: ProductInput): Promise<Product> {
     const id = this.currentProductId++;
     const createdAt = new Date();
+    
+    // Преобразуем числовые данные в строковые для хранения
+    const insertProduct: InsertProduct = {
+      ...productInput,
+      // Преобразуем число в строку с двумя десятичными знаками
+      price: productInput.price.toString(),
+      // Обрабатываем опциональную цену
+      originalPrice: productInput.originalPrice ? productInput.originalPrice.toString() : null,
+    };
+    
+    console.log("Преобразованные данные товара для хранения:", insertProduct);
     
     const product: Product = { 
       ...insertProduct, 
@@ -383,7 +394,15 @@ export class MemStorage implements IStorage {
     return product;
   }
   
-  async updateProduct(id: number, updateData: Partial<InsertProduct>): Promise<Product | undefined> {
+  async updateProduct(id: number, updateInput: Partial<ProductInput>): Promise<Product | undefined> {
+    // Преобразуем числовые данные в строки для обновления
+    const updateData: Partial<InsertProduct> = {
+      ...updateInput,
+      price: updateInput.price !== undefined ? updateInput.price.toString() : undefined,
+      originalPrice: updateInput.originalPrice !== undefined 
+        ? (updateInput.originalPrice === null ? null : updateInput.originalPrice.toString()) 
+        : undefined,
+    };
     const product = this.products.get(id);
     if (!product) return undefined;
     
@@ -435,9 +454,23 @@ export class MemStorage implements IStorage {
     
     for (const productData of productsToImport) {
       try {
-        await this.createProduct(productData);
+        // Преобразуем InsertProduct в ProductInput
+        const productInput: ProductInput = {
+          ...productData,
+          price: typeof productData.price === 'string' ? parseFloat(productData.price) : 0,
+          originalPrice: productData.originalPrice && typeof productData.originalPrice === 'string' 
+            ? parseFloat(productData.originalPrice) 
+            : null,
+          stock: typeof productData.stock === 'number' ? productData.stock : 0,
+          categoryId: typeof productData.categoryId === 'number' ? productData.categoryId : 1,
+          isActive: typeof productData.isActive === 'boolean' ? productData.isActive : true,
+          isFeatured: typeof productData.isFeatured === 'boolean' ? productData.isFeatured : false,
+        };
+        
+        await this.createProduct(productInput);
         success++;
       } catch (error) {
+        console.error("Ошибка при импорте товара:", error);
         failed++;
       }
     }
