@@ -68,49 +68,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Настройка авторизации
   setupAuth(app);
 
-  // User Routes
-  app.post("/api/auth/register", async (req, res) => {
-    try {
-      const userData = validateData(insertUserSchema, req.body);
-      const existingUser = await storage.getUserByUsername(userData.username);
-      
-      if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
-      
-      const user = await storage.createUser(userData);
-      // Don't send password back
-      const { password, ...userWithoutPassword } = user;
-      
-      res.status(201).json(userWithoutPassword);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/auth/login", async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      
-      if (!username || !password) {
-        return res.status(400).json({ message: "Username and password are required" });
-      }
-      
-      const user = await storage.getUserByUsername(username);
-      
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid username or password" });
-      }
-      
-      // In a real application, you'd use proper authentication with JWT or sessions
-      // For this demo, we'll just return the user info
-      const { password: _, ...userWithoutPassword } = user;
-      
-      res.status(200).json(userWithoutPassword);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
+  // User Routes для администрирования
+  // (авторизация уже добавлена через setupAuth)
 
   // Category Routes
   app.get("/api/categories", async (req, res) => {
