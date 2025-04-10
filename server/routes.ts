@@ -246,20 +246,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/products", async (req, res) => {
     try {
-      const productData = validateData(insertProductSchema, req.body);
+      console.log("Received product data:", req.body);
+      
+      // Преобразуем числовые данные
+      const modifiedData = {
+        ...req.body,
+        price: typeof req.body.price === 'string' ? parseFloat(req.body.price) : req.body.price,
+        originalPrice: req.body.originalPrice ? 
+          (typeof req.body.originalPrice === 'string' ? parseFloat(req.body.originalPrice) : req.body.originalPrice) : null,
+        stock: req.body.stock ? 
+          (typeof req.body.stock === 'string' ? parseInt(req.body.stock, 10) : req.body.stock) : 0,
+        categoryId: typeof req.body.categoryId === 'string' ? parseInt(req.body.categoryId, 10) : req.body.categoryId,
+      };
+      
+      console.log("Modified product data:", modifiedData);
+      
+      const productData = validateData(insertProductSchema, modifiedData);
+      console.log("Validated product data:", productData);
+      
       const product = await storage.createProduct(productData);
+      console.log("Created product:", product);
+      
       res.status(201).json(product);
     } catch (error: any) {
+      console.error("Error creating product:", error);
       res.status(400).json({ message: error.message });
     }
   });
 
   app.patch("/api/products/:id", async (req, res) => {
     try {
+      console.log("Received product update data:", req.body);
       const id = parseInt(req.params.id);
-      const updateData = req.body;
       
-      const product = await storage.updateProduct(id, updateData);
+      // Преобразуем числовые данные
+      const modifiedData = {
+        ...req.body,
+        price: req.body.price !== undefined ? 
+          (typeof req.body.price === 'string' ? parseFloat(req.body.price) : req.body.price) : undefined,
+        originalPrice: req.body.originalPrice !== undefined ? 
+          (typeof req.body.originalPrice === 'string' ? parseFloat(req.body.originalPrice) : req.body.originalPrice) : undefined,
+        stock: req.body.stock !== undefined ? 
+          (typeof req.body.stock === 'string' ? parseInt(req.body.stock, 10) : req.body.stock) : undefined,
+        categoryId: req.body.categoryId !== undefined ? 
+          (typeof req.body.categoryId === 'string' ? parseInt(req.body.categoryId, 10) : req.body.categoryId) : undefined,
+      };
+      
+      console.log("Modified product update data:", modifiedData);
+      
+      const product = await storage.updateProduct(id, modifiedData);
+      console.log("Updated product:", product);
       
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
@@ -267,6 +303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(200).json(product);
     } catch (error: any) {
+      console.error("Error updating product:", error);
       res.status(400).json({ message: error.message });
     }
   });
