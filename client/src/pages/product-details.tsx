@@ -116,7 +116,7 @@ export default function ProductDetails() {
           <BreadcrumbLink asChild>
             <Link href="/">
               <Home className="h-4 w-4 mr-1" />
-              Home
+              Главная
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
@@ -162,36 +162,36 @@ export default function ProductDetails() {
               <Star className="h-4 w-4 fill-gray-200 text-gray-200" />
             </div>
             <span className="text-sm ml-2 text-gray-500">
-              {product.rating} ({product.reviewCount} reviews)
+              {product.rating} ({product.reviewCount} отзывов)
             </span>
             <span className="mx-2 text-gray-300">|</span>
-            <span className="text-sm text-gray-500">SKU: {product.sku}</span>
+            <span className="text-sm text-gray-500">Артикул: {product.sku}</span>
           </div>
 
           <div className="mb-6">
             <div className="flex items-center">
-              <span className="text-3xl font-bold text-gray-900">${Number(product.price).toFixed(2)}</span>
+              <span className="text-3xl font-bold text-gray-900">{formatPrice(product.price)}</span>
               {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
-                <span className="text-lg line-through text-gray-500 ml-3">${Number(product.originalPrice).toFixed(2)}</span>
+                <span className="text-lg line-through text-gray-500 ml-3">{formatPrice(product.originalPrice)}</span>
               )}
               {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
                 <span className="ml-3 bg-rose-100 text-rose-700 text-sm font-medium px-2 py-0.5 rounded">
-                  Save ${(Number(product.originalPrice) - Number(product.price)).toFixed(2)}
+                  Экономия {formatPrice(Number(product.originalPrice) - Number(product.price))}
                 </span>
               )}
             </div>
             <p className="text-sm text-gray-500 mt-1">
               {product.stock > 0 ? (
-                <span className="text-emerald-600 font-medium">In Stock ({product.stock} available)</span>
+                <span className="text-emerald-600 font-medium">В наличии ({product.stock} шт.)</span>
               ) : (
-                <span className="text-rose-600 font-medium">Out of Stock</span>
+                <span className="text-rose-600 font-medium">Нет в наличии</span>
               )}
             </p>
           </div>
 
           <p className="text-gray-600 mb-6">{product.shortDescription}</p>
 
-          {/* Quantity and Add to Cart */}
+          {/* Количество и Добавить в корзину */}
           <div className="flex space-x-3 mb-6">
             <div className="flex items-center border border-gray-300 rounded-md w-32">
               <Button 
@@ -232,41 +232,41 @@ export default function ProductDetails() {
               disabled={isAddingToCart || product.stock === 0}
             >
               <ShoppingCart className="h-5 w-5 mr-2" />
-              Add to Cart
+              В корзину
             </Button>
           </div>
 
-          {/* Features */}
+          {/* Преимущества */}
           <div className="space-y-3 mb-6">
             <div className="flex items-center text-gray-600">
               <Truck className="h-5 w-5 mr-3 text-primary" />
-              <span>Free shipping on orders over $75</span>
+              <span>Бесплатная доставка при заказе от 5000 ₽</span>
             </div>
             <div className="flex items-center text-gray-600">
               <ShieldCheck className="h-5 w-5 mr-3 text-primary" />
-              <span>2-year manufacturer warranty</span>
+              <span>Гарантия производителя 2 года</span>
             </div>
             <div className="flex items-center text-gray-600">
               <RefreshCw className="h-5 w-5 mr-3 text-primary" />
-              <span>30-day hassle-free returns</span>
+              <span>Возврат в течение 30 дней</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Product Details Tabs */}
+      {/* Вкладки с информацией о товаре */}
       <div className="mb-12">
         <Tabs defaultValue="description">
           <TabsList className="grid w-full grid-cols-3 lg:w-1/2">
-            <TabsTrigger value="description">Description</TabsTrigger>
-            <TabsTrigger value="specifications">Specifications</TabsTrigger>
-            <TabsTrigger value="reviews">Reviews</TabsTrigger>
+            <TabsTrigger value="description">Описание</TabsTrigger>
+            <TabsTrigger value="specifications">Характеристики</TabsTrigger>
+            <TabsTrigger value="reviews">Отзывы</TabsTrigger>
           </TabsList>
           <TabsContent value="description" className="mt-6">
             <Card>
               <CardContent className="p-6">
                 <div className="prose max-w-none">
-                  <p>{product.description || "No detailed description available for this product."}</p>
+                  <p>{product.description || "Подробное описание для этого товара отсутствует."}</p>
                 </div>
               </CardContent>
             </Card>
@@ -276,20 +276,20 @@ export default function ProductDetails() {
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="border-b pb-2">
-                    <div className="text-sm text-gray-500">SKU</div>
+                    <div className="text-sm text-gray-500">Артикул</div>
                     <div className="font-medium">{product.sku}</div>
                   </div>
                   <div className="border-b pb-2">
-                    <div className="text-sm text-gray-500">Category</div>
+                    <div className="text-sm text-gray-500">Категория</div>
                     <div className="font-medium">{categoryName}</div>
                   </div>
                   <div className="border-b pb-2">
-                    <div className="text-sm text-gray-500">Stock</div>
-                    <div className="font-medium">{product.stock} units</div>
+                    <div className="text-sm text-gray-500">Количество на складе</div>
+                    <div className="font-medium">{product.stock} шт.</div>
                   </div>
                   <div className="border-b pb-2">
-                    <div className="text-sm text-gray-500">Weight</div>
-                    <div className="font-medium">1.2 kg</div>
+                    <div className="text-sm text-gray-500">Вес</div>
+                    <div className="font-medium">1.2 кг</div>
                   </div>
                 </div>
               </CardContent>
@@ -299,9 +299,9 @@ export default function ProductDetails() {
             <Card>
               <CardContent className="p-6">
                 <div className="text-center py-8">
-                  <h3 className="text-lg font-medium mb-2">No reviews yet</h3>
-                  <p className="text-gray-500 mb-4">Be the first to review this product</p>
-                  <Button variant="outline">Write a Review</Button>
+                  <h3 className="text-lg font-medium mb-2">Ещё нет отзывов</h3>
+                  <p className="text-gray-500 mb-4">Будьте первым, кто оставит отзыв об этом товаре</p>
+                  <Button variant="outline">Написать отзыв</Button>
                 </div>
               </CardContent>
             </Card>
@@ -309,10 +309,10 @@ export default function ProductDetails() {
         </Tabs>
       </div>
 
-      {/* Related Products */}
+      {/* Похожие товары */}
       {relatedProducts.length > 1 && (
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Products</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Похожие товары</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {relatedProducts
               .filter(p => p.id !== product.id)
