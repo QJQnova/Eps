@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/header";
@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 
 export default function OrderComplete() {
   const { id } = useParams();
-  const [, navigate] = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -90,7 +90,7 @@ export default function OrderComplete() {
             <div className="flex h-[400px] flex-col items-center justify-center space-y-4">
               <h1 className="text-2xl font-bold text-red-600">Ошибка</h1>
               <p>{error}</p>
-              <Button onClick={() => navigate("/")}>Вернуться на главную</Button>
+              <Button onClick={() => setLocation("/")}>Вернуться на главную</Button>
             </div>
           </div>
         </main>
@@ -202,7 +202,7 @@ export default function OrderComplete() {
               </div>
             </CardContent>
             <CardFooter className="flex justify-end space-x-4">
-              <Button variant="outline" onClick={() => navigate("/")}>
+              <Button variant="outline" onClick={() => setLocation("/")}>
                 Вернуться к покупкам
               </Button>
             </CardFooter>
