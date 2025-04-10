@@ -107,8 +107,7 @@ export default function Checkout() {
       };
 
       // Отправляем запрос на создание заказа
-      const response = await apiRequest("POST", "/api/orders", orderData);
-      const order = await response.json();
+      const order = await apiRequest("POST", "/api/orders", orderData);
 
       // Очищаем корзину после успешного создания заказа
       await clearCart();

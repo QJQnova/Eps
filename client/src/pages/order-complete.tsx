@@ -20,8 +20,7 @@ export default function OrderComplete() {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const response = await apiRequest("GET", `/api/orders/${id}`);
-        const data = await response.json();
+        const data = await apiRequest("GET", `/api/orders/${id}`);
         setOrder(data);
       } catch (error: any) {
         console.error("Ошибка при загрузке заказа:", error);

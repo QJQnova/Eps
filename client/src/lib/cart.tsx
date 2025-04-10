@@ -23,6 +23,7 @@ type CartItem = {
     originalPrice?: number;
     imageUrl?: string;
     shortDescription?: string;
+    slug: string;
   };
 };
 
