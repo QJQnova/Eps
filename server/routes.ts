@@ -460,10 +460,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Маршрут для получения заказов пользователя
   app.get("/api/orders/my-orders", async (req, res) => {
     try {
-      // В реальном приложении здесь должно быть получение ID пользователя из сессии
-      // const userId = req.user.id;
+      // Проверяем, авторизован ли пользователь
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Не авторизован" });
+      }
       
-      // Пока используем заглушку, возвращаем все заказы
+      // Получаем ID пользователя из сессии
+      const userId = req.user.id;
+      
+      // В реальном приложении здесь будет фильтрация заказов по ID пользователя
+      // Пока используем заглушку, возвращаем все заказы, так как у нас нет поля userId в схеме заказов
       const orders = await storage.getAllOrders();
       
       // Добавляем проверку на null перед обращением к createdAt
@@ -472,7 +478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
           const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           return dateB - dateA;
-        })
+        }).slice(0, 10) // Ограничиваем количество заказов для демонстрации
       });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
