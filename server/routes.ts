@@ -2,7 +2,11 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertUserSchema, insertCategorySchema, insertProductSchema, insertCartItemSchema, productSearchSchema, bulkImportSchema } from "@shared/schema";
+import { 
+  insertUserSchema, insertCategorySchema, insertProductSchema, 
+  insertCartItemSchema, productSearchSchema, bulkImportSchema,
+  orderInputSchema, orderSearchSchema
+} from "@shared/schema";
 import { parseImportFile } from "./utils/file-parser";
 import multer from "multer";
 import fs from "fs/promises";
@@ -465,6 +469,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).end();
     } catch (error: any) {
       res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Order Routes
+  app.post("/api/orders", async (req, res) => {
+    try {
+      const orderData = validateData(orderInputSchema, req.body);
+      
+      // Получаем товары из корзины
+      const cartItems = await storage.getCartItemWithProduct(orderData.cartId);
+      
+      if (cartItems.length === 0) {
+        return res.status(400).json({ message: "Корзина пуста" });
+      }
+      
+      // Создаем заказ
+      const order = await storage.createOrder(orderData, cartItems);
+      
+      res.status(201).json(order);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/orders", async (req, res) => {
+    try {
+      // Схема поиска с преобразованием типов
+      const customSearchSchema = z.object({
+        query: z.string().optional(),
+        status: z.enum(['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled']).optional(),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+        page: z.union([z.number(), z.string().transform(val => parseInt(val, 10))]).transform(val => val || 1),
+        limit: z.union([z.number(), z.string().transform(val => parseInt(val, 10))]).transform(val => val || 10)
+      });
+      
+      const params = customSearchSchema.parse(req.query);
+      
+      // Получаем заказы с пагинацией
+      const { orders, total } = await storage.searchOrders(params);
+      
+      const totalPages = Math.ceil(total / params.limit);
+      
+      res.status(200).json({
+        orders,
+        pagination: {
+          page: params.page,
+          limit: params.limit,
+          total,
+          totalPages
+        }
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        const errorMessages = error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+        res.status(400).json({ message: `Ошибка валидации: ${errorMessages}` });
+      } else {
+        res.status(500).json({ message: error.message });
+      }
+    }
+  });
+
+  app.get("/api/orders/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const order = await storage.getOrderById(id);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Заказ не найден" });
+      }
+      
+      res.status(200).json(order);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/orders/:id/status", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      if (!status) {
+        return res.status(400).json({ message: "Статус обязателен" });
+      }
+      
+      const order = await storage.updateOrderStatus(id, status);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Заказ не найден" });
+      }
+      
+      res.status(200).json(order);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
     }
   });
 

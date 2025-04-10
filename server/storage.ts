@@ -1,10 +1,12 @@
 import { 
-  users, categories, products, cartItems,
+  users, categories, products, cartItems, orders, orderItems,
   type User, type InsertUser, 
   type Category, type InsertCategory,
   type Product, type InsertProduct,
   type CartItem, type InsertCartItem,
-  type ProductSearchParams, type ProductInput
+  type ProductSearchParams, type ProductInput,
+  type Order, type InsertOrder, type OrderInput, type OrderSearchParams,
+  type OrderItem, type InsertOrderItem
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
