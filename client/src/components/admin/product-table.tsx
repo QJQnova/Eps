@@ -32,7 +32,7 @@ import { Input } from "@/components/ui/input";
 import { Pencil, Trash2, Plus, Search } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Product } from "@shared/schema";
+import { Product, Category } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProductTable() {
@@ -77,14 +77,14 @@ export default function ProductTable() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       toast({
-        title: "Product deleted",
-        description: "The product has been deleted successfully.",
+        title: "Товар удален",
+        description: "Товар был успешно удален.",
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to delete product: ${error}`,
+        title: "Ошибка",
+        description: `Не удалось удалить товар: ${error}`,
         variant: "destructive",
       });
     }
@@ -98,14 +98,14 @@ export default function ProductTable() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       toast({
-        title: "Status updated",
-        description: "The product status has been updated.",
+        title: "Статус обновлен",
+        description: "Статус товара был успешно обновлен.",
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to update product status: ${error}`,
+        title: "Ошибка",
+        description: `Не удалось обновить статус товара: ${error}`,
         variant: "destructive",
       });
     }
@@ -165,7 +165,7 @@ export default function ProductTable() {
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-gray-400" />
             </div>
-            <Button type="submit" className="sr-only">Search</Button>
+            <Button type="submit" className="sr-only">Поиск</Button>
           </div>
         </form>
         
@@ -233,7 +233,7 @@ export default function ProductTable() {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <img 
-                        src={product.imageUrl || "https://placehold.co/100x100?text=No+Image"} 
+                        src={product.imageUrl || "https://placehold.co/100x100?text=Нет+изображения"} 
                         alt={product.name} 
                         className="w-10 h-10 rounded object-cover bg-gray-100" 
                       />
@@ -241,7 +241,7 @@ export default function ProductTable() {
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    {categories.find(c => c.id === product.categoryId)?.name || "Unknown"}
+                    {categories.find(c => c.id === product.categoryId)?.name || "Не указана"}
                   </TableCell>
                   <TableCell>{Number(product.price).toFixed(2)} ₽</TableCell>
                   <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
