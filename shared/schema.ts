@@ -131,3 +131,91 @@ export const productSearchSchema = z.object({
 export const bulkImportSchema = z.array(insertProductSchema);
 
 export type ProductSearchParams = z.infer<typeof productSearchSchema>;
+
+// Orders Schema
+export const orders = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id"),
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerPhone: text("customer_phone").notNull(),
+  address: text("address").notNull(),
+  city: text("city").notNull(),
+  postalCode: text("postal_code").notNull(),
+  status: text("status").notNull().default("pending"),
+  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  paymentMethod: text("payment_method").notNull().default("Наличными при получении"),
+  paymentStatus: text("payment_status").notNull().default("не оплачен"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertOrderSchema = createInsertSchema(orders).pick({
+  userId: true,
+  customerName: true,
+  customerEmail: true,
+  customerPhone: true,
+  address: true,
+  city: true,
+  postalCode: true,
+  status: true,
+  totalAmount: true,
+  paymentMethod: true,
+  paymentStatus: true,
+  notes: true,
+});
+
+// Order Items Schema
+export const orderItems = pgTable("order_items", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").notNull(),
+  productId: integer("product_id").notNull(),
+  productName: text("product_name").notNull(),
+  productPrice: numeric("product_price", { precision: 10, scale: 2 }).notNull(),
+  quantity: integer("quantity").notNull(),
+  totalPrice: numeric("total_price", { precision: 10, scale: 2 }).notNull(),
+});
+
+export const insertOrderItemSchema = createInsertSchema(orderItems).pick({
+  orderId: true,
+  productId: true,
+  productName: true,
+  productPrice: true,
+  quantity: true,
+  totalPrice: true,
+});
+
+// Types
+export type InsertOrder = z.infer<typeof insertOrderSchema>;
+export type Order = typeof orders.$inferSelect;
+
+export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
+export type OrderItem = typeof orderItems.$inferSelect;
+
+// Order input schema
+export const orderInputSchema = z.object({
+  customerName: z.string().min(1, "Имя обязательно"),
+  customerEmail: z.string().email("Некорректный email"),
+  customerPhone: z.string().min(5, "Телефон обязателен"),
+  address: z.string().min(1, "Адрес обязателен"),
+  city: z.string().min(1, "Город обязателен"),
+  postalCode: z.string().min(1, "Индекс обязателен"),
+  paymentMethod: z.enum(["Наличными при получении", "Картой при получении", "Онлайн оплата"]),
+  notes: z.string().optional().nullable(),
+  cartId: z.string().min(1, "ID корзины обязателен"),
+});
+
+export type OrderInput = z.infer<typeof orderInputSchema>;
+
+// Order search schema
+export const orderSearchSchema = z.object({
+  query: z.string().optional(),
+  status: z.enum(['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled']).optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  page: z.coerce.number().default(1),
+  limit: z.coerce.number().default(10),
+});
+
+export type OrderSearchParams = z.infer<typeof orderSearchSchema>;

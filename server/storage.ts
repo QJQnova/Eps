@@ -42,6 +42,15 @@ export interface IStorage {
   updateCartItemQuantity(id: number, quantity: number): Promise<CartItem | undefined>;
   removeFromCart(id: number): Promise<boolean>;
   clearCart(cartId: string): Promise<boolean>;
+  
+  // Order operations
+  createOrder(orderInput: OrderInput, cartItems: (CartItem & { product: Product })[]): Promise<Order>;
+  getOrderById(id: number): Promise<(Order & { items: (OrderItem & { product?: Product })[] }) | undefined>;
+  getAllOrders(): Promise<Order[]>;
+  searchOrders(params: OrderSearchParams): Promise<{ orders: Order[], total: number }>;
+  updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
+  getOrderItems(orderId: number): Promise<OrderItem[]>;
+  getOrderItemsWithProducts(orderId: number): Promise<(OrderItem & { product?: Product })[]>;
 }
 
 // In-memory storage implementation
@@ -556,6 +565,167 @@ export class MemStorage implements IStorage {
     }
     
     return true;
+  }
+  
+  // Order operations
+  private orders: Map<number, Order> = new Map();
+  private orderItems: Map<number, OrderItem> = new Map();
+  private currentOrderId: number = 1;
+  private currentOrderItemId: number = 1;
+  
+  async createOrder(orderInput: OrderInput, cartItems: (CartItem & { product: Product })[]): Promise<Order> {
+    // Calculate total
+    const totalAmount = cartItems.reduce((total, item) => {
+      return total + (Number(item.product.price) * item.quantity);
+    }, 0);
+    
+    // Create order
+    const orderId = this.currentOrderId++;
+    const now = new Date();
+    
+    const order: Order = {
+      id: orderId,
+      userId: null, // Для гостевого заказа
+      customerName: orderInput.customerName,
+      customerEmail: orderInput.customerEmail,
+      customerPhone: orderInput.customerPhone,
+      address: orderInput.address,
+      city: orderInput.city,
+      postalCode: orderInput.postalCode,
+      status: "pending",
+      totalAmount: totalAmount.toString(),
+      paymentMethod: orderInput.paymentMethod,
+      paymentStatus: "не оплачен",
+      notes: orderInput.notes,
+      createdAt: now,
+      updatedAt: now,
+    };
+    
+    this.orders.set(orderId, order);
+    
+    // Create order items
+    for (const item of cartItems) {
+      const orderItemId = this.currentOrderItemId++;
+      const totalPrice = Number(item.product.price) * item.quantity;
+      
+      const orderItem: OrderItem = {
+        id: orderItemId,
+        orderId,
+        productId: item.productId,
+        productName: item.product.name,
+        productPrice: item.product.price,
+        quantity: item.quantity,
+        totalPrice: totalPrice.toString(),
+      };
+      
+      this.orderItems.set(orderItemId, orderItem);
+    }
+    
+    // Очистить корзину после создания заказа
+    await this.clearCart(orderInput.cartId);
+    
+    return order;
+  }
+  
+  async getOrderById(id: number): Promise<(Order & { items: (OrderItem & { product?: Product })[] }) | undefined> {
+    const order = this.orders.get(id);
+    if (!order) return undefined;
+    
+    const items = await this.getOrderItemsWithProducts(id);
+    
+    return {
+      ...order,
+      items,
+    };
+  }
+  
+  async getAllOrders(): Promise<Order[]> {
+    return Array.from(this.orders.values());
+  }
+  
+  async searchOrders(params: OrderSearchParams): Promise<{ orders: Order[], total: number }> {
+    let filtered = Array.from(this.orders.values());
+    
+    // Apply filters
+    if (params.query) {
+      const query = params.query.toLowerCase();
+      filtered = filtered.filter(order => 
+        order.customerName.toLowerCase().includes(query) ||
+        order.customerEmail.toLowerCase().includes(query) ||
+        order.customerPhone.includes(query)
+      );
+    }
+    
+    if (params.status && params.status !== 'all') {
+      filtered = filtered.filter(order => order.status === params.status);
+    }
+    
+    if (params.startDate) {
+      const startDate = new Date(params.startDate);
+      filtered = filtered.filter(order => 
+        new Date(order.createdAt || Date.now()) >= startDate
+      );
+    }
+    
+    if (params.endDate) {
+      const endDate = new Date(params.endDate);
+      filtered = filtered.filter(order => 
+        new Date(order.createdAt || Date.now()) <= endDate
+      );
+    }
+    
+    // Sort by date, newest first
+    filtered.sort((a, b) => 
+      new Date(b.createdAt || Date.now()).getTime() - 
+      new Date(a.createdAt || Date.now()).getTime()
+    );
+    
+    const total = filtered.length;
+    
+    // Apply pagination
+    const page = params.page || 1;
+    const limit = params.limit || 10;
+    const start = (page - 1) * limit;
+    const end = page * limit;
+    
+    const paginatedOrders = filtered.slice(start, end);
+    
+    return {
+      orders: paginatedOrders,
+      total
+    };
+  }
+  
+  async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
+    const order = this.orders.get(id);
+    if (!order) return undefined;
+    
+    const updatedOrder = { 
+      ...order, 
+      status,
+      updatedAt: new Date(),
+    };
+    
+    this.orders.set(id, updatedOrder);
+    return updatedOrder;
+  }
+  
+  async getOrderItems(orderId: number): Promise<OrderItem[]> {
+    return Array.from(this.orderItems.values()).filter(
+      item => item.orderId === orderId
+    );
+  }
+  
+  async getOrderItemsWithProducts(orderId: number): Promise<(OrderItem & { product?: Product })[]> {
+    const items = await this.getOrderItems(orderId);
+    
+    return items.map(item => {
+      const product = this.products.get(item.productId);
+      return {
+        ...item,
+        product,
+      };
+    });
   }
 }
 
