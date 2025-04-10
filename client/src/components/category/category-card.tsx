@@ -2,24 +2,14 @@ import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Category } from "@shared/schema";
 import { 
+  Bolt, 
   Drill, 
   Hammer, 
-  Ruler, 
-  HardHat, 
-  Bolt, 
-  Cable, 
-  TreePine, 
-  Wrench, 
-  Gauge, 
-  Cog, 
-  Flame, 
-  Droplet, 
-  Activity, 
-  BatteryCharging, 
-  Cloud, 
-  Zap, 
-  Target,
-  Building
+  Ruler,
+  Zap,
+  Gauge,
+  Cable,
+  Wrench
 } from "lucide-react";
 
 interface CategoryCardProps {
@@ -27,46 +17,9 @@ interface CategoryCardProps {
 }
 
 export default function CategoryCard({ category }: CategoryCardProps) {
-  // Map category icon to Lucide icon component
+  // Получаем иконку для категории
   const getIcon = () => {
-    switch (category.icon) {
-      case "drill":
-        return <Drill className="h-8 w-8" />;
-      case "hammer":
-        return <Hammer className="h-8 w-8" />;
-      case "ruler-combined":
-        return <Ruler className="h-8 w-8" />;
-      case "hard-hat":
-        return <HardHat className="h-8 w-8" />;
-      case "power":
-        return <Cable className="h-8 w-8" />;
-      case "tree":
-        return <TreePine className="h-8 w-8" />;
-      case "flash":
-        return <Wrench className="h-8 w-8" />;
-      case "gauge":
-        return <Gauge className="h-8 w-8" />;
-      case "cog":
-        return <Cog className="h-8 w-8" />;
-      case "fire":
-        return <Flame className="h-8 w-8" />;
-      case "droplet":
-        return <Droplet className="h-8 w-8" />;
-      case "activity":
-        return <Activity className="h-8 w-8" />;
-      case "battery-charging":
-        return <BatteryCharging className="h-8 w-8" />;
-      case "cloud-snow":
-        return <Cloud className="h-8 w-8" />;
-      case "zap":
-        return <Zap className="h-8 w-8" />;
-      case "crosshair":
-        return <Target className="h-8 w-8" />;
-      case "construction":
-        return <Building className="h-8 w-8" />;
-      default:
-        return <Bolt className="h-8 w-8" />;
-    }
+    return <Bolt className="h-8 w-8" />;
   };
   
   // Определим цвет категории на основе ее названия

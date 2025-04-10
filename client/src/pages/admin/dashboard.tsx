@@ -21,31 +21,31 @@ import { Button } from "@/components/ui/button";
 import AdminSidebar from "@/components/admin/sidebar";
 import { Category, Product } from "@shared/schema";
 
-// Overview cards data
+// Данные для карточек обзора
 const overviewCards = [
   {
-    title: "Total Revenue",
-    value: "$15,231.89",
+    title: "Общая выручка",
+    value: "15 231,89 ₽",
     change: "+12.5%",
     trend: "up",
     icon: DollarSign,
   },
   {
-    title: "Active Products",
-    value: "0", // Will be updated from API data
+    title: "Активные товары",
+    value: "0", // Будет обновлено из API
     change: "+4.3%",
     trend: "up",
     icon: Package2,
   },
   {
-    title: "Categories",
-    value: "0", // Will be updated from API data
+    title: "Категории",
+    value: "0", // Будет обновлено из API
     change: "0%",
     trend: "neutral",
     icon: ShoppingBag,
   },
   {
-    title: "Customers",
+    title: "Клиенты",
     value: "573",
     change: "+9.1%",
     trend: "up",
@@ -79,20 +79,20 @@ export default function AdminDashboard() {
       <div className="flex-1 p-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-500">Welcome back to your admin dashboard.</p>
+            <h1 className="text-3xl font-bold text-gray-900">Панель управления</h1>
+            <p className="text-gray-500">Добро пожаловать в панель администратора.</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" asChild>
-              <Link href="/admin/import">Bulk Import</Link>
+              <Link href="/admin/import">Импорт товаров</Link>
             </Button>
             <Button asChild>
-              <Link href="/admin/products">Manage Products</Link>
+              <Link href="/admin/products">Управление товарами</Link>
             </Button>
           </div>
         </div>
         
-        {/* Overview Cards */}
+        {/* Обзорные карточки */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
           {updatedCards.map((card, i) => (
             <Card key={i}>
@@ -119,7 +119,7 @@ export default function AdminDashboard() {
                         ? 'text-rose-500' 
                         : ''
                   }>
-                    {card.change} from last month
+                    {card.change} по сравнению с прошлым месяцем
                   </span>
                 </p>
               </CardContent>
@@ -127,41 +127,41 @@ export default function AdminDashboard() {
           ))}
         </div>
         
-        {/* Quick Actions */}
+        {/* Быстрые действия */}
         <div className="grid gap-4 md:grid-cols-3 mb-8">
           <Card>
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+              <CardTitle>Быстрые действия</CardTitle>
               <CardDescription>
-                Common tasks and shortcuts
+                Часто используемые задачи
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-2">
               <Button className="justify-start" asChild>
                 <Link href="/admin/products/create">
                   <Package2 className="mr-2 h-4 w-4" />
-                  Add New Product
+                  Добавить товар
                 </Link>
               </Button>
               <Button variant="outline" className="justify-start" asChild>
                 <Link href="/admin/import">
                   <ShoppingBag className="mr-2 h-4 w-4" />
-                  Import Products
+                  Массовый импорт
                 </Link>
               </Button>
               <Button variant="outline" className="justify-start">
                 <BarChart3 className="mr-2 h-4 w-4" />
-                View Sales Report
+                Отчёт по продажам
               </Button>
             </CardContent>
           </Card>
           
-          {/* Recent Orders */}
+          {/* Последние заказы */}
           <Card className="md:col-span-2">
             <CardHeader>
-              <CardTitle>Recent Orders</CardTitle>
+              <CardTitle>Последние заказы</CardTitle>
               <CardDescription>
-                Latest customer orders
+                Недавние заказы клиентов
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -173,16 +173,16 @@ export default function AdminDashboard() {
                         <ShoppingBag className="h-4 w-4 text-gray-500" />
                       </div>
                       <div>
-                        <p className="font-medium">Order #{1000 + i}</p>
+                        <p className="font-medium">Заказ #{1000 + i}</p>
                         <p className="text-sm text-gray-500">
                           {new Date(Date.now() - i * 86400000).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
                     <div>
-                      <p className="font-medium text-right">${(Math.random() * 300 + 50).toFixed(2)}</p>
+                      <p className="font-medium text-right">{(Math.random() * 300 + 50).toFixed(2)} ₽</p>
                       <p className="text-sm text-gray-500">
-                        {i === 0 ? "Processing" : i === 1 ? "Shipped" : "Delivered"}
+                        {i === 0 ? "Обработка" : i === 1 ? "Отправлен" : "Доставлен"}
                       </p>
                     </div>
                   </div>
@@ -192,12 +192,12 @@ export default function AdminDashboard() {
           </Card>
         </div>
         
-        {/* Category Performance */}
+        {/* Эффективность категорий */}
         <Card>
           <CardHeader>
-            <CardTitle>Category Performance</CardTitle>
+            <CardTitle>Эффективность категорий</CardTitle>
             <CardDescription>
-              Product count by category
+              Количество товаров по категориям
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -206,7 +206,10 @@ export default function AdminDashboard() {
                 <div key={category.id}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-medium">{category.name}</span>
-                    <span className="text-sm text-gray-500">{category.productCount} products</span>
+                    <span className="text-sm text-gray-500">
+                      {category.productCount || 0} {category.productCount === 1 ? 'товар' : 
+                       (category.productCount && category.productCount >= 2 && category.productCount <= 4) ? 'товара' : 'товаров'}
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2.5">
                     <div 
