@@ -147,40 +147,36 @@ export class DatabaseStorage implements IStorage {
   }
   
   async searchProducts(params: ProductSearchParams): Promise<{ products: Product[], total: number }> {
+    const conditions: any[] = [];
+
+    // Базовый запрос для поиска товаров
     let query = db.select().from(products);
     
-    // Фильтр по поисковому запросу
+    // Фильтрация по поисковому запросу
     if (params.query) {
       query = query.where(
         sql`(${products.name} ILIKE ${'%' + params.query + '%'} OR ${products.description} ILIKE ${'%' + params.query + '%'})`
       );
     }
     
-    // Фильтр по категории
+    // Фильтрация по категории
     if (params.categoryId) {
       query = query.where(eq(products.categoryId, params.categoryId));
     }
     
-    // Фильтр по цене
-    if (params.minPrice !== undefined && params.maxPrice !== undefined) {
-      query = query.where(
-        and(
-          gte(products.price, params.minPrice),
-          lte(products.price, params.maxPrice)
-        )
-      );
-    } else if (params.minPrice !== undefined) {
-      query = query.where(gte(products.price, params.minPrice));
-    } else if (params.maxPrice !== undefined) {
-      query = query.where(lte(products.price, params.maxPrice));
+    // Фильтрация по цене
+    if (params.minPrice !== undefined) {
+      query = query.where(sql`${products.price} >= ${params.minPrice.toString()}`);
+    }
+    
+    if (params.maxPrice !== undefined) {
+      query = query.where(sql`${products.price} <= ${params.maxPrice.toString()}`);
     }
     
     // Подсчет общего количества товаров для пагинации
-    const countResult = await db.select({ count: sql<number>`count(*)` })
-      .from(products)
-      .where(query.where);
-    
-    const total = countResult[0]?.count || 0;
+    const countQuery = sql`SELECT COUNT(*) FROM (${query}) AS count_query`;
+    const countResult = await db.execute(countQuery);
+    const total = parseInt(countResult.rows[0]?.count || '0');
     
     // Сортировка
     if (params.sort) {
@@ -195,12 +191,13 @@ export class DatabaseStorage implements IStorage {
           query = query.orderBy(desc(products.id));
           break;
         case "popular":
-          // Предполагаем, что популярные в топе
-          query = query.orderBy(desc(products.isFeatured), desc(products.id));
+          query = query.orderBy(desc(products.isFeatured));
+          query = query.orderBy(desc(products.id));
           break;
         case "featured":
         default:
-          query = query.orderBy(desc(products.isFeatured), asc(products.name));
+          query = query.orderBy(desc(products.isFeatured));
+          query = query.orderBy(asc(products.name));
           break;
       }
     }
@@ -468,9 +465,10 @@ export class DatabaseStorage implements IStorage {
   }
   
   async searchOrders(params: OrderSearchParams): Promise<{ orders: Order[], total: number }> {
+    // Базовый запрос для поиска заказов
     let query = db.select().from(orders);
     
-    // Фильтр по поисковому запросу
+    // Фильтрация по поисковому запросу
     if (params.query) {
       query = query.where(
         sql`(${orders.customerName} ILIKE ${'%' + params.query + '%'} OR 
@@ -479,31 +477,24 @@ export class DatabaseStorage implements IStorage {
       );
     }
     
-    // Фильтр по статусу
+    // Фильтрация по статусу
     if (params.status && params.status !== 'all') {
       query = query.where(eq(orders.status, params.status));
     }
     
-    // Фильтр по датам
-    if (params.startDate && params.endDate) {
-      query = query.where(
-        and(
-          gte(orders.createdAt, new Date(params.startDate)),
-          lte(orders.createdAt, new Date(params.endDate))
-        )
-      );
-    } else if (params.startDate) {
-      query = query.where(gte(orders.createdAt, new Date(params.startDate)));
-    } else if (params.endDate) {
-      query = query.where(lte(orders.createdAt, new Date(params.endDate)));
+    // Фильтрация по датам
+    if (params.startDate) {
+      query = query.where(sql`${orders.createdAt} >= ${new Date(params.startDate)}`);
     }
     
-    // Подсчет общего количества заказов
-    const countResult = await db.select({ count: sql<number>`count(*)` })
-      .from(orders)
-      .where(query.where);
+    if (params.endDate) {
+      query = query.where(sql`${orders.createdAt} <= ${new Date(params.endDate)}`);
+    }
     
-    const total = countResult[0]?.count || 0;
+    // Подсчет общего количества заказов для пагинации
+    const countQuery = sql`SELECT COUNT(*) FROM (${query}) AS count_query`;
+    const countResult = await db.execute(countQuery);
+    const total = parseInt(countResult.rows[0]?.count || '0');
     
     // Сортировка по дате создания (новые в начале)
     query = query.orderBy(desc(orders.createdAt));
