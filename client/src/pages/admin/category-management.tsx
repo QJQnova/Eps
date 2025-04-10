@@ -47,6 +47,11 @@ export default function CategoryManagement() {
       icon: "",
     },
   });
+  
+  // Преобразование null в пустую строку для полей формы
+  const handleNullableField = (value: string | null | undefined): string => {
+    return value === null || value === undefined ? "" : value;
+  };
 
   // Открытие диалога для создания новой категории
   const handleAddCategory = () => {
@@ -102,14 +107,11 @@ export default function CategoryManagement() {
   // Мутация для обновления категории
   const updateMutation = useMutation({
     mutationFn: (data: CategoryFormValues & { id: number }) => 
-      apiRequest<any, CategoryFormValues>(`/api/categories/${data.id}`, {
-        method: "PATCH",
-        data: {
-          name: data.name,
-          slug: data.slug,
-          description: data.description || null,
-          icon: data.icon || null,
-        },
+      apiRequest("PATCH", `/api/categories/${data.id}`, {
+        name: data.name,
+        slug: data.slug,
+        description: data.description || null,
+        icon: data.icon || null,
       }),
     onSuccess: () => {
       toast({
@@ -131,9 +133,7 @@ export default function CategoryManagement() {
   // Мутация для удаления категории
   const deleteMutation = useMutation({
     mutationFn: (id: number) => 
-      apiRequest<any>(`/api/categories/${id}`, {
-        method: "DELETE",
-      }),
+      apiRequest("DELETE", `/api/categories/${id}`),
     onSuccess: () => {
       toast({
         title: "Успех",
@@ -314,7 +314,11 @@ export default function CategoryManagement() {
                     <FormItem>
                       <FormLabel>Описание</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Описание категории" />
+                        <Input 
+                          {...field}
+                          value={handleNullableField(field.value)}
+                          placeholder="Описание категории" 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -330,6 +334,7 @@ export default function CategoryManagement() {
                       <FormControl>
                         <Input
                           {...field}
+                          value={handleNullableField(field.value)}
                           placeholder="Название иконки Lucide (например: tag, smartphone, tool)"
                         />
                       </FormControl>
