@@ -70,7 +70,7 @@ export default function Checkout() {
   const { items, subtotal, cartId, clearCart } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const [, navigate] = useNavigate();
+  const [, setLocation] = useLocation();
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutFormSchema),
@@ -119,7 +119,7 @@ export default function Checkout() {
       });
 
       // Перенаправляем пользователя на страницу успешного оформления заказа
-      navigate(`/order-complete/${order.id}`);
+      setLocation(`/order-complete/${order.id}`);
     } catch (error: any) {
       console.error("Ошибка при оформлении заказа:", error);
       toast({
@@ -401,7 +401,7 @@ export default function Checkout() {
                 <CardFooter className="flex flex-col space-y-3">
                   <Button
                     variant="outline"
-                    onClick={() => navigate("/cart")}
+                    onClick={() => setLocation("/cart")}
                     className="w-full"
                   >
                     Вернуться в корзину
