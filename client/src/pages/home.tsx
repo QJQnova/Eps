@@ -46,12 +46,94 @@ export default function Home() {
                 </Button>
               </div>
             </div>
-            <div className="hidden md:block">
-              <img 
-                src="https://images.unsplash.com/photo-1581147036324-c47a03a07739?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80" 
-                alt="Коллекция профессиональных инструментов" 
-                className="rounded-lg shadow-xl" 
-              />
+            <div className="hidden md:block relative overflow-hidden rounded-lg shadow-xl bg-gray-800 h-[400px]">
+              <div className="absolute inset-0 bg-[rgba(0,0,0,0.4)] z-10 flex items-center justify-center">
+                <div className="text-white text-center p-6">
+                  <h2 className="text-2xl font-bold mb-2">Коллекция профессиональных инструментов</h2>
+                  <p className="text-gray-200">ЭПС - надежный поставщик инструментов с 2005 года</p>
+                </div>
+              </div>
+              
+              {/* Слайдер изображений */}
+              <div className="absolute inset-0 z-0">
+                <div className="flex animate-slider w-[200%] h-full">
+                  {/* Первая группа изображений */}
+                  <div className="grid grid-cols-2 w-full h-full">
+                    <div className="bg-[#f97316] p-4 flex items-center justify-center">
+                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 15V9C5 7.89543 5.89543 7 7 7H15C16.1046 7 17 7.89543 17 9V15C17 16.1046 16.1046 17 15 17H7C5.89543 17 5 16.1046 5 15Z" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M17 12H20C20.5523 12 21 11.5523 21 11V10C21 9.44772 20.5523 9 20 9H17V12Z" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M9 21V17M13 21V17" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M8 7V5C8 4.44772 8.44772 4 9 4H13C13.5523 4 14 4.44772 14 5V7" stroke="currentColor" strokeWidth="1.5"/>
+                      </svg>
+                    </div>
+                    <div className="bg-[#ef4444] p-4 flex items-center justify-center">
+                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 8L3 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M7 9V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M11 6V18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M15 3V21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M19 9V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M3 12H19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                    </div>
+                    <div className="bg-[#eab308] p-4 flex items-center justify-center">
+                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 6V10" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M12 10L19 17" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M9 7H15" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M7 4H17V7C17 8.65685 15.6569 10 14 10H10C8.34315 10 7 8.65685 7 7V4Z" stroke="currentColor" strokeWidth="1.5"/>
+                      </svg>
+                    </div>
+                    <div className="bg-[#06b6d4] p-4 flex items-center justify-center">
+                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17 3L21 7" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M15 5L19 9" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M14 10L6 18C5.44772 18.5523 4.55228 18.5523 4 18L6 20C5.44772 19.4477 5.44772 18.5523 6 18L14 10" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M17 7L7 17C6.44772 17.5523 5.55228 17.5523 5 17C4.44772 16.4477 4.44772 15.5523 5 15L15 5" stroke="currentColor" strokeWidth="1.5"/>
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Вторая группа изображений (для непрерывной анимации) */}
+                  <div className="grid grid-cols-2 w-full h-full">
+                    <div className="bg-[#f97316] p-4 flex items-center justify-center">
+                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 15V9C5 7.89543 5.89543 7 7 7H15C16.1046 7 17 7.89543 17 9V15C17 16.1046 16.1046 17 15 17H7C5.89543 17 5 16.1046 5 15Z" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M17 12H20C20.5523 12 21 11.5523 21 11V10C21 9.44772 20.5523 9 20 9H17V12Z" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M9 21V17M13 21V17" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M8 7V5C8 4.44772 8.44772 4 9 4H13C13.5523 4 14 4.44772 14 5V7" stroke="currentColor" strokeWidth="1.5"/>
+                      </svg>
+                    </div>
+                    <div className="bg-[#ef4444] p-4 flex items-center justify-center">
+                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 8L3 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M7 9V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M11 6V18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M15 3V21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M19 9V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M3 12H19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                    </div>
+                    <div className="bg-[#eab308] p-4 flex items-center justify-center">
+                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 6V10" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M12 10L19 17" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M9 7H15" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M7 4H17V7C17 8.65685 15.6569 10 14 10H10C8.34315 10 7 8.65685 7 7V4Z" stroke="currentColor" strokeWidth="1.5"/>
+                      </svg>
+                    </div>
+                    <div className="bg-[#06b6d4] p-4 flex items-center justify-center">
+                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17 3L21 7" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M15 5L19 9" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M14 10L6 18C5.44772 18.5523 4.55228 18.5523 4 18L6 20C5.44772 19.4477 5.44772 18.5523 6 18L14 10" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M17 7L7 17C6.44772 17.5523 5.55228 17.5523 5 17C4.44772 16.4477 4.44772 15.5523 5 15L15 5" stroke="currentColor" strokeWidth="1.5"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
