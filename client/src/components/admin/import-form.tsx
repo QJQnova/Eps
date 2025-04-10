@@ -215,7 +215,7 @@ export default function ImportForm() {
         {/* Templates */}
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-500 mb-2">
-            Need a template? Download our sample templates:
+            Нужен шаблон? Скачайте наши примеры:
           </p>
           <div className="flex justify-center space-x-4">
             <Button 
@@ -223,14 +223,14 @@ export default function ImportForm() {
               className="text-primary"
               onClick={() => downloadTemplate("csv")}
             >
-              CSV Template
+              Шаблон CSV
             </Button>
             <Button 
               variant="link" 
               className="text-primary"
               onClick={() => downloadTemplate("json")}
             >
-              JSON Template
+              Шаблон JSON
             </Button>
           </div>
         </div>
@@ -238,7 +238,7 @@ export default function ImportForm() {
         {/* Data preview */}
         {previewData && previewData.length > 0 && (
           <div className="mt-6">
-            <Label className="text-sm font-medium mb-2 block">Data Preview</Label>
+            <Label className="text-sm font-medium mb-2 block">Предпросмотр данных</Label>
             <div className="border rounded-md overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -271,7 +271,7 @@ export default function ImportForm() {
               </table>
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              Showing {previewData.length} of {file?.name.includes('.csv') ? 'many' : JSON.parse(JSON.stringify(previewData)).length} records.
+              Показано {previewData.length} из {file?.name.includes('.csv') ? 'множества' : JSON.parse(JSON.stringify(previewData)).length} записей.
             </p>
           </div>
         )}
@@ -280,7 +280,7 @@ export default function ImportForm() {
         {isUploading && (
           <div className="mt-6">
             <div className="flex justify-between items-center mb-2">
-              <Label>Uploading...</Label>
+              <Label>Загрузка...</Label>
               <span className="text-sm text-gray-500">{Math.round(uploadProgress)}%</span>
             </div>
             <Progress value={uploadProgress} className="h-2" />
@@ -292,10 +292,10 @@ export default function ImportForm() {
           <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-md flex items-start">
             <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
             <div>
-              <h4 className="font-medium text-green-800">Import completed</h4>
+              <h4 className="font-medium text-green-800">Импорт завершен</h4>
               <p className="text-green-700 text-sm">
-                Successfully imported {result.success} products.
-                {result.failed > 0 && ` Failed to import ${result.failed} products.`}
+                Успешно импортировано {result.success} товаров.
+                {result.failed > 0 && ` Не удалось импортировать ${result.failed} товаров.`}
               </p>
             </div>
           </div>
@@ -306,7 +306,7 @@ export default function ImportForm() {
           <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-md flex items-start">
             <AlertCircle className="h-5 w-5 text-red-500 mr-3 mt-0.5" />
             <div>
-              <h4 className="font-medium text-red-800">Import failed</h4>
+              <h4 className="font-medium text-red-800">Ошибка импорта</h4>
               <p className="text-red-700 text-sm">{error}</p>
             </div>
           </div>
@@ -324,7 +324,7 @@ export default function ImportForm() {
               if (fileInputRef.current) fileInputRef.current.value = "";
             }}
           >
-            Reset
+            Сбросить
           </Button>
           <Button 
             onClick={handleUpload} 
@@ -333,10 +333,10 @@ export default function ImportForm() {
             {isUploading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Uploading...
+                Загрузка...
               </>
             ) : (
-              'Upload and Import'
+              'Загрузить и импортировать'
             )}
           </Button>
         </div>
