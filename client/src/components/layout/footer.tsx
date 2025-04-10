@@ -29,6 +29,16 @@ export default function Footer() {
           <div>
             <h3 className="text-xl font-bold mb-4 text-eps-gradient">ЭПС</h3>
             <p className="text-gray-400 mb-4">Надежный поставщик профессиональных инструментов и оборудования.</p>
+            
+            <div className="mb-4">
+              <p className="text-gray-300 text-sm">Телефон: <a href="tel:+78442505857" className="text-eps-orange">+7 8442 50-58-57</a></p>
+              <p className="text-gray-300 text-sm">Адрес: г. Волгоград, ул. им. Маршала Еременко 44</p>
+              <p className="text-gray-300 text-sm">Режим работы:</p>
+              <p className="text-gray-400 text-xs">пн. - пт.: 8:00 - 19:00</p>
+              <p className="text-gray-400 text-xs">сб.: 9:00 - 15:00</p>
+              <p className="text-gray-400 text-xs">вс: выходной</p>
+            </div>
+            
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-eps-orange transition duration-200">
                 <Facebook size={20} />
@@ -50,22 +60,22 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link href="/category/power-tools" className="text-gray-400 hover:text-eps-orange transition duration-200">
-                  Электроинструменты
+                  Электроинструмент
                 </Link>
               </li>
               <li>
-                <Link href="/category/hand-tools" className="text-gray-400 hover:text-eps-orange transition duration-200">
-                  Ручные инструменты
+                <Link href="/category/diesel-power-stations" className="text-gray-400 hover:text-eps-orange transition duration-200">
+                  Электростанции дизельные
                 </Link>
               </li>
               <li>
-                <Link href="/category/measuring-tools" className="text-gray-400 hover:text-eps-orange transition duration-200">
-                  Измерительные приборы
+                <Link href="/category/petrol-power-stations" className="text-gray-400 hover:text-eps-orange transition duration-200">
+                  Электростанции бензиновые
                 </Link>
               </li>
               <li>
-                <Link href="/category/safety-equipment" className="text-gray-400 hover:text-eps-orange transition duration-200">
-                  Средства защиты
+                <Link href="/category/garden-equipment" className="text-gray-400 hover:text-eps-orange transition duration-200">
+                  Садовая техника
                 </Link>
               </li>
               <li>

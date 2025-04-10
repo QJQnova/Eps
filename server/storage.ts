@@ -83,28 +83,118 @@ export class MemStorage implements IStorage {
   private seedCategories() {
     const initialCategories: InsertCategory[] = [
       {
-        name: "Power Tools",
+        name: "Электростанции дизельные",
+        slug: "diesel-power-stations",
+        description: "Дизельные генераторы для обеспечения автономного электроснабжения",
+        icon: "power"
+      },
+      {
+        name: "Электроинструмент",
         slug: "power-tools",
-        description: "Electric and battery-powered tools",
+        description: "Профессиональные электрические инструменты",
         icon: "drill"
       },
       {
-        name: "Hand Tools",
-        slug: "hand-tools",
-        description: "Manual tools for various tasks",
-        icon: "hammer"
+        name: "Мотобуры",
+        slug: "motor-drills",
+        description: "Мотобуры для сверления отверстий в грунте",
+        icon: "drill"
       },
       {
-        name: "Measuring Tools",
+        name: "Сварочные аппараты",
+        slug: "welding-machines",
+        description: "Промышленные сварочные аппараты различных типов",
+        icon: "flash"
+      },
+      {
+        name: "Садовая техника",
+        slug: "garden-equipment",
+        description: "Оборудование для сада и ландшафтных работ",
+        icon: "tree"
+      },
+      {
+        name: "Электростанции бензиновые",
+        slug: "petrol-power-stations",
+        description: "Бензиновые генераторы для автономного электроснабжения",
+        icon: "power"
+      },
+      {
+        name: "Строительное оборудование",
+        slug: "construction-equipment",
+        description: "Техника для строительных и дорожных работ",
+        icon: "construction"
+      },
+      {
+        name: "Измерительная техника",
         slug: "measuring-tools",
-        description: "Precision measuring instruments",
+        description: "Точные измерительные приборы и инструменты",
         icon: "ruler-combined"
       },
       {
-        name: "Safety Equipment",
-        slug: "safety-equipment",
-        description: "Personal protective equipment",
-        icon: "hard-hat"
+        name: "Компрессоры",
+        slug: "compressors",
+        description: "Воздушные компрессоры различной мощности",
+        icon: "gauge"
+      },
+      {
+        name: "Станки",
+        slug: "machine-tools",
+        description: "Промышленные станки для обработки материалов",
+        icon: "cog"
+      },
+      {
+        name: "Пушки тепловые",
+        slug: "heat-guns",
+        description: "Тепловые пушки для обогрева помещений",
+        icon: "fire"
+      },
+      {
+        name: "Насосы",
+        slug: "pumps", 
+        description: "Насосное оборудование различных типов",
+        icon: "droplet"
+      },
+      {
+        name: "Двигатели",
+        slug: "engines",
+        description: "Двигатели внутреннего сгорания",
+        icon: "activity"
+      },
+      {
+        name: "Пусковые устройства",
+        slug: "starting-devices",
+        description: "Пусковые и зарядные устройства для автомобилей",
+        icon: "battery-charging"
+      },
+      {
+        name: "Снегоуборочные машины",
+        slug: "snow-removal-machines",
+        description: "Техника для уборки снега",
+        icon: "cloud-snow"
+      },
+      {
+        name: "Мойки",
+        slug: "washers",
+        description: "Моечное оборудование высокого давления",
+        icon: "droplet"
+      },
+      {
+        name: "Мотопомпы",
+        slug: "motor-pumps",
+        description: "Мотопомпы для перекачивания воды",
+        icon: "activity"
+      },
+      {
+        name: "Стабилизаторы напряжения",
+        slug: "voltage-stabilizers",
+        description: "Стабилизаторы для защиты электрооборудования",
+        icon: "zap"
+      },
+      {
+        name: "Лазерные уровни",
+        slug: "laser-levels",
+        description: "Лазерные измерительные приборы",
+        icon: "crosshair"
       }
     ];
     
