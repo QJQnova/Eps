@@ -18,6 +18,7 @@ import NotFound from "@/pages/not-found";
 import AdminDashboard from "@/pages/admin/dashboard";
 import ProductManagement from "@/pages/admin/product-management";
 import BulkImport from "@/pages/admin/bulk-import";
+import ProductFormPage from "@/pages/admin/product-form-page";
 
 function Router() {
   const [location] = useLocation();
@@ -40,6 +41,8 @@ function Router() {
           {/* Admin Routes */}
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/products" component={ProductManagement} />
+          <Route path="/admin/products/create" component={ProductFormPage} />
+          <Route path="/admin/products/edit/:id" component={ProductFormPage} />
           <Route path="/admin/import" component={BulkImport} />
           
           {/* Fallback to 404 */}
