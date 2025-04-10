@@ -1,12 +1,13 @@
 import React from "react";
 import { useCart } from "@/lib/cart";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
 
 import {
   Form,
@@ -35,8 +36,43 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+
+// Схема валидации формы регистрации
+const registerSchema = z.object({
+  username: z.string().min(3, {
+    message: "Имя пользователя должно содержать не менее 3 символов",
+  }),
+  email: z.string().email({
+    message: "Пожалуйста, введите корректный email",
+  }),
+  password: z.string().min(6, {
+    message: "Пароль должен содержать не менее 6 символов",
+  }),
+});
+
+// Схема валидации формы входа
+const loginSchema = z.object({
+  username: z.string().min(3, {
+    message: "Имя пользователя должно содержать не менее 3 символов",
+  }),
+  password: z.string().min(1, {
+    message: "Пожалуйста, введите пароль",
+  }),
+});
+
+type RegisterFormValues = z.infer<typeof registerSchema>;
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 // Схема валидации формы оформления заказа
 const checkoutFormSchema = z.object({
@@ -71,6 +107,14 @@ export default function Checkout() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { user, registerMutation, loginMutation } = useAuth();
+  
+  // Состояние диалогового окна
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const [authTab, setAuthTab] = useState<"login" | "register">("register");
+  
+  // Данные для заполнения формы после регистрации или входа
+  const [orderFormData, setOrderFormData] = useState<CheckoutFormValues | null>(null);
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutFormSchema),
@@ -94,6 +138,15 @@ export default function Checkout() {
         description: "Добавьте товары в корзину перед оформлением заказа",
         variant: "destructive",
       });
+      return;
+    }
+    
+    // Проверяем, авторизован ли пользователь
+    if (!user) {
+      // Сохраняем данные формы для последующего использования
+      setOrderFormData(data);
+      // Показываем диалоговое окно авторизации
+      setIsAuthDialogOpen(true);
       return;
     }
 
@@ -129,6 +182,67 @@ export default function Checkout() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+  
+  // Обработчики для форм авторизации
+  const registerForm = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+    },
+  });
+  
+  const loginForm = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  });
+  
+  // Продолжение оформления заказа после успешной авторизации
+  const continueWithOrder = () => {
+    if (orderFormData) {
+      setIsAuthDialogOpen(false);
+      setTimeout(() => {
+        onSubmit(orderFormData);
+      }, 500);
+    }
+  };
+  
+  // Обработка отправки формы регистрации
+  const onRegisterSubmit = (data: RegisterFormValues) => {
+    registerMutation.mutate(
+      {
+        username: data.username,
+        password: data.password,
+        email: data.email,
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Регистрация выполнена",
+            description: "Теперь вы можете оформить заказ",
+          });
+          continueWithOrder();
+        },
+      }
+    );
+  };
+  
+  // Обработка отправки формы входа
+  const onLoginSubmit = (data: LoginFormValues) => {
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        toast({
+          title: "Вход выполнен",
+          description: "Теперь вы можете оформить заказ",
+        });
+        continueWithOrder();
+      },
+    });
   };
 
   // Функция для форматирования цены
@@ -412,6 +526,127 @@ export default function Checkout() {
         </div>
       </main>
       <Footer />
+      
+      {/* Диалоговое окно для быстрой регистрации */}
+      <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Авторизация</DialogTitle>
+            <DialogDescription>
+              Для оформления заказа необходимо войти в систему или зарегистрироваться.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Tabs defaultValue={authTab} onValueChange={(value) => setAuthTab(value as "login" | "register")}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="register">Регистрация</TabsTrigger>
+              <TabsTrigger value="login">Вход</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="register" className="mt-4">
+              <Form {...registerForm}>
+                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                  <FormField
+                    control={registerForm.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Имя пользователя</FormLabel>
+                        <FormControl>
+                          <Input placeholder="user123" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="name@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Пароль</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <DialogFooter className="mt-4">
+                    <Button 
+                      type="submit" 
+                      disabled={registerMutation.isPending}
+                      className="w-full"
+                    >
+                      {registerMutation.isPending ? "Регистрация..." : "Зарегистрироваться"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </TabsContent>
+            
+            <TabsContent value="login" className="mt-4">
+              <Form {...loginForm}>
+                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                  <FormField
+                    control={loginForm.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Имя пользователя</FormLabel>
+                        <FormControl>
+                          <Input placeholder="user123" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={loginForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Пароль</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <DialogFooter className="mt-4">
+                    <Button 
+                      type="submit" 
+                      disabled={loginMutation.isPending}
+                      className="w-full"
+                    >
+                      {loginMutation.isPending ? "Вход..." : "Войти"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

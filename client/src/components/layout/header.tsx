@@ -94,27 +94,28 @@ export default function Header() {
               
               {/* Кнопки авторизации, профиля и корзины */}
               <div className="flex items-center space-x-4">
+                {/* Корзина (для всех пользователей) */}
+                <Link href="/cart" className="flex items-center text-gray-800 hover:text-eps-orange relative">
+                  <div className="flex flex-col sm:flex-row sm:items-center">
+                    <div className="relative mx-auto sm:mx-0">
+                      <ShoppingCart className="h-5 w-5" />
+                      {itemCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-eps-red text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                          {itemCount}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs mt-1 sm:mt-0 sm:ml-1.5 sm:text-sm">Корзина</span>
+                  </div>
+                </Link>
+                
                 {user ? (
-                  // Для авторизованных пользователей
+                  // Для авторизованных пользователей - Профиль
                   <>
                     <Link href="/profile" className="flex items-center text-gray-800 hover:text-eps-orange">
                       <div className="flex flex-col sm:flex-row sm:items-center">
                         <User className="h-5 w-5 mx-auto sm:mx-0" />
                         <span className="text-xs mt-1 sm:mt-0 sm:ml-1.5 sm:text-sm">Профиль</span>
-                      </div>
-                    </Link>
-                    
-                    <Link href="/cart" className="flex items-center text-gray-800 hover:text-eps-orange relative">
-                      <div className="flex flex-col sm:flex-row sm:items-center">
-                        <div className="relative mx-auto sm:mx-0">
-                          <ShoppingCart className="h-5 w-5" />
-                          {itemCount > 0 && (
-                            <span className="absolute -top-2 -right-2 bg-eps-red text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                              {itemCount}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-xs mt-1 sm:mt-0 sm:ml-1.5 sm:text-sm">Корзина</span>
                       </div>
                     </Link>
                     
@@ -132,22 +133,13 @@ export default function Header() {
                     </button>
                   </>
                 ) : (
-                  // Для неавторизованных пользователей
-                  <>
-                    <Link href="/auth" className="flex items-center text-gray-800 hover:text-eps-orange">
-                      <div className="flex flex-col sm:flex-row sm:items-center">
-                        <LogIn className="h-5 w-5 mx-auto sm:mx-0" />
-                        <span className="text-xs mt-1 sm:mt-0 sm:ml-1.5 sm:text-sm">Войти</span>
-                      </div>
-                    </Link>
-                    
-                    <Link href="/auth?tab=register" className="flex items-center text-gray-800 hover:text-eps-orange">
-                      <div className="flex flex-col sm:flex-row sm:items-center">
-                        <User className="h-5 w-5 mx-auto sm:mx-0" />
-                        <span className="text-xs mt-1 sm:mt-0 sm:ml-1.5 sm:text-sm">Регистрация</span>
-                      </div>
-                    </Link>
-                  </>
+                  // Для неавторизованных пользователей - только кнопка Войти
+                  <Link href="/auth" className="flex items-center text-gray-800 hover:text-eps-orange">
+                    <div className="flex flex-col sm:flex-row sm:items-center">
+                      <LogIn className="h-5 w-5 mx-auto sm:mx-0" />
+                      <span className="text-xs mt-1 sm:mt-0 sm:ml-1.5 sm:text-sm">Войти</span>
+                    </div>
+                  </Link>
                 )}
               </div>
               
@@ -266,32 +258,33 @@ export default function Header() {
                   </li>
                 </ul>
               </li>
+              <li className="border-t border-gray-200 pt-2">
+                <Link 
+                  href="/cart" 
+                  className="text-gray-700 hover:text-eps-orange font-medium flex items-center py-2 px-3 bg-gray-50 rounded-md"
+                >
+                  <div className="relative">
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    {itemCount > 0 && (
+                      <span className="absolute -top-2 -right-1 bg-eps-red text-white text-xs font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                        {itemCount}
+                      </span>
+                    )}
+                  </div>
+                  Корзина
+                </Link>
+              </li>
+              
               {user ? (
                 // Для авторизованных пользователей (мобильное меню)
                 <>
-                  <li className="border-t border-gray-200 pt-2">
+                  <li>
                     <Link 
                       href="/profile" 
                       className="text-gray-700 hover:text-eps-orange font-medium flex items-center py-2 px-3 bg-gray-50 rounded-md"
                     >
                       <User className="h-4 w-4 mr-2" />
                       Профиль
-                    </Link>
-                  </li>
-                  <li>
-                    <Link 
-                      href="/cart" 
-                      className="text-gray-700 hover:text-eps-orange font-medium flex items-center py-2 px-3 bg-gray-50 rounded-md"
-                    >
-                      <div className="relative">
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                        {itemCount > 0 && (
-                          <span className="absolute -top-2 -right-1 bg-eps-red text-white text-xs font-bold w-4 h-4 flex items-center justify-center rounded-full">
-                            {itemCount}
-                          </span>
-                        )}
-                      </div>
-                      Корзина
                     </Link>
                   </li>
                   <li>
@@ -317,22 +310,13 @@ export default function Header() {
               ) : (
                 // Для неавторизованных пользователей (мобильное меню)
                 <>
-                  <li className="border-t border-gray-200 pt-2">
+                  <li>
                     <Link 
                       href="/auth" 
                       className="text-gray-700 hover:text-eps-orange font-medium flex items-center py-2 px-3 bg-gray-50 rounded-md"
                     >
                       <LogIn className="h-4 w-4 mr-2" />
                       Войти
-                    </Link>
-                  </li>
-                  <li>
-                    <Link 
-                      href="/auth?tab=register" 
-                      className="text-gray-700 hover:text-eps-orange font-medium flex items-center py-2 px-3 bg-gray-50 rounded-md"
-                    >
-                      <User className="h-4 w-4 mr-2" />
-                      Регистрация
                     </Link>
                   </li>
                   <li>
