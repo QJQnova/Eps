@@ -36,7 +36,7 @@ const productFormSchema = insertProductSchema.extend({
   stock: z.coerce.number().min(0, "Количество должно быть положительным").optional().nullable(),
 });
 
-type ProductFormData = z.infer<typeof productFormSchema>;
+type ProductFormValues = z.infer<typeof productFormSchema>;
 
 interface ProductFormProps {
   productId?: number;
@@ -61,7 +61,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
   });
 
   // Инициализация формы
-  const form = useForm<ProductFormData>({
+  const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: "",
@@ -81,14 +81,30 @@ export default function ProductForm({ productId }: ProductFormProps) {
   // Заполнение формы данными товара при редактировании
   useEffect(() => {
     if (productData && isEditing) {
+      const price = typeof productData.price === 'string' 
+        ? parseFloat(productData.price) 
+        : productData.price;
+        
+      const originalPrice = productData.originalPrice 
+        ? (typeof productData.originalPrice === 'string' 
+          ? parseFloat(productData.originalPrice) 
+          : productData.originalPrice)
+        : null;
+        
+      const stock = productData.stock 
+        ? (typeof productData.stock === 'string'
+          ? parseInt(productData.stock, 10)
+          : productData.stock)
+        : 0;
+      
       form.reset({
         name: productData.name,
         slug: productData.slug,
         description: productData.description || "",
         shortDescription: productData.shortDescription || "",
-        price: productData.price,
-        originalPrice: productData.originalPrice || null,
-        stock: productData.stock || 0,
+        price: price,
+        originalPrice: originalPrice,
+        stock: stock,
         categoryId: productData.categoryId,
         imageUrl: productData.imageUrl || "",
         isActive: productData.isActive,
@@ -99,8 +115,8 @@ export default function ProductForm({ productId }: ProductFormProps) {
 
   // Мутация для создания/обновления товара
   const productMutation = useMutation({
-    mutationFn: async (data: ProductFormData) => {
-      if (isEditing) {
+    mutationFn: async (data: ProductFormValues) => {
+      if (isEditing && productId) {
         return apiRequest("PATCH", `/api/products/${productId}`, data);
       } else {
         return apiRequest("POST", "/api/products", data);
@@ -122,14 +138,12 @@ export default function ProductForm({ productId }: ProductFormProps) {
         description: `Не удалось ${isEditing ? "обновить" : "создать"} товар: ${error}`,
         variant: "destructive",
       });
-    },
-    onSettled: () => {
       setIsSubmitting(false);
-    },
+    }
   });
 
   // Обработка отправки формы
-  const onSubmit = (data: ProductFormData) => {
+  const onSubmit = (data: ProductFormValues) => {
     setIsSubmitting(true);
     productMutation.mutate(data);
   };
@@ -212,7 +226,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
                 <FormItem>
                   <FormLabel>Категория</FormLabel>
                   <Select
-                    value={field.value ? field.value.toString() : ""}
+                    value={field.value?.toString() || ""}
                     onValueChange={(value) => field.onChange(Number(value))}
                   >
                     <FormControl>
@@ -259,8 +273,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
                         type="number"
                         min="0"
                         step="0.01"
-                        {...field}
-                        value={field.value || ""}
+                        value={field.value === null ? "" : field.value}
                         onChange={(e) => {
                           const value = e.target.value;
                           field.onChange(value === "" ? null : Number(value));
@@ -287,8 +300,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
                       type="number"
                       min="0"
                       step="1"
-                      {...field}
-                      value={field.value ?? ""}
+                      value={field.value === null ? "" : field.value}
                       onChange={(e) => {
                         const value = e.target.value;
                         field.onChange(value === "" ? null : Number(value));
@@ -309,7 +321,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
                 <FormItem>
                   <FormLabel>Краткое описание</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input value={field.value || ""} onChange={(e) => field.onChange(e.target.value)} />
                   </FormControl>
                   <FormDescription>
                     Отображается в карточке товара (необязательно)
@@ -329,7 +341,8 @@ export default function ProductForm({ productId }: ProductFormProps) {
                     <Textarea
                       placeholder="Подробное описание товара"
                       className="min-h-[120px]"
-                      {...field}
+                      value={field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -344,7 +357,11 @@ export default function ProductForm({ productId }: ProductFormProps) {
                 <FormItem>
                   <FormLabel>URL изображения</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.com/image.jpg" {...field} />
+                    <Input 
+                      placeholder="https://example.com/image.jpg" 
+                      value={field.value || ""} 
+                      onChange={(e) => field.onChange(e.target.value)}
+                    />
                   </FormControl>
                   <FormDescription>
                     Ссылка на изображение товара (необязательно)
@@ -368,7 +385,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
                     </div>
                     <FormControl>
                       <Switch
-                        checked={field.value}
+                        checked={field.value === true}
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
@@ -389,7 +406,7 @@ export default function ProductForm({ productId }: ProductFormProps) {
                     </div>
                     <FormControl>
                       <Switch
-                        checked={field.value}
+                        checked={field.value === true}
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
