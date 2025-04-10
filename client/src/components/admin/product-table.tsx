@@ -117,7 +117,8 @@ export default function ProductTable() {
   };
   
   const handleCategoryChange = (value: string) => {
-    setCategoryFilter(value);
+    // Если выбрано "all", очищаем фильтр
+    setCategoryFilter(value === "all" ? "" : value);
     setPage(1); // Reset to first page on category change
   };
   
@@ -138,12 +139,12 @@ export default function ProductTable() {
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4 sm:mb-0">Product Management</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4 sm:mb-0">Управление товарами</h2>
         
         <Link href="/admin/import">
           <Button className="bg-primary hover:bg-primary/90">
             <Plus className="mr-2 h-4 w-4" />
-            Bulk Import
+            Импорт товаров
           </Button>
         </Link>
       </div>
@@ -154,7 +155,7 @@ export default function ProductTable() {
           <div className="relative">
             <Input
               type="text"
-              placeholder="Search products..."
+              placeholder="Поиск товаров..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -169,10 +170,10 @@ export default function ProductTable() {
         <div className="w-full sm:w-1/4">
           <Select value={categoryFilter} onValueChange={handleCategoryChange}>
             <SelectTrigger>
-              <SelectValue placeholder="All Categories" />
+              <SelectValue placeholder="Все категории" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
+              <SelectItem value="all">Все категории</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id.toString()}>
                   {category.name}
@@ -185,7 +186,7 @@ export default function ProductTable() {
         <Link href="/admin/products/create" className="w-full sm:w-auto flex-shrink-0">
           <Button className="w-full">
             <Plus className="mr-2 h-4 w-4" />
-            Add Product
+            Добавить товар
           </Button>
         </Link>
       </div>
@@ -196,12 +197,12 @@ export default function ProductTable() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]">#</TableHead>
-              <TableHead>Product</TableHead>
-              <TableHead className="hidden md:table-cell">Category</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead className="hidden md:table-cell">Stock</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Товар</TableHead>
+              <TableHead className="hidden md:table-cell">Категория</TableHead>
+              <TableHead>Цена</TableHead>
+              <TableHead className="hidden md:table-cell">Остаток</TableHead>
+              <TableHead>Статус</TableHead>
+              <TableHead className="text-right">Действия</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
