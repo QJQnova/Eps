@@ -55,12 +55,13 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
     <div>
       <div className="flex flex-col md:flex-row justify-between items-start mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            {query ? `Search Results: "${query}"` : "Featured Products"}
+          <h2 className="text-2xl font-bold text-eps-gradient">
+            {query ? `Результаты поиска: "${query}"` : "Рекомендуемые товары"}
           </h2>
           <p className="text-gray-500">
-            {isLoading ? "Loading products..." : 
-             `${data?.pagination.total || 0} products found`}
+            {isLoading ? "Загрузка товаров..." : 
+             `Найдено ${data?.pagination.total || 0} ${data?.pagination.total === 1 ? 'товар' : 
+               (data?.pagination.total && data.pagination.total >= 2 && data.pagination.total <= 4) ? 'товара' : 'товаров'}`}
           </p>
         </div>
         
@@ -69,14 +70,14 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
           <div className="relative w-full md:w-auto">
             <Select value={sort} onValueChange={handleSortChange}>
               <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder="Сортировка" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="featured">Featured</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="popular">Most Popular</SelectItem>
+                <SelectItem value="featured">Рекомендуемые</SelectItem>
+                <SelectItem value="price-low">Цена: по возрастанию</SelectItem>
+                <SelectItem value="price-high">Цена: по убыванию</SelectItem>
+                <SelectItem value="newest">Новинки</SelectItem>
+                <SelectItem value="popular">Популярные</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -145,9 +146,9 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
         </>
       ) : (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <h3 className="text-xl font-medium text-gray-900 mb-2">No products found</h3>
+          <h3 className="text-xl font-medium text-eps-gradient mb-2">Товары не найдены</h3>
           <p className="text-gray-500 max-w-md">
-            We couldn't find any products matching your criteria. Try adjusting your filters or search terms.
+            Мы не смогли найти товары, соответствующие вашему запросу. Попробуйте изменить параметры поиска или фильтры.
           </p>
         </div>
       )}

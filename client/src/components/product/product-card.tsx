@@ -48,7 +48,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}</p>
+                <p>{isWishlisted ? 'Удалить из избранного' : 'Добавить в избранное'}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -57,12 +57,15 @@ export default function ProductCard({ product }: ProductCardProps) {
         {product.tag && (
           <div className="absolute top-2 left-2">
             <span className={`text-white text-xs font-bold px-2 py-1 rounded ${
-              product.tag === 'Best Seller' ? 'bg-amber-500' : 
-              product.tag === 'New' ? 'bg-emerald-500' : 
-              product.tag === 'Sale' ? 'bg-rose-500' : 
+              product.tag === 'Best Seller' || product.tag === 'Хит продаж' ? 'bg-amber-500' : 
+              product.tag === 'New' || product.tag === 'Новинка' ? 'bg-emerald-500' : 
+              product.tag === 'Sale' || product.tag === 'Скидка' ? 'bg-rose-500' : 
               'bg-blue-500'
             }`}>
-              {product.tag}
+              {product.tag === 'Best Seller' ? 'Хит продаж' : 
+               product.tag === 'New' ? 'Новинка' : 
+               product.tag === 'Sale' ? 'Скидка' : 
+               product.tag}
             </span>
           </div>
         )}
@@ -72,7 +75,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="flex justify-between items-start mb-1">
           <p className="text-sm text-gray-500">
             {/* Category would normally be fetched by joining with categories table */}
-            Category
+            Категория
           </p>
           
           {product.rating && (
@@ -96,10 +99,10 @@ export default function ProductCard({ product }: ProductCardProps) {
         
         <div className="flex justify-between items-center">
           <div>
-            <span className="text-lg font-medium text-gray-900">${Number(product.price).toFixed(2)}</span>
+            <span className="text-lg font-medium text-gray-900">{Number(product.price).toFixed(0)} ₽</span>
             {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
               <span className="text-sm line-through text-gray-500 ml-2">
-                ${Number(product.originalPrice).toFixed(2)}
+                {Number(product.originalPrice).toFixed(0)} ₽
               </span>
             )}
           </div>
@@ -112,7 +115,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             disabled={isLoading}
           >
             <ShoppingCart className="h-4 w-4 mr-1" />
-            Add
+            В корзину
           </Button>
         </div>
       </CardContent>
