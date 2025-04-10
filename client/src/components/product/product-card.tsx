@@ -99,10 +99,10 @@ export default function ProductCard({ product }: ProductCardProps) {
         
         <div className="flex justify-between items-center">
           <div>
-            <span className="text-lg font-medium text-gray-900">{Number(product.price).toFixed(0)} ₽</span>
+            <span className="text-lg font-medium text-gray-900">{Number(product.price).toLocaleString('ru-RU')} ₽</span>
             {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
               <span className="text-sm line-through text-gray-500 ml-2">
-                {Number(product.originalPrice).toFixed(0)} ₽
+                {Number(product.originalPrice).toLocaleString('ru-RU')} ₽
               </span>
             )}
           </div>

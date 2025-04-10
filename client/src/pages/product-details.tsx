@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/lib/cart";
+import { formatPrice } from "@/lib/format";
 import { Home, ChevronRight, ShoppingCart, MinusCircle, PlusCircle, Star, Truck, ShieldCheck, RefreshCw } from "lucide-react";
 import ProductCard from "@/components/product/product-card";
 import { Product, Category } from "@shared/schema";
@@ -98,10 +99,10 @@ export default function ProductDetails() {
   if (!product) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h2>
-        <p className="text-gray-500 mb-6">The product you're looking for doesn't exist or has been removed.</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Товар не найден</h2>
+        <p className="text-gray-500 mb-6">Товар, который вы ищете, не существует или был удален.</p>
         <Button asChild>
-          <Link href="/">Back to Home</Link>
+          <Link href="/">Вернуться на главную</Link>
         </Button>
       </div>
     );
