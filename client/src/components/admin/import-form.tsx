@@ -1,0 +1,346 @@
+import { useState, useRef } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Loader2, UploadCloud, FileText, Check, AlertCircle } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { parseFile } from "@/lib/file-parser";
+
+// Sample templates
+const CSV_TEMPLATE = `sku,name,slug,description,shortDescription,price,originalPrice,stock,categoryId,isActive,isFeatured,tag,imageUrl
+TP001,Professional Cordless Drill,professional-cordless-drill,"18V lithium-ion battery drill with 2-speed gearbox","18V drill with LED work light",129.99,159.99,43,1,true,true,Best Seller,https://images.unsplash.com/photo-1572981779307-38b8cabb2407
+TP002,Digital Laser Measure,digital-laser-measure,"Accurate laser measuring up to 50m with area and volume calculations","Precision laser measure",79.99,89.99,21,3,true,false,,https://images.unsplash.com/photo-1586864387789-628af9feed72
+TP003,Premium Safety Glasses,premium-safety-glasses,"Anti-fog scratch-resistant lenses with UV protection","Safety glasses with UV protection",24.99,34.99,76,4,true,false,New,https://images.unsplash.com/photo-1530124566582-a618bc2615dc`;
+
+const JSON_TEMPLATE = `[
+  {
+    "sku": "TP001",
+    "name": "Professional Cordless Drill",
+    "slug": "professional-cordless-drill",
+    "description": "18V lithium-ion battery drill with 2-speed gearbox",
+    "shortDescription": "18V drill with LED work light",
+    "price": 129.99,
+    "originalPrice": 159.99,
+    "stock": 43,
+    "categoryId": 1,
+    "isActive": true,
+    "isFeatured": true,
+    "tag": "Best Seller",
+    "imageUrl": "https://images.unsplash.com/photo-1572981779307-38b8cabb2407"
+  },
+  {
+    "sku": "TP002",
+    "name": "Digital Laser Measure",
+    "slug": "digital-laser-measure",
+    "description": "Accurate laser measuring up to 50m with area and volume calculations",
+    "shortDescription": "Precision laser measure",
+    "price": 79.99,
+    "originalPrice": 89.99,
+    "stock": 21,
+    "categoryId": 3,
+    "isActive": true,
+    "isFeatured": false,
+    "imageUrl": "https://images.unsplash.com/photo-1586864387789-628af9feed72"
+  }
+]`;
+
+export default function ImportForm() {
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [previewData, setPreviewData] = useState<any[] | null>(null);
+  const [result, setResult] = useState<{ success: number, failed: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+  
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null);
+    setResult(null);
+    
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+    
+    // Validate file type
+    const fileType = selectedFile.type;
+    if (fileType !== 'text/csv' && fileType !== 'application/json') {
+      setError("Please upload a CSV or JSON file");
+      return;
+    }
+    
+    setFile(selectedFile);
+    
+    try {
+      // Parse and preview the file contents
+      const parsedData = await parseFile(selectedFile);
+      setPreviewData(parsedData.slice(0, 3)); // Show first 3 items
+    } catch (err: any) {
+      setError(err.message || "Failed to parse file");
+      setFile(null);
+    }
+  };
+  
+  const handleUpload = async () => {
+    if (!file) return;
+    
+    setIsUploading(true);
+    setUploadProgress(0);
+    setError(null);
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append("file", file);
+    
+    try {
+      // Simulate progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          const newProgress = prev + Math.random() * 15;
+          return newProgress >= 90 ? 90 : newProgress;
+        });
+      }, 300);
+      
+      // Send the request
+      const response = await fetch("/api/products/bulk-import", {
+        method: "POST",
+        body: formData,
+      });
+      
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to import products");
+      }
+      
+      const data = await response.json();
+      setResult(data);
+      
+      toast({
+        title: "Import successful",
+        description: `Successfully imported ${data.success} products. Failed: ${data.failed}.`,
+      });
+    } catch (err: any) {
+      setError(err.message || "An error occurred during upload");
+      toast({
+        title: "Import failed",
+        description: err.message || "Failed to import products",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+  
+  const downloadTemplate = (type: "csv" | "json") => {
+    const template = type === "csv" ? CSV_TEMPLATE : JSON_TEMPLATE;
+    const fileName = type === "csv" ? "product-template.csv" : "product-template.json";
+    const mimeType = type === "csv" ? "text/csv" : "application/json";
+    
+    const blob = new Blob([template], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+  
+  return (
+    <Card className="max-w-3xl mx-auto">
+      <CardHeader>
+        <CardTitle>Bulk Product Import</CardTitle>
+        <CardDescription>
+          Upload a CSV or JSON file to import multiple products at once.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {/* Upload area */}
+        <div 
+          className={`border-2 border-dashed rounded-lg p-8 text-center ${
+            file ? 'border-primary bg-primary/5' : 'border-gray-300'
+          } transition-colors`}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <input 
+            type="file" 
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept=".csv,.json" 
+            className="hidden" 
+          />
+          
+          <div className="mb-4">
+            {file ? (
+              <FileText className="mx-auto h-12 w-12 text-primary" />
+            ) : (
+              <UploadCloud className="mx-auto h-12 w-12 text-gray-400" />
+            )}
+          </div>
+          
+          <h4 className="text-lg font-medium text-gray-900 mb-2">
+            {file ? file.name : "Bulk Product Upload"}
+          </h4>
+          
+          <p className="text-gray-500 mb-4">
+            {file 
+              ? `${(file.size / 1024).toFixed(2)} KB · ${file.type}`
+              : "Drag and drop your CSV or JSON file here, or click to select files"}
+          </p>
+          
+          {!file && (
+            <Button type="button" variant="outline" className="mx-auto">
+              Select File
+            </Button>
+          )}
+        </div>
+        
+        {/* Templates */}
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-500 mb-2">
+            Need a template? Download our sample templates:
+          </p>
+          <div className="flex justify-center space-x-4">
+            <Button 
+              variant="link" 
+              className="text-primary"
+              onClick={() => downloadTemplate("csv")}
+            >
+              CSV Template
+            </Button>
+            <Button 
+              variant="link" 
+              className="text-primary"
+              onClick={() => downloadTemplate("json")}
+            >
+              JSON Template
+            </Button>
+          </div>
+        </div>
+        
+        {/* Data preview */}
+        {previewData && previewData.length > 0 && (
+          <div className="mt-6">
+            <Label className="text-sm font-medium mb-2 block">Data Preview</Label>
+            <div className="border rounded-md overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    {Object.keys(previewData[0]).slice(0, 5).map((header) => (
+                      <th 
+                        key={header}
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        {header}
+                      </th>
+                    ))}
+                    <th className="px-4 py-3 text-xs font-medium text-gray-500">
+                      ...
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {previewData.map((item, index) => (
+                    <tr key={index}>
+                      {Object.values(item).slice(0, 5).map((value, i) => (
+                        <td key={i} className="px-4 py-3 text-sm text-gray-500 truncate max-w-xs">
+                          {value?.toString() || "-"}
+                        </td>
+                      ))}
+                      <td className="px-4 py-3 text-sm text-gray-500">...</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Showing {previewData.length} of {file?.name.includes('.csv') ? 'many' : JSON.parse(JSON.stringify(previewData)).length} records.
+            </p>
+          </div>
+        )}
+        
+        {/* Upload progress */}
+        {isUploading && (
+          <div className="mt-6">
+            <div className="flex justify-between items-center mb-2">
+              <Label>Uploading...</Label>
+              <span className="text-sm text-gray-500">{Math.round(uploadProgress)}%</span>
+            </div>
+            <Progress value={uploadProgress} className="h-2" />
+          </div>
+        )}
+        
+        {/* Results */}
+        {result && (
+          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-md flex items-start">
+            <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
+            <div>
+              <h4 className="font-medium text-green-800">Import completed</h4>
+              <p className="text-green-700 text-sm">
+                Successfully imported {result.success} products.
+                {result.failed > 0 && ` Failed to import ${result.failed} products.`}
+              </p>
+            </div>
+          </div>
+        )}
+        
+        {/* Error message */}
+        {error && (
+          <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-md flex items-start">
+            <AlertCircle className="h-5 w-5 text-red-500 mr-3 mt-0.5" />
+            <div>
+              <h4 className="font-medium text-red-800">Import failed</h4>
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Actions */}
+        <div className="mt-6 flex justify-end space-x-4">
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              setFile(null);
+              setPreviewData(null);
+              setResult(null);
+              setError(null);
+              if (fileInputRef.current) fileInputRef.current.value = "";
+            }}
+          >
+            Reset
+          </Button>
+          <Button 
+            onClick={handleUpload} 
+            disabled={!file || isUploading}
+          >
+            {isUploading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              'Upload and Import'
+            )}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
