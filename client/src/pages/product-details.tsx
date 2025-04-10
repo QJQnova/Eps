@@ -154,10 +154,68 @@ export default function ProductDetails() {
           {/* Promotional Banner */}
           <div className="absolute right-0 top-0 w-1/3 h-auto hidden md:block">
             <div 
-              className="w-full h-auto rounded-lg p-3 bg-gradient-to-r from-orange-500 to-red-500 text-white"
+              className="w-full h-auto rounded-lg p-3 bg-gradient-to-r from-orange-500 to-red-500 text-white overflow-hidden"
             >
-              <h3 className="text-sm font-bold mb-1">Профессиональные инструменты</h3>
-              <p className="text-xs">Для любых задач</p>
+              <h3 className="text-sm font-bold mb-1">Коллекция профессиональных инструментов</h3>
+              <p className="text-xs mb-2">Для любых задач</p>
+              
+              {/* Анимированный слайдер с инструментами */}
+              <div className="relative h-16 bg-white/10 rounded p-1 overflow-hidden">
+                <div className="absolute inset-0 flex items-center animate-slider">
+                  {/* Инструмент 1: Дрель */}
+                  <div className="flex-shrink-0 w-14 h-14 mx-2 flex items-center justify-center">
+                    <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5 15V9C5 7.89543 5.89543 7 7 7H15C16.1046 7 17 7.89543 17 9V15C17 16.1046 16.1046 17 15 17H7C5.89543 17 5 16.1046 5 15Z" stroke="white" strokeWidth="1.5"/>
+                      <path d="M17 12H20C20.5523 12 21 11.5523 21 11V10C21 9.44772 20.5523 9 20 9H17V12Z" stroke="white" strokeWidth="1.5"/>
+                      <path d="M9 21V17M13 21V17" stroke="white" strokeWidth="1.5"/>
+                      <path d="M8 7V5C8 4.44772 8.44772 4 9 4H13C13.5523 4 14 4.44772 14 5V7" stroke="white" strokeWidth="1.5"/>
+                    </svg>
+                  </div>
+                  
+                  {/* Инструмент 2: Пила */}
+                  <div className="flex-shrink-0 w-14 h-14 mx-2 flex items-center justify-center">
+                    <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M2 12H20" stroke="white" strokeWidth="1.5"/>
+                      <path d="M5 9V15" stroke="white" strokeWidth="1.5"/>
+                      <path d="M8 7V17" stroke="white" strokeWidth="1.5"/>
+                      <path d="M11 9V15" stroke="white" strokeWidth="1.5"/>
+                      <path d="M14 7V17" stroke="white" strokeWidth="1.5"/>
+                      <path d="M17 9V15" stroke="white" strokeWidth="1.5"/>
+                      <path d="M20 8V16" stroke="white" strokeWidth="1.5"/>
+                    </svg>
+                  </div>
+                  
+                  {/* Инструмент 3: Отвертка */}
+                  <div className="flex-shrink-0 w-14 h-14 mx-2 flex items-center justify-center">
+                    <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17 3L21 7" stroke="white" strokeWidth="1.5"/>
+                      <path d="M15 5L19 9" stroke="white" strokeWidth="1.5"/>
+                      <path d="M14 10L6 18C5.44772 18.5523 4.55228 18.5523 4 18L6 20C5.44772 19.4477 5.44772 18.5523 6 18L14 10" stroke="white" strokeWidth="1.5"/>
+                      <path d="M17 7L7 17C6.44772 17.5523 5.55228 17.5523 5 17C4.44772 16.4477 4.44772 15.5523 5 15L15 5" stroke="white" strokeWidth="1.5"/>
+                    </svg>
+                  </div>
+                  
+                  {/* Инструмент 4: Молоток */}
+                  <div className="flex-shrink-0 w-14 h-14 mx-2 flex items-center justify-center">
+                    <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 6V10" stroke="white" strokeWidth="1.5"/>
+                      <path d="M12 10L19 17" stroke="white" strokeWidth="1.5"/>
+                      <path d="M9 7H15" stroke="white" strokeWidth="1.5"/>
+                      <path d="M7 4H17V7C17 8.65685 15.6569 10 14 10H10C8.34315 10 7 8.65685 7 7V4Z" stroke="white" strokeWidth="1.5"/>
+                    </svg>
+                  </div>
+                  
+                  {/* Повторяем инструменты для бесконечной анимации */}
+                  <div className="flex-shrink-0 w-14 h-14 mx-2 flex items-center justify-center">
+                    <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5 15V9C5 7.89543 5.89543 7 7 7H15C16.1046 7 17 7.89543 17 9V15C17 16.1046 16.1046 17 15 17H7C5.89543 17 5 16.1046 5 15Z" stroke="white" strokeWidth="1.5"/>
+                      <path d="M17 12H20C20.5523 12 21 11.5523 21 11V10C21 9.44772 20.5523 9 20 9H17V12Z" stroke="white" strokeWidth="1.5"/>
+                      <path d="M9 21V17M13 21V17" stroke="white" strokeWidth="1.5"/>
+                      <path d="M8 7V5C8 4.44772 8.44772 4 9 4H13C13.5523 4 14 4.44772 14 5V7" stroke="white" strokeWidth="1.5"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           

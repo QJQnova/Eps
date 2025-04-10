@@ -57,4 +57,18 @@
   .text-eps-yellow {
     color: hsl(var(--color-eps-yellow));
   }
+  
+  /* Анимация слайдера инструментов */
+  @keyframes slide {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  
+  .animate-slider {
+    animation: slide 15s linear infinite;
+  }
 }
