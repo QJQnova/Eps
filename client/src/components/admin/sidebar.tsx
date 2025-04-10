@@ -50,37 +50,37 @@ export default function AdminSidebar() {
   const menuItems = [
     {
       icon: LayoutDashboard,
-      label: "Dashboard",
+      label: "Панель управления",
       href: "/admin",
     },
     {
       icon: Package2,
-      label: "Products",
+      label: "Товары",
       href: "/admin/products",
     },
     {
       icon: Upload,
-      label: "Bulk Import",
+      label: "Импорт товаров",
       href: "/admin/import",
     },
     {
       icon: Tag,
-      label: "Categories",
+      label: "Категории",
       href: "/admin/categories",
     },
     {
       icon: ShoppingCart,
-      label: "Orders",
+      label: "Заказы",
       href: "/admin/orders",
     },
     {
       icon: Users,
-      label: "Customers",
+      label: "Клиенты",
       href: "/admin/customers",
     },
     {
       icon: Settings,
-      label: "Settings",
+      label: "Настройки",
       href: "/admin/settings",
     },
   ];
@@ -108,8 +108,8 @@ export default function AdminSidebar() {
       >
         <div className="flex h-16 items-center border-b px-6">
           <Link href="/admin" className="flex items-center">
-            <span className="text-xl font-bold text-primary">ToolMaster</span>
-            <span className="ml-2 text-xs text-gray-500">Admin</span>
+            <span className="text-xl font-extrabold text-eps-gradient">ЭПС</span>
+            <span className="ml-2 text-xs text-gray-500">Администратор</span>
           </Link>
         </div>
         
@@ -129,7 +129,7 @@ export default function AdminSidebar() {
           <Link href="/">
             <Button variant="ghost" className="w-full justify-start text-gray-500 hover:text-gray-900">
               <LogOut className="mr-2 h-5 w-5" />
-              Back to Store
+              Вернуться в магазин
             </Button>
           </Link>
         </div>

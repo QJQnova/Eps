@@ -70,21 +70,21 @@ export default function ImportForm() {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
     
-    // Validate file type
+    // Проверка типа файла
     const fileType = selectedFile.type;
     if (fileType !== 'text/csv' && fileType !== 'application/json') {
-      setError("Please upload a CSV or JSON file");
+      setError("Пожалуйста, загрузите файл в формате CSV или JSON");
       return;
     }
     
     setFile(selectedFile);
     
     try {
-      // Parse and preview the file contents
+      // Анализ и предпросмотр содержимого файла
       const parsedData = await parseFile(selectedFile);
-      setPreviewData(parsedData.slice(0, 3)); // Show first 3 items
+      setPreviewData(parsedData.slice(0, 3)); // Показать первые 3 элемента
     } catch (err: any) {
-      setError(err.message || "Failed to parse file");
+      setError(err.message || "Не удалось обработать файл");
       setFile(null);
     }
   };
@@ -109,7 +109,7 @@ export default function ImportForm() {
         });
       }, 300);
       
-      // Send the request
+      // Отправляем запрос
       const response = await fetch("/api/products/bulk-import", {
         method: "POST",
         body: formData,
@@ -120,26 +120,26 @@ export default function ImportForm() {
       
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to import products");
+        throw new Error(error.message || "Не удалось импортировать товары");
       }
       
       const data = await response.json();
       setResult(data);
       
       toast({
-        title: "Import successful",
-        description: `Successfully imported ${data.success} products. Failed: ${data.failed}.`,
+        title: "Импорт успешно завершен",
+        description: `Успешно импортировано ${data.success} товаров. Не удалось: ${data.failed}.`,
       });
     } catch (err: any) {
-      setError(err.message || "An error occurred during upload");
+      setError(err.message || "Произошла ошибка при загрузке");
       toast({
-        title: "Import failed",
-        description: err.message || "Failed to import products",
+        title: "Ошибка импорта",
+        description: err.message || "Не удалось импортировать товары",
         variant: "destructive",
       });
     } finally {
       setIsUploading(false);
-      // Reset file input
+      // Сбрасываем поле выбора файла
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -166,9 +166,9 @@ export default function ImportForm() {
   return (
     <Card className="max-w-3xl mx-auto">
       <CardHeader>
-        <CardTitle>Bulk Product Import</CardTitle>
+        <CardTitle>Массовый импорт товаров</CardTitle>
         <CardDescription>
-          Upload a CSV or JSON file to import multiple products at once.
+          Загрузите файл CSV или JSON для импорта нескольких товаров одновременно.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -196,18 +196,18 @@ export default function ImportForm() {
           </div>
           
           <h4 className="text-lg font-medium text-gray-900 mb-2">
-            {file ? file.name : "Bulk Product Upload"}
+            {file ? file.name : "Загрузка товаров"}
           </h4>
           
           <p className="text-gray-500 mb-4">
             {file 
               ? `${(file.size / 1024).toFixed(2)} KB · ${file.type}`
-              : "Drag and drop your CSV or JSON file here, or click to select files"}
+              : "Перетащите файл CSV или JSON сюда, или нажмите для выбора файла"}
           </p>
           
           {!file && (
             <Button type="button" variant="outline" className="mx-auto">
-              Select File
+              Выбрать файл
             </Button>
           )}
         </div>
