@@ -65,7 +65,7 @@ export default function ProductTable() {
   });
   
   // Fetch categories for filter
-  const { data: categories = [] } = useQuery({ 
+  const { data: categories = [] } = useQuery<Category[]>({ 
     queryKey: ["/api/categories"],
   });
   
@@ -124,16 +124,18 @@ export default function ProductTable() {
   
   const getStatusBadgeClass = (product: Product) => {
     if (!product.isActive) return "bg-gray-200 text-gray-800";
-    if (product.stock === 0) return "bg-red-100 text-red-800";
-    if (product.stock < 10) return "bg-yellow-100 text-yellow-800";
+    const stock = product.stock ?? 0;
+    if (stock === 0) return "bg-red-100 text-red-800";
+    if (stock < 10) return "bg-yellow-100 text-yellow-800";
     return "bg-green-100 text-green-800";
   };
   
   const getStatusText = (product: Product) => {
-    if (!product.isActive) return "Inactive";
-    if (product.stock === 0) return "Out of Stock";
-    if (product.stock < 10) return "Low Stock";
-    return "Active";
+    if (!product.isActive) return "Неактивен";
+    const stock = product.stock ?? 0;
+    if (stock === 0) return "Нет в наличии";
+    if (stock < 10) return "Мало на складе";
+    return "Активен";
   };
   
   return (
@@ -241,7 +243,7 @@ export default function ProductTable() {
                   <TableCell className="hidden md:table-cell">
                     {categories.find(c => c.id === product.categoryId)?.name || "Unknown"}
                   </TableCell>
-                  <TableCell>${Number(product.price).toFixed(2)}</TableCell>
+                  <TableCell>{Number(product.price).toFixed(2)} ₽</TableCell>
                   <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeClass(product)}`}>
@@ -263,8 +265,8 @@ export default function ProductTable() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="active">Active</SelectItem>
-                          <SelectItem value="inactive">Inactive</SelectItem>
+                          <SelectItem value="active">Активен</SelectItem>
+                          <SelectItem value="inactive">Неактивен</SelectItem>
                         </SelectContent>
                       </Select>
                       
@@ -282,18 +284,18 @@ export default function ProductTable() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Product</AlertDialogTitle>
+                            <AlertDialogTitle>Удалить товар</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Are you sure you want to delete "{product.name}"? This action cannot be undone.
+                              Вы уверены, что хотите удалить "{product.name}"? Это действие нельзя отменить.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>Отмена</AlertDialogCancel>
                             <AlertDialogAction 
                               className="bg-red-500 hover:bg-red-600"
                               onClick={() => deleteProduct.mutate(product.id)}
                             >
-                              Delete
+                              Удалить
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -305,7 +307,7 @@ export default function ProductTable() {
             ) : (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-6">
-                  <p className="text-gray-500">No products found</p>
+                  <p className="text-gray-500">Товары не найдены</p>
                 </TableCell>
               </TableRow>
             )}
@@ -317,8 +319,8 @@ export default function ProductTable() {
       {data?.pagination && data.pagination.totalPages > 1 && (
         <div className="flex justify-between items-center mt-6">
           <p className="text-sm text-gray-500">
-            Showing {(page - 1) * limit + 1}-
-            {Math.min(page * limit, data.pagination.total)} of {data.pagination.total} products
+            Показано {(page - 1) * limit + 1}-
+            {Math.min(page * limit, data.pagination.total)} из {data.pagination.total} товаров
           </p>
           
           <div className="flex gap-2">
@@ -327,14 +329,14 @@ export default function ProductTable() {
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page === 1}
             >
-              Previous
+              Назад
             </Button>
             <Button 
               variant="outline"
               onClick={() => setPage(Math.min(data.pagination.totalPages, page + 1))}
               disabled={page === data.pagination.totalPages}
             >
-              Next
+              Вперед
             </Button>
           </div>
         </div>
