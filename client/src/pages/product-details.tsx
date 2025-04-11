@@ -144,12 +144,19 @@ export default function ProductDetails() {
       {/* Product Details */}
       <div className="grid md:grid-cols-2 gap-8 mb-12">
         {/* Product Image */}
-        <div className="bg-white rounded-lg overflow-hidden shadow-sm">
-          <img 
-            src={product.imageUrl || "https://placehold.co/800x600?text=No+Image"} 
-            alt={product.name}
-            className="w-full h-auto object-cover"
-          />
+        <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-500 animate-fadeIn" style={{ animationDelay: '0.1s' }}>
+          <div className="relative group">
+            <img 
+              src={product.imageUrl || "https://placehold.co/800x600?text=No+Image"} 
+              alt={product.name}
+              className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+              <div className="p-4 text-white w-full">
+                <p className="text-sm font-medium">Нажмите для увеличения</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Product Info */}
