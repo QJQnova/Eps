@@ -19,6 +19,15 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined>;
+  deleteUser(id: number): Promise<boolean>;
+  searchUsers(params: {
+    query?: string;
+    role?: string;
+    isActive?: boolean;
+    page: number;
+    limit: number;
+  }): Promise<{ users: User[], total: number }>;
   
   // Category operations
   getAllCategories(): Promise<Category[]>;
@@ -83,6 +92,66 @@ export class DatabaseStorage implements IStorage {
   async createUser(user: InsertUser): Promise<User> {
     const result = await db.insert(users).values(user).returning();
     return result[0];
+  }
+  
+  async updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined> {
+    const result = await db.update(users)
+      .set({
+        ...userData,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, id))
+      .returning();
+    return result.length > 0 ? result[0] : undefined;
+  }
+  
+  async deleteUser(id: number): Promise<boolean> {
+    const result = await db.delete(users).where(eq(users.id, id)).returning();
+    return result.length > 0;
+  }
+  
+  async searchUsers(params: {
+    query?: string;
+    role?: string;
+    isActive?: boolean;
+    page: number;
+    limit: number;
+  }): Promise<{ users: User[], total: number }> {
+    let query = db.select().from(users);
+    
+    // Фильтрация по поисковому запросу
+    if (params.query) {
+      query = query.where(
+        sql`(${users.username} ILIKE ${'%' + params.query + '%'} OR ${users.email} ILIKE ${'%' + params.query + '%'} OR ${users.fullName} ILIKE ${'%' + params.query + '%'})`
+      );
+    }
+    
+    // Фильтрация по роли
+    if (params.role) {
+      query = query.where(eq(users.role, params.role));
+    }
+    
+    // Фильтрация по статусу активности
+    if (params.isActive !== undefined) {
+      query = query.where(eq(users.isActive, params.isActive));
+    }
+    
+    // Подсчет общего количества пользователей для пагинации
+    const countQuery = sql`SELECT COUNT(*) FROM (${query}) AS count_query`;
+    const countResult = await db.execute(countQuery);
+    const total = parseInt(countResult.rows[0]?.count || '0');
+    
+    // Пагинация
+    const offset = (params.page - 1) * params.limit;
+    query = query.limit(params.limit).offset(offset);
+    query = query.orderBy(desc(users.id));
+    
+    const usersResult = await query;
+    
+    return {
+      users: usersResult,
+      total
+    };
   }
   
   // Category operations

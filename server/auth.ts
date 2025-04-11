@@ -16,7 +16,7 @@ declare global {
 const scryptAsync = promisify(scrypt);
 
 // Функция для хеширования пароля
-async function hashPassword(password: string) {
+export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
   const buf = (await scryptAsync(password, salt, 64)) as Buffer;
   return `${buf.toString("hex")}.${salt}`;
@@ -105,7 +105,8 @@ export function setupAuth(app: Express) {
         username,
         email,
         password, // В реальном приложении: hashedPassword
-        isAdmin: false
+        role: "user",
+        isActive: true
       });
       
       req.login(user, (err: Error | null) => {

@@ -5,8 +5,9 @@ import { z } from "zod";
 import { 
   insertUserSchema, insertCategorySchema, insertProductSchema, 
   insertCartItemSchema, productSearchSchema, bulkImportSchema,
-  orderInputSchema, orderSearchSchema
+  orderInputSchema, orderSearchSchema, userSearchSchema
 } from "@shared/schema";
+import { hashPassword } from "./auth";
 import { parseImportFile } from "./utils/file-parser";
 import { setupAuth } from "./auth";
 import multer from "multer";
@@ -69,7 +70,151 @@ export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
   // User Routes для администрирования
-  // (авторизация уже добавлена через setupAuth)
+  // Middleware для проверки прав администратора
+  const isAdmin = (req: Request, res: Response, next: any) => {
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).json({ message: "Необходима авторизация" });
+    }
+    
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Недостаточно прав" });
+    }
+    
+    next();
+  };
+  
+  // Получение списка пользователей (только для админов)
+  app.get("/api/admin/users", isAdmin, async (req, res) => {
+    try {
+      const params = validateData(userSearchSchema, req.query);
+      
+      const roleFilter = params.role === "all" || params.role === null ? undefined : params.role;
+      const isActiveFilter = params.isActive === "all" || params.isActive === null ? undefined : params.isActive === true;
+      
+      // Преобразуем параметры к правильным типам для устранения ошибок TypeScript
+      const result = await storage.searchUsers({
+        query: params.query,
+        role: roleFilter as string | undefined,
+        isActive: isActiveFilter as boolean | undefined,
+        page: Number(params.page),
+        limit: Number(params.limit)
+      });
+      
+      res.status(200).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+  
+  // Получение отдельного пользователя по ID
+  app.get("/api/admin/users/:id", isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const user = await storage.getUser(id);
+      
+      if (!user) {
+        return res.status(404).json({ message: "Пользователь не найден" });
+      }
+      
+      // Не возвращаем пароль
+      const { password, ...userWithoutPassword } = user;
+      res.status(200).json(userWithoutPassword);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Создание нового пользователя администратором
+  app.post("/api/admin/users", isAdmin, async (req, res) => {
+    try {
+      // Особая валидация для админского создания пользователя
+      const userData = validateData(insertUserSchema, req.body);
+      
+      // Хеширование пароля и создание пользователя
+      const hashedPassword = await hashPassword(userData.password);
+      const user = await storage.createUser({
+        ...userData,
+        password: hashedPassword,
+      });
+      
+      // Не возвращаем пароль
+      const { password, ...userWithoutPassword } = user;
+      res.status(201).json(userWithoutPassword);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+  
+  // Обновление пользователя
+  app.patch("/api/admin/users/:id", isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      let updateData = req.body;
+      
+      // Если в запросе есть пароль, хешируем его
+      if (updateData.password) {
+        updateData.password = await hashPassword(updateData.password);
+      }
+      
+      const user = await storage.updateUser(id, updateData);
+      
+      if (!user) {
+        return res.status(404).json({ message: "Пользователь не найден" });
+      }
+      
+      // Не возвращаем пароль
+      const { password, ...userWithoutPassword } = user;
+      res.status(200).json(userWithoutPassword);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+  
+  // Изменение статуса пользователя (активация/деактивация)
+  app.patch("/api/admin/users/:id/status", isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { isActive } = req.body;
+      
+      if (typeof isActive !== "boolean") {
+        return res.status(400).json({ message: "Поле isActive должно быть булевым значением" });
+      }
+      
+      const user = await storage.updateUser(id, { isActive });
+      
+      if (!user) {
+        return res.status(404).json({ message: "Пользователь не найден" });
+      }
+      
+      // Не возвращаем пароль
+      const { password, ...userWithoutPassword } = user;
+      res.status(200).json(userWithoutPassword);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+  
+  // Удаление пользователя
+  app.delete("/api/admin/users/:id", isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Проверяем, что админ не пытается удалить себя
+      if (req.user && id === req.user.id) {
+        return res.status(400).json({ message: "Невозможно удалить собственную учетную запись" });
+      }
+      
+      const success = await storage.deleteUser(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Пользователь не найден" });
+      }
+      
+      res.status(204).end();
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
 
   // Category Routes
   app.get("/api/categories", async (req, res) => {

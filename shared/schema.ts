@@ -9,15 +9,34 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
-  isAdmin: boolean("is_admin").default(false).notNull(),
+  role: text("role").default("user").notNull(),
+  fullName: text("full_name"),
+  phone: text("phone"),
+  address: text("address"),
+  isActive: boolean("is_active").default(true).notNull(),
+  lastLogin: timestamp("last_login"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   email: true,
   password: true,
-  isAdmin: true,
+  role: true,
+  fullName: true,
+  phone: true,
+  address: true,
+  isActive: true,
+});
+
+// Пользовательские схемы для администрирования
+export const userSearchSchema = z.object({
+  query: z.string().optional(),
+  role: z.union([z.string(), z.null()]).optional(),
+  isActive: z.union([z.boolean(), z.string().transform(val => val === 'true'), z.null()]).optional(),
+  page: z.union([z.number(), z.string().transform(val => parseInt(val, 10))]).transform(val => val || 1),
+  limit: z.union([z.number(), z.string().transform(val => parseInt(val, 10))]).transform(val => val || 10)
 });
 
 // Categories Schema
