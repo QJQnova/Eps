@@ -728,8 +728,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         maintenanceMode: typeof req.body.maintenanceMode === 'boolean' ? req.body.maintenanceMode : false
       };
       
-      const settingsData = validateData(shopSettingsSchema, data);
-      const success = await storage.updateShopSettings(settingsData);
+      // Убедимся, что объект соответствует схеме перед валидацией
+      const validatedData = shopSettingsSchema.parse(data);
+      const success = await storage.updateShopSettings(validatedData);
       
       if (!success) {
         return res.status(500).json({ message: "Не удалось обновить настройки магазина" });
@@ -798,12 +799,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Даже если письмо не отправлено (из-за отсутствия настроек), возвращаем успех
       // В целях безопасности не показываем, отправилось ли письмо на самом деле
+      // В режиме разработки предоставляем дополнительную информацию
+      let message = "Если указанный email существует, на него отправлена инструкция по восстановлению пароля";
+      
+      if (emailSent) {
+        // В тестовом окружении Resend отправляет только на email, который зарегистрирован в аккаунте
+        message = "Инструкция по восстановлению отправлена на тестовый email (проверьте консоль сервера)";
+      }
+      
       res.status(200).json({ 
         success: true, 
-        message: "Если указанный email существует, на него отправлена инструкция по восстановлению пароля",
+        message,
         // Только для тестирования и разработки, в продакшн удалить
         token: resetToken.token,
-        emailSent
+        emailSent,
+        // Информация о том, что в режиме тестирования письмо отправляется на тестовый email
+        note: "В режиме тестирования Resend отправляет письма только на email, зарегистрированный в аккаунте"
       });
     } catch (error: any) {
       res.status(400).json({ success: false, message: error.message });

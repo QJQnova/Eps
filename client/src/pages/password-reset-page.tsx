@@ -47,10 +47,20 @@ function RequestResetForm() {
       const result = await apiRequest("POST", "/api/password-reset/request", data);
       
       setRequestSent(true);
-      toast({
-        title: "Запрос отправлен",
-        description: "Инструкции по восстановлению пароля отправлены на ваш email.",
-      });
+
+      // Проверяем, если это тестовый режим Resend
+      if (result && result.note) {
+        toast({
+          title: "Тестовый режим",
+          description: result.message || "Инструкции отправлены на тестовый email разработчика.",
+        });
+        console.log(result.note);
+      } else {
+        toast({
+          title: "Запрос отправлен",
+          description: "Инструкции по восстановлению пароля отправлены на ваш email.",
+        });
+      }
       
       // Для тестовых целей: отображаем токен в консоли, если он возвращается с сервера
       if (result && result.token) {
@@ -72,7 +82,15 @@ function RequestResetForm() {
     return (
       <Alert className="bg-green-50 border-green-200 text-green-800">
         <AlertDescription>
-          Запрос на восстановление пароля отправлен. Пожалуйста, следуйте инструкциям в полученном письме.
+          <p>
+            Запрос на восстановление пароля отправлен. Пожалуйста, следуйте инструкциям в полученном письме.
+          </p>
+          
+          <p className="mt-2 text-amber-600 text-sm font-semibold">
+            Важно: В тестовом режиме письма отправляются на тестовый почтовый ящик разработчика.
+            Используйте токен из консоли для тестирования функции.
+          </p>
+          
           <div className="mt-4">
             <Link href="/auth">
               <span className="text-blue-600 hover:underline">Вернуться на страницу входа</span>

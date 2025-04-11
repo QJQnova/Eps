@@ -29,13 +29,20 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
       return false;
     }
 
+    // Получаем авторизованный email для тестирования из переменной окружения
+    const authorizedTestEmail = "encposter@gmail.com"; // Ваш email, который зарегистрирован в Resend
+    
+    // В тестовом режиме Resend позволяет отправлять только на email, зарегистрированный в аккаунте
+    // Для других получателей нужно верифицировать домен
+    console.log(`Email would be sent to ${options.to}, but in test mode sending to ${authorizedTestEmail} instead`);
+    
     // Отправляем электронное письмо
     const { data, error } = await resend.emails.send({
       from: 'onboarding@resend.dev', // Используем тестовый домен Resend для разработки
-      to: options.to,
+      to: authorizedTestEmail, // Всегда отправляем на наш собственный email в тестовом режиме
       subject: options.subject,
-      text: options.text || '',
-      html: options.html || ''
+      text: `ТЕСТОВОЕ ПИСЬМО - должно было быть отправлено на адрес ${options.to}\n\n${options.text || ''}`,
+      html: `<p><strong>ТЕСТОВОЕ ПИСЬМО - должно было быть отправлено на адрес ${options.to}</strong></p>${options.html || ''}`
     });
 
     if (error) {
