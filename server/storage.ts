@@ -65,6 +65,12 @@ export interface IStorage {
   updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
   getOrderItems(orderId: number): Promise<OrderItem[]>;
   getOrderItemsWithProducts(orderId: number): Promise<(OrderItem & { product?: Product })[]>;
+  
+  // Settings operations
+  getShopSettings(): Promise<Record<string, any>>;
+  updateShopSettings(settings: z.infer<typeof shopSettingsSchema>): Promise<boolean>;
+  getSeoSettings(): Promise<Record<string, any>>;
+  updateSeoSettings(settings: z.infer<typeof seoSettingsSchema>): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {

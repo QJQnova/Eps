@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, numeric, timestamp, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, numeric, timestamp, primaryKey, jsonb } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -287,3 +287,36 @@ export const orderItemsRelations = relations(orderItems, ({ one }) => ({
     references: [products.id],
   }),
 }));
+
+// Настройки магазина
+export const shopSettings = pgTable("shop_settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: jsonb("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type ShopSetting = typeof shopSettings.$inferSelect;
+
+// Схемы для настроек магазина
+export const shopSettingsSchema = z.object({
+  shopName: z.string().min(1, "Название магазина обязательно"),
+  shopDescription: z.string().optional(),
+  contactEmail: z.string().email("Введите корректный email").min(1, "Email обязателен"),
+  contactPhone: z.string().min(1, "Телефон обязателен"),
+  address: z.string().min(1, "Адрес обязателен"),
+  workingHours: z.string().optional(),
+  enableRegistration: z.boolean().default(true),
+  enableCheckout: z.boolean().default(true),
+  maintenanceMode: z.boolean().default(false),
+});
+
+// Схема для настроек SEO
+export const seoSettingsSchema = z.object({
+  siteTitle: z.string().min(1, "Title обязателен"),
+  metaDescription: z.string().max(160, "Описание должно быть не более 160 символов").optional(),
+  metaKeywords: z.string().optional(),
+  ogImage: z.string().url("Укажите корректный URL").optional().or(z.literal("")),
+  googleAnalyticsId: z.string().optional(),
+  yandexMetrikaId: z.string().optional(),
+});

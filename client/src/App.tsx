@@ -29,6 +29,7 @@ import ProductFormPage from "@/pages/admin/product-form-page";
 import CategoryManagement from "@/pages/admin/category-management";
 import OrderManagement from "@/pages/admin/order-management";
 import UserManagement from "@/pages/admin/user-management";
+import SettingsManagement from "@/pages/admin/settings-management";
 
 function Router() {
   const [location] = useLocation();
@@ -63,6 +64,7 @@ function Router() {
           <ProtectedRoute path="/admin/categories" component={CategoryManagement} />
           <ProtectedRoute path="/admin/orders" component={OrderManagement} />
           <ProtectedRoute path="/admin/users" component={UserManagement} />
+          <ProtectedRoute path="/admin/settings" component={SettingsManagement} />
           
           {/* Fallback to 404 */}
           <Route component={NotFound} />
