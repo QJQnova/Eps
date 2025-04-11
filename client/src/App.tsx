@@ -20,6 +20,7 @@ import OrderComplete from "@/pages/order-complete";
 import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
+import PasswordResetPage from "@/pages/password-reset-page";
 
 // Admin Pages
 import AdminDashboard from "@/pages/admin/dashboard";
@@ -49,6 +50,8 @@ function Router() {
           <Route path="/category/:slug" component={Category} />
           <Route path="/cart" component={Cart} />
           <Route path="/auth" component={AuthPage} />
+          <Route path="/password-reset" component={PasswordResetPage} />
+          <Route path="/password-reset/reset" component={PasswordResetPage} />
           
           {/* Protected Routes (требуют авторизации) */}
           <ProtectedRoute path="/checkout" component={Checkout} />
