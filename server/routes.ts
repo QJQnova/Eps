@@ -720,16 +720,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Обновить настройки магазина
   app.put("/api/admin/settings/shop", isAdmin, async (req, res) => {
     try {
-      // Убедимся что все булевы поля определены
-      const data = {
-        ...req.body,
-        enableRegistration: typeof req.body.enableRegistration === 'boolean' ? req.body.enableRegistration : true,
-        enableCheckout: typeof req.body.enableCheckout === 'boolean' ? req.body.enableCheckout : true,
-        maintenanceMode: typeof req.body.maintenanceMode === 'boolean' ? req.body.maintenanceMode : false
-      };
+      // Используем схему с дефолтными значениями для необязательных полей
+      const validatedData = shopSettingsSchema.parse(req.body);
       
-      // Убедимся, что объект соответствует схеме перед валидацией
-      const validatedData = shopSettingsSchema.parse(data);
+      // Теперь все булевы поля гарантированно имеют дефолтные значения благодаря схеме
       const success = await storage.updateShopSettings(validatedData);
       
       if (!success) {
