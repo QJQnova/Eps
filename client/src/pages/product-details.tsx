@@ -31,6 +31,7 @@ import { Product, Category } from "@shared/schema";
 export default function ProductDetails() {
   const { slug } = useParams();
   const [quantity, setQuantity] = useState(1);
+  const [option, setOption] = useState("default");
   const { addToCart, isLoading: isAddingToCart } = useCart();
   const { toast } = useToast();
 
@@ -258,140 +259,256 @@ export default function ProductDetails() {
             )}
           </div>
 
-          <div className="mb-6">
-            <div className="flex items-center">
-              <span className="text-3xl font-bold text-gray-900">{formatPrice(product.price)}</span>
+          {/* Price Section with Animation */}
+          <div className="bg-gray-50 rounded-lg p-4 mb-6 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-100/50 to-transparent"></div>
+            <div className="relative z-10">
               {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
-                <span className="text-lg line-through text-gray-500 ml-3">{formatPrice(product.originalPrice)}</span>
+                <div className="mb-1">
+                  <span className="text-base line-through text-gray-500">
+                    {formatPrice(product.originalPrice)}
+                  </span>
+                  <span className="ml-2 bg-red-100 text-red-700 text-xs font-medium px-2 py-0.5 rounded">
+                    Скидка {Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
+                  </span>
+                </div>
               )}
-              {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
-                <span className="ml-3 bg-rose-100 text-rose-700 text-sm font-medium px-2 py-0.5 rounded">
-                  Экономия {formatPrice(Number(product.originalPrice) - Number(product.price))}
-                </span>
-              )}
+              <div className="text-3xl font-bold text-gray-900">
+                {formatPrice(product.price)}
+              </div>
+              <div className="text-sm text-gray-500 mt-1">
+                {(product.stock && product.stock > 0) ? (
+                  <span className="text-emerald-600 font-medium">В наличии ({product.stock} шт.)</span>
+                ) : (
+                  <span className="text-rose-600 font-medium">Нет в наличии</span>
+                )}
+              </div>
             </div>
-            <p className="text-sm text-gray-500 mt-1">
-              {(product.stock && product.stock > 0) ? (
-                <span className="text-emerald-600 font-medium">В наличии ({product.stock} шт.)</span>
-              ) : (
-                <span className="text-rose-600 font-medium">Нет в наличии</span>
-              )}
-            </p>
           </div>
-
-          <p className="text-gray-600 mb-6">{product.shortDescription}</p>
-
-          {/* Количество и Добавить в корзину */}
-          <div className="flex space-x-3 mb-6">
-            <div className="flex items-center border border-gray-300 rounded-md w-32">
-              <Button 
-                type="button" 
-                variant="ghost" 
-                size="icon"
-                onClick={decreaseQuantity}
-                disabled={quantity <= 1}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <MinusCircle className="h-4 w-4" />
-              </Button>
-              <Select value={quantity.toString()} onValueChange={handleQuantityChange}>
-                <SelectTrigger className="border-0 focus:ring-0 text-center">
-                  <SelectValue />
+          
+          {/* Product Description */}
+          <div className="prose prose-sm text-gray-700 mb-6">
+            <p>{product.shortDescription || product.description}</p>
+          </div>
+          
+          {/* Features Section */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="flex items-start p-3 bg-orange-50 rounded-lg">
+              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3 text-orange-600 feature-icon">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Гарантия</p>
+                <p className="text-xs text-gray-600">24 месяца на все инструменты</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start p-3 bg-orange-50 rounded-lg">
+              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3 text-orange-600 feature-icon">
+                <Truck className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Доставка</p>
+                <p className="text-xs text-gray-600">Доставка по всей России</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start p-3 bg-orange-50 rounded-lg">
+              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3 text-orange-600 feature-icon">
+                <RefreshCw className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Возврат</p>
+                <p className="text-xs text-gray-600">14 дней на возврат товара</p>
+              </div>
+            </div>
+            
+            {/* Extra feature slot */}
+            <div className="flex items-start p-3 bg-orange-50 rounded-lg">
+              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3 text-orange-600 feature-icon">
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 6V10" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M12 10L19 17" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M9 7H15" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M7 4H17V7C17 8.65685 15.6569 10 14 10H10C8.34315 10 7 8.65685 7 7V4Z" stroke="currentColor" strokeWidth="1.5"/>
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Качество</p>
+                <p className="text-xs text-gray-600">Профессиональный инструмент</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Quantity and Options Selector */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 mb-6 p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center mb-4 sm:mb-0">
+              <span className="text-sm font-medium text-gray-700 mr-3">Количество:</span>
+              <div className="flex items-center bg-white rounded-md border border-gray-300 p-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-md hover:bg-gray-100"
+                  onClick={decreaseQuantity}
+                  disabled={quantity <= 1}
+                >
+                  <MinusCircle className="h-4 w-4 text-gray-500" />
+                </Button>
+                <span className="mx-3 text-sm font-medium text-gray-900 min-w-[1.5rem] text-center">{quantity}</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-md hover:bg-gray-100"
+                  onClick={increaseQuantity}
+                >
+                  <PlusCircle className="h-4 w-4 text-gray-500" />
+                </Button>
+              </div>
+            </div>
+            
+            <div className="flex items-center">
+              <span className="text-sm font-medium text-gray-700 mr-3">Опция:</span>
+              <Select value={option} onValueChange={setOption}>
+                <SelectTrigger className="w-36 border-gray-300 focus:ring-orange-500 focus:border-orange-500 bg-white">
+                  <SelectValue placeholder="Опция" />
                 </SelectTrigger>
                 <SelectContent>
-                  {[...Array(10)].map((_, i) => (
-                    <SelectItem key={i} value={(i + 1).toString()}>
-                      {i + 1}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="default">Стандарт</SelectItem>
+                  <SelectItem value="pro">Профессиональный</SelectItem>
+                  <SelectItem value="premium">Премиум</SelectItem>
                 </SelectContent>
               </Select>
-              <Button 
-                type="button" 
-                variant="ghost" 
-                size="icon"
-                onClick={increaseQuantity}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <PlusCircle className="h-4 w-4" />
-              </Button>
             </div>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
             <Button 
-              className="flex-1" 
-              onClick={handleAddToCart} 
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white w-full h-12 text-base font-medium shadow-md hover:shadow-lg transition-all duration-200 border-0"
+              onClick={handleAddToCart}
               disabled={isAddingToCart || !product.stock || product.stock === 0}
             >
-              <ShoppingCart className="h-5 w-5 mr-2" />
-              В корзину
+              <ShoppingCart className="mr-2 h-5 w-5" />
+              {isAddingToCart ? "Добавление..." : "Добавить в корзину"}
             </Button>
-          </div>
-
-          {/* Преимущества */}
-          <div className="space-y-3 mb-6">
-            <div className="flex items-center text-gray-600">
-              <Truck className="h-5 w-5 mr-3 text-primary" />
-              <span>Бесплатная доставка при заказе от 5000 ₽</span>
-            </div>
-            <div className="flex items-center text-gray-600">
-              <ShieldCheck className="h-5 w-5 mr-3 text-primary" />
-              <span>Гарантия производителя 2 года</span>
-            </div>
-            <div className="flex items-center text-gray-600">
-              <RefreshCw className="h-5 w-5 mr-3 text-primary" />
-              <span>Возврат в течение 30 дней</span>
-            </div>
+            
+            <Button 
+              variant="outline"
+              className="border-orange-500 text-orange-600 hover:bg-orange-50 w-full h-12 text-base font-medium transition-all duration-200"
+              onClick={() => {}}
+            >
+              Купить сейчас
+            </Button>
           </div>
         </div>
       </div>
 
       {/* Вкладки с информацией о товаре */}
       <div className="mb-12">
-        <Tabs defaultValue="description">
-          <TabsList className="grid w-full grid-cols-3 lg:w-1/2">
-            <TabsTrigger value="description">Описание</TabsTrigger>
-            <TabsTrigger value="specifications">Характеристики</TabsTrigger>
-            <TabsTrigger value="reviews">Отзывы</TabsTrigger>
+        <h2 className="text-2xl font-bold mb-6 text-gray-900 flex items-center">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-orange-500">
+            Дополнительная информация
+          </span>
+          <div className="h-px flex-grow bg-gradient-to-r from-orange-300 to-transparent ml-4"></div>
+        </h2>
+        
+        <Tabs defaultValue="description" className="w-full">
+          <TabsList className="w-full md:w-auto bg-gray-100 p-1 rounded-lg mb-6 border border-gray-200">
+            <TabsTrigger 
+              value="description" 
+              className="data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm rounded-md text-sm font-medium"
+            >
+              Описание
+            </TabsTrigger>
+            <TabsTrigger 
+              value="specifications" 
+              className="data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm rounded-md text-sm font-medium"
+            >
+              Характеристики
+            </TabsTrigger>
+            <TabsTrigger 
+              value="reviews" 
+              className="data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm rounded-md text-sm font-medium"
+            >
+              Отзывы
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="description" className="mt-6">
-            <Card>
-              <CardContent className="p-6">
+          
+          <TabsContent value="description">
+            <Card className="border-gray-200 shadow-sm overflow-hidden">
+              <CardContent className="p-6 bg-gradient-to-br from-white to-gray-50">
                 <div className="prose max-w-none">
                   <p>{product.description || "Подробное описание для этого товара отсутствует."}</p>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
-          <TabsContent value="specifications" className="mt-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="border-b pb-2">
-                    <div className="text-sm text-gray-500">Артикул</div>
-                    <div className="font-medium">{product.sku}</div>
+          
+          <TabsContent value="specifications">
+            <Card className="border-gray-200 shadow-sm overflow-hidden">
+              <CardContent className="p-6 bg-gradient-to-br from-white to-gray-50">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Основные характеристики</h3>
+                    
+                    <div className="flex justify-between p-3 bg-white border border-gray-100 rounded-lg">
+                      <span className="text-sm text-gray-600">Артикул</span>
+                      <span className="text-sm font-medium">{product.sku}</span>
+                    </div>
+                    
+                    <div className="flex justify-between p-3 bg-white border border-gray-100 rounded-lg">
+                      <span className="text-sm text-gray-600">Категория</span>
+                      <span className="text-sm font-medium">{categoryName}</span>
+                    </div>
+                    
+                    <div className="flex justify-between p-3 bg-white border border-gray-100 rounded-lg">
+                      <span className="text-sm text-gray-600">Наличие</span>
+                      <span className={`text-sm font-medium ${product.stock && product.stock > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        {product.stock && product.stock > 0 ? `В наличии (${product.stock} шт.)` : 'Нет в наличии'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="border-b pb-2">
-                    <div className="text-sm text-gray-500">Категория</div>
-                    <div className="font-medium">{categoryName}</div>
-                  </div>
-                  <div className="border-b pb-2">
-                    <div className="text-sm text-gray-500">Количество на складе</div>
-                    <div className="font-medium">{product.stock || 0} шт.</div>
-                  </div>
-                  <div className="border-b pb-2">
-                    <div className="text-sm text-gray-500">Вес</div>
-                    <div className="font-medium">1.2 кг</div>
+                  
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Технические характеристики</h3>
+                    
+                    <div className="flex justify-between p-3 bg-white border border-gray-100 rounded-lg">
+                      <span className="text-sm text-gray-600">Вес</span>
+                      <span className="text-sm font-medium">1.2 кг</span>
+                    </div>
+                    
+                    <div className="flex justify-between p-3 bg-white border border-gray-100 rounded-lg">
+                      <span className="text-sm text-gray-600">Габариты</span>
+                      <span className="text-sm font-medium">30 × 15 × 10 см</span>
+                    </div>
+                    
+                    <div className="flex justify-between p-3 bg-white border border-gray-100 rounded-lg">
+                      <span className="text-sm text-gray-600">Гарантия</span>
+                      <span className="text-sm font-medium">24 месяца</span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
-          <TabsContent value="reviews" className="mt-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-center py-8">
-                  <h3 className="text-lg font-medium mb-2">Ещё нет отзывов</h3>
-                  <p className="text-gray-500 mb-4">Будьте первым, кто оставит отзыв об этом товаре</p>
-                  <Button variant="outline">Написать отзыв</Button>
+          
+          <TabsContent value="reviews">
+            <Card className="border-gray-200 shadow-sm overflow-hidden">
+              <CardContent className="p-6 bg-gradient-to-br from-white to-gray-50">
+                <div className="text-center py-10">
+                  <div className="mb-4 inline-flex items-center justify-center w-16 h-16 bg-orange-100 text-orange-500 rounded-full">
+                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11.0489 3.92705C11.3483 3.00574 12.6517 3.00574 12.9511 3.92705L14.2451 7.90983C14.379 8.32185 14.763 8.60081 15.1962 8.60081H19.3839C20.3527 8.60081 20.7554 9.84043 19.9717 10.4098L16.5838 12.8713C16.2333 13.126 16.0866 13.5773 16.2205 13.9894L17.5146 17.9721C17.8139 18.8934 16.7595 19.6596 15.9757 19.0902L12.5878 16.6287C12.2373 16.374 11.7627 16.374 11.4122 16.6287L8.02426 19.0902C7.24054 19.6596 6.18607 18.8934 6.48542 17.9721L7.77949 13.9894C7.91338 13.5773 7.76672 13.126 7.41623 12.8713L4.02827 10.4098C3.24455 9.84043 3.64732 8.60081 4.61606 8.60081H8.8038C9.23703 8.60081 9.62099 8.32185 9.75488 7.90983L11.0489 3.92705Z" stroke="currentColor" strokeWidth="2"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2 text-gray-900">Ещё нет отзывов</h3>
+                  <p className="text-gray-500 mb-6 max-w-lg mx-auto">Будьте первым, кто оставит отзыв об этом товаре. Ваше мнение поможет другим покупателям сделать правильный выбор.</p>
+                  <Button className="bg-orange-500 hover:bg-orange-600">
+                    <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Написать отзыв
+                  </Button>
                 </div>
               </CardContent>
             </Card>

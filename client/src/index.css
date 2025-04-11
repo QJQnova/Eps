@@ -42,6 +42,60 @@
     @apply scale-105;
   }
   
+  /* Страница продукта - эффекты изображения */
+  .product-image-container {
+    @apply relative transition-all duration-500 ease-in-out;
+  }
+  
+  .product-image-container:hover .product-image {
+    @apply scale-110;
+  }
+  
+  .product-image-container::after {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-500 bg-gradient-to-tr from-orange-500/10 to-transparent pointer-events-none;
+  }
+  
+  .product-image-container:hover::after {
+    @apply opacity-100;
+  }
+  
+  /* Анимация слайдера с инструментами */
+  @keyframes slider {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  
+  .animate-slider {
+    animation: slider 20s linear infinite;
+    width: 200%;
+  }
+  
+  /* Пульсирующие иконки на странице продукта */
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(255, 138, 0, 0.6);
+    }
+    70% {
+      transform: scale(1);
+      box-shadow: 0 0 0 6px rgba(255, 138, 0, 0);
+    }
+    100% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(255, 138, 0, 0);
+    }
+  }
+  
+  .feature-icon {
+    @apply relative overflow-hidden;
+    animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+  
   /* Стилизация кнопок действий */
   .action-button {
     @apply transition-all duration-200 transform hover:scale-105;
@@ -102,17 +156,5 @@
     color: hsl(var(--color-eps-yellow));
   }
   
-  /* Анимация слайдера инструментов */
-  @keyframes slide {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
-  }
-  
-  .animate-slider {
-    animation: slide 15s linear infinite;
-  }
+  /* Дополнительные стили */
 }
