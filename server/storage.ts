@@ -4,9 +4,10 @@ import { pool, db } from "./db";
 import {
   User, InsertUser, Category, InsertCategory, Product, InsertProduct, 
   ProductInput, CartItem, InsertCartItem, ProductSearchParams, Order, 
-  OrderInput, OrderItem, OrderSearchParams,
-  users, categories, products, cartItems, orders, orderItems
+  OrderInput, OrderItem, OrderSearchParams, shopSettingsSchema, seoSettingsSchema,
+  users, categories, products, cartItems, orders, orderItems, shopSettings
 } from "@shared/schema";
+import { z } from "zod";
 import { and, eq, like, between, desc, asc, sql, isNull, gte, lte } from "drizzle-orm";
 
 const PostgresSessionStore = connectPg(session);
@@ -612,6 +613,106 @@ export class DatabaseStorage implements IStorage {
       ...row.orderItem,
       product: row.product
     }));
+  }
+  
+  // Settings operations
+  async getShopSettings(): Promise<Record<string, any>> {
+    const result = await db.select()
+      .from(shopSettings)
+      .where(eq(shopSettings.key, 'shop_settings'));
+      
+    if (result.length === 0) {
+      // Возвращаем настройки по умолчанию, если их еще нет
+      return {
+        shopName: "ЭПС",
+        shopDescription: "Коллекция профессиональных инструментов",
+        contactEmail: "info@example.com",
+        contactPhone: "+7 8442 50-58-57",
+        address: "г. Волгоград, ул. им. Маршала Еременко 44",
+        workingHours: "пн. - пт.: 8:00 - 19:00, сб.: 9:00 - 15:00, вс: выходной",
+        enableRegistration: true,
+        enableCheckout: true,
+        maintenanceMode: false,
+      };
+    }
+    
+    return result[0].value as Record<string, any>;
+  }
+  
+  async updateShopSettings(settings: z.infer<typeof shopSettingsSchema>): Promise<boolean> {
+    try {
+      const result = await db.select().from(shopSettings).where(eq(shopSettings.key, 'shop_settings'));
+      
+      if (result.length === 0) {
+        // Если настроек еще нет, создаем их
+        await db.insert(shopSettings).values({
+          key: 'shop_settings',
+          value: settings as any,
+          updatedAt: new Date()
+        });
+      } else {
+        // Иначе обновляем существующие
+        await db.update(shopSettings)
+          .set({ 
+            value: settings as any,
+            updatedAt: new Date()
+          })
+          .where(eq(shopSettings.key, 'shop_settings'));
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Ошибка при обновлении настроек магазина:', error);
+      return false;
+    }
+  }
+  
+  async getSeoSettings(): Promise<Record<string, any>> {
+    const result = await db.select()
+      .from(shopSettings)
+      .where(eq(shopSettings.key, 'seo_settings'));
+      
+    if (result.length === 0) {
+      // Возвращаем настройки по умолчанию, если их еще нет
+      return {
+        siteTitle: "ЭПС - Коллекция профессиональных инструментов",
+        metaDescription: "ЭПС - магазин профессиональных инструментов в Волгограде. Большой выбор, доступные цены.",
+        metaKeywords: "инструменты, электроинструменты, ручные инструменты, Волгоград",
+        ogImage: "",
+        googleAnalyticsId: "",
+        yandexMetrikaId: "",
+      };
+    }
+    
+    return result[0].value as Record<string, any>;
+  }
+  
+  async updateSeoSettings(settings: z.infer<typeof seoSettingsSchema>): Promise<boolean> {
+    try {
+      const result = await db.select().from(shopSettings).where(eq(shopSettings.key, 'seo_settings'));
+      
+      if (result.length === 0) {
+        // Если настроек еще нет, создаем их
+        await db.insert(shopSettings).values({
+          key: 'seo_settings',
+          value: settings as any,
+          updatedAt: new Date()
+        });
+      } else {
+        // Иначе обновляем существующие
+        await db.update(shopSettings)
+          .set({ 
+            value: settings as any,
+            updatedAt: new Date() 
+          })
+          .where(eq(shopSettings.key, 'seo_settings'));
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Ошибка при обновлении SEO настроек:', error);
+      return false;
+    }
   }
 }
 
