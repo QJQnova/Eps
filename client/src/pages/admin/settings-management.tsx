@@ -56,7 +56,7 @@ export default function SettingsManagement() {
     error: shopSettingsError
   } = useQuery({
     queryKey: ["/api/admin/settings/shop"],
-    queryFn: getQueryFn({ on401: "reject" })
+    queryFn: getQueryFn()
   });
 
   // Запрос SEO настроек
@@ -66,7 +66,7 @@ export default function SettingsManagement() {
     error: seoSettingsError
   } = useQuery({
     queryKey: ["/api/admin/settings/seo"],
-    queryFn: getQueryFn({ on401: "reject" })
+    queryFn: getQueryFn()
   });
   
   // Обработка ошибок загрузки настроек магазина

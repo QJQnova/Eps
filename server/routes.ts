@@ -719,7 +719,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Обновить настройки магазина
   app.put("/api/admin/settings/shop", isAdmin, async (req, res) => {
     try {
-      const settingsData = validateData(shopSettingsSchema, req.body);
+      const settingsData = validateData(shopSettingsSchema, {
+        ...req.body,
+        enableRegistration: req.body.enableRegistration ?? true,
+        enableCheckout: req.body.enableCheckout ?? true,
+        maintenanceMode: req.body.maintenanceMode ?? false
+      });
+      
       const success = await storage.updateShopSettings(settingsData);
       
       if (!success) {
