@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient, apiRequest, getQueryFn } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AdminSidebar from "@/components/admin/sidebar";
 
@@ -49,6 +49,48 @@ export default function SettingsManagement() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("shop");
 
+  // Запрос настроек магазина
+  const { 
+    data: shopSettingsData, 
+    isLoading: isLoadingShopSettings,
+    error: shopSettingsError
+  } = useQuery({
+    queryKey: ["/api/admin/settings/shop"],
+    queryFn: getQueryFn({ on401: "reject" })
+  });
+
+  // Запрос SEO настроек
+  const { 
+    data: seoSettingsData, 
+    isLoading: isLoadingSeoSettings,
+    error: seoSettingsError
+  } = useQuery({
+    queryKey: ["/api/admin/settings/seo"],
+    queryFn: getQueryFn({ on401: "reject" })
+  });
+  
+  // Обработка ошибок загрузки настроек магазина
+  React.useEffect(() => {
+    if (shopSettingsError) {
+      toast({
+        title: "Ошибка загрузки",
+        description: `Не удалось загрузить настройки магазина: ${shopSettingsError.message}`,
+        variant: "destructive",
+      });
+    }
+  }, [shopSettingsError, toast]);
+  
+  // Обработка ошибок загрузки SEO настроек
+  React.useEffect(() => {
+    if (seoSettingsError) {
+      toast({
+        title: "Ошибка загрузки",
+        description: `Не удалось загрузить SEO настройки: ${seoSettingsError.message}`,
+        variant: "destructive",
+      });
+    }
+  }, [seoSettingsError, toast]);
+
   // Форма для основных настроек
   const shopSettingsForm = useForm<ShopSettingsFormValues>({
     resolver: zodResolver(shopSettingsSchema),
@@ -77,6 +119,19 @@ export default function SettingsManagement() {
       yandexMetrikaId: "",
     },
   });
+
+  // Обновление форм после получения данных
+  React.useEffect(() => {
+    if (shopSettingsData) {
+      shopSettingsForm.reset(shopSettingsData);
+    }
+  }, [shopSettingsData, shopSettingsForm]);
+
+  React.useEffect(() => {
+    if (seoSettingsData) {
+      seoSettingsForm.reset(seoSettingsData);
+    }
+  }, [seoSettingsData, seoSettingsForm]);
 
   // Мутация для сохранения основных настроек
   const saveShopSettingsMutation = useMutation({
