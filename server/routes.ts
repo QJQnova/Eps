@@ -803,9 +803,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // 2. Проверка токена сброса пароля
-  app.get("/api/password-reset/verify/:token", async (req, res) => {
+  app.get("/api/password-reset/verify", async (req, res) => {
     try {
-      const { token } = req.params;
+      const token = req.query.token as string;
+      
+      if (!token) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Токен не предоставлен" 
+        });
+      }
       
       const resetToken = await storage.getPasswordResetToken(token);
       
