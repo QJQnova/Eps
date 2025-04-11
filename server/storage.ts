@@ -19,6 +19,7 @@ export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined>;
   deleteUser(id: number): Promise<boolean>;
@@ -72,6 +73,12 @@ export interface IStorage {
   updateShopSettings(settings: z.infer<typeof shopSettingsSchema>): Promise<boolean>;
   getSeoSettings(): Promise<Record<string, any>>;
   updateSeoSettings(settings: z.infer<typeof seoSettingsSchema>): Promise<boolean>;
+  
+  // Password reset operations
+  createPasswordResetToken(userId: number): Promise<PasswordResetToken>;
+  getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
+  markPasswordResetTokenAsUsed(token: string): Promise<boolean>;
+  deleteExpiredPasswordResetTokens(): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -93,6 +100,11 @@ export class DatabaseStorage implements IStorage {
   
   async getUserByUsername(username: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.username, username));
+    return result.length > 0 ? result[0] : undefined;
+  }
+  
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.email, email));
     return result.length > 0 ? result[0] : undefined;
   }
   

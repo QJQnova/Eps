@@ -320,3 +320,37 @@ export const seoSettingsSchema = z.object({
   googleAnalyticsId: z.string().optional(),
   yandexMetrikaId: z.string().optional(),
 });
+
+// Таблица для хранения токенов сброса пароля
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  token: text("token").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  usedAt: timestamp("used_at"),
+});
+
+export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens).pick({
+  userId: true,
+  token: true,
+  expiresAt: true,
+});
+
+export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+
+// Схема для запроса сброса пароля
+export const passwordResetRequestSchema = z.object({
+  email: z.string().email("Введите корректный email").min(1, "Email обязателен"),
+});
+
+// Схема для установки нового пароля
+export const passwordResetSchema = z.object({
+  token: z.string().min(1, "Токен обязателен"),
+  password: z.string().min(6, "Пароль должен содержать не менее 6 символов"),
+  confirmPassword: z.string().min(1, "Подтверждение пароля обязательно"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Пароли не совпадают",
+  path: ["confirmPassword"],
+});
