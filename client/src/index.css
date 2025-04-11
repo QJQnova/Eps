@@ -58,7 +58,7 @@
     color: hsl(var(--color-eps-yellow));
   }
   
-  /* Анимация слайдера инструментов */
+  /* Анимации для компонентов */
   @keyframes slide {
     0% {
       transform: translateX(0);
@@ -70,5 +70,58 @@
   
   .animate-slider {
     animation: slide 15s linear infinite;
+  }
+  
+  /* Анимация постепенного появления элементов */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  /* Анимации для карточек товаров */
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s infinite ease-in-out;
+  }
+
+  /* Анимация для кнопок */
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+  }
+
+  .hover-wiggle:hover {
+    animation: wiggle 0.5s ease-in-out;
+  }
+  
+  /* Анимация для текста */
+  @keyframes textGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  .animate-text-gradient {
+    background: linear-gradient(
+      to right,
+      hsl(var(--color-eps-orange)), 
+      hsl(var(--color-eps-red)), 
+      hsl(var(--color-eps-yellow)), 
+      hsl(var(--color-eps-orange))
+    );
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: textGradient 6s ease infinite;
   }
 }

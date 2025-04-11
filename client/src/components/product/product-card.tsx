@@ -24,13 +24,13 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
   
   return (
-    <Card className="overflow-hidden shadow-sm hover:shadow-md transition duration-200 group h-full">
+    <Card className="overflow-hidden shadow-sm hover:shadow-lg hover:translate-y-[-4px] transition-all duration-300 ease-in-out group h-full">
       <div className="relative">
         <Link href={`/product/${product.slug}`}>
           <img 
             src={product.imageUrl || "https://placehold.co/400x300?text=No+Image"} 
             alt={product.name}
-            className="w-full h-56 object-cover"
+            className="w-full h-56 object-cover transform transition-transform duration-300 group-hover:scale-105"
           />
         </Link>
         
@@ -110,11 +110,11 @@ export default function ProductCard({ product }: ProductCardProps) {
           <Button
             variant="default"
             size="sm"
-            className="bg-primary hover:bg-primary/90 text-white rounded-lg transition duration-200"
+            className="bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-md"
             onClick={handleAddToCart}
             disabled={isLoading || !product.stock || product.stock === 0}
           >
-            <ShoppingCart className="h-4 w-4 mr-1" />
+            <ShoppingCart className="h-4 w-4 mr-1 group-hover:animate-bounce" />
             В корзину
           </Button>
         </div>
