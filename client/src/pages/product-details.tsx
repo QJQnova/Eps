@@ -44,10 +44,11 @@ export default function ProductDetails() {
     queryKey: ["/api/categories"]
   });
   
-  // Fetch related products based on category
+  // Fetch related products based on category - с оптимизацией кеширования
   const { data: relatedProducts = [] } = useQuery<Product[]>({
-    queryKey: [`/api/categories/${product?.categoryId}/products`],
+    queryKey: ['/api/categories', product?.categoryId, 'products'],
     enabled: !!product?.categoryId,
+    staleTime: 60000, // кеширование на 1 минуту для улучшения производительности
   });
 
   const categoryName = product?.categoryId 

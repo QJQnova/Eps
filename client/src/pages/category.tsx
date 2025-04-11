@@ -34,7 +34,7 @@ export default function CategoryPage() {
         <BreadcrumbItem>
           <BreadcrumbLink href="/">
             <Home className="h-4 w-4 mr-1" />
-            Home
+            Главная
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator>
