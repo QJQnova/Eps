@@ -186,6 +186,7 @@ function ResetPasswordForm({ token }: { token: string }) {
     try {
       const { confirmPassword, ...resetData } = data;
       
+      // Обязательно отправляем только токен и пароль, без confirmPassword
       const result = await apiRequest("POST", "/api/password-reset/reset", {
         token,
         password: resetData.password

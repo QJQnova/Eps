@@ -848,7 +848,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 3. Установка нового пароля
   app.post("/api/password-reset/reset", async (req, res) => {
     try {
-      const { token, password } = validateData(passwordResetSchema, req.body);
+      // Создаем упрощенную схему для валидации без проверки confirmPassword
+      const resetPasswordServerSchema = z.object({
+        token: z.string().min(1, "Токен обязателен"),
+        password: z.string().min(6, "Пароль должен содержать не менее 6 символов"),
+      });
+      
+      // Парсим данные напрямую, без использования validateData
+      const validData = resetPasswordServerSchema.parse(req.body);
+      const { token, password } = validData;
       
       // Проверяем токен
       const resetToken = await storage.getPasswordResetToken(token);
@@ -877,7 +885,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Пароль успешно обновлен" 
       });
     } catch (error: any) {
-      res.status(400).json({ success: false, message: error.message });
+      console.error("Password reset error:", error);
+      
+      // Проверяем, является ли ошибка ошибкой валидации от Zod
+      if (error.name === 'ZodError' || error.issues) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Ошибка валидации данных. Убедитесь, что пароль содержит не менее 6 символов.", 
+        });
+      }
+      
+      res.status(400).json({ 
+        success: false, 
+        message: error.message || "Произошла ошибка при сбросе пароля" 
+      });
     }
   });
 
