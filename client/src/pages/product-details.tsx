@@ -305,27 +305,33 @@ export default function ProductDetails() {
               </Button>
             </div>
             <Button 
-              className="flex-1" 
+              className="flex-1 transition-all duration-300 transform hover:scale-105 hover:shadow-md bg-primary hover:bg-primary/90" 
               onClick={handleAddToCart} 
               disabled={isAddingToCart || !product.stock || product.stock === 0}
             >
-              <ShoppingCart className="h-5 w-5 mr-2" />
-              В корзину
+              <ShoppingCart className="h-5 w-5 mr-2 animate-pulse-slow" />
+              {isAddingToCart ? "Добавляем..." : "В корзину"}
             </Button>
           </div>
 
           {/* Преимущества */}
-          <div className="space-y-3 mb-6">
-            <div className="flex items-center text-gray-600">
-              <Truck className="h-5 w-5 mr-3 text-primary" />
+          <div className="space-y-3 mb-6 animate-fadeIn" style={{ animationDelay: '0.3s' }}>
+            <div className="flex items-center text-gray-600 p-2 hover:bg-primary/5 rounded-lg transition-colors duration-300">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 transition-transform duration-300 hover:scale-110">
+                <Truck className="h-5 w-5 text-primary" />
+              </div>
               <span>Бесплатная доставка при заказе от 5000 ₽</span>
             </div>
-            <div className="flex items-center text-gray-600">
-              <ShieldCheck className="h-5 w-5 mr-3 text-primary" />
+            <div className="flex items-center text-gray-600 p-2 hover:bg-primary/5 rounded-lg transition-colors duration-300">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 transition-transform duration-300 hover:scale-110">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+              </div>
               <span>Гарантия производителя 2 года</span>
             </div>
-            <div className="flex items-center text-gray-600">
-              <RefreshCw className="h-5 w-5 mr-3 text-primary" />
+            <div className="flex items-center text-gray-600 p-2 hover:bg-primary/5 rounded-lg transition-colors duration-300">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 transition-transform duration-300 hover:scale-110">
+                <RefreshCw className="h-5 w-5 text-primary" />
+              </div>
               <span>Возврат в течение 30 дней</span>
             </div>
           </div>
@@ -389,14 +395,16 @@ export default function ProductDetails() {
 
       {/* Похожие товары */}
       {relatedProducts.length > 1 && (
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Похожие товары</h2>
+        <div className="animate-fadeIn" style={{ animationDelay: '0.5s' }}>
+          <h2 className="text-2xl font-bold mb-6 animate-text-gradient inline-block">Похожие товары</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {relatedProducts
               .filter(p => p.id !== product.id)
               .slice(0, 4)
-              .map(relatedProduct => (
-                <ProductCard key={relatedProduct.id} product={relatedProduct} />
+              .map((relatedProduct, index) => (
+                <div key={relatedProduct.id} className="animate-fadeIn" style={{ animationDelay: `${0.6 + index * 0.1}s` }}>
+                  <ProductCard product={relatedProduct} />
+                </div>
               ))}
           </div>
         </div>
