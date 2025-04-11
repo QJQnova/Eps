@@ -5,10 +5,12 @@ import {
   User, InsertUser, Category, InsertCategory, Product, InsertProduct, 
   ProductInput, CartItem, InsertCartItem, ProductSearchParams, Order, 
   OrderInput, OrderItem, OrderSearchParams, shopSettingsSchema, seoSettingsSchema,
-  users, categories, products, cartItems, orders, orderItems, shopSettings
+  users, categories, products, cartItems, orders, orderItems, shopSettings,
+  passwordResetTokens, InsertPasswordResetToken, PasswordResetToken
 } from "@shared/schema";
 import { z } from "zod";
-import { and, eq, like, between, desc, asc, sql, isNull, gte, lte } from "drizzle-orm";
+import { and, eq, like, between, desc, asc, sql, isNull, gte, lte, or, not } from "drizzle-orm";
+import * as crypto from "crypto";
 
 const PostgresSessionStore = connectPg(session);
 
@@ -733,6 +735,63 @@ export class DatabaseStorage implements IStorage {
       console.error('Ошибка при обновлении SEO настроек:', error);
       return false;
     }
+  }
+
+  // Password reset operations
+  async createPasswordResetToken(userId: number): Promise<PasswordResetToken> {
+    // Генерируем случайный токен и срок годности (24 часа)
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24);
+
+    const tokenData: InsertPasswordResetToken = {
+      userId,
+      token,
+      expiresAt
+    };
+
+    // Удаляем все предыдущие токены для пользователя
+    await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, userId));
+
+    // Создаем новый токен
+    const [result] = await db.insert(passwordResetTokens).values(tokenData).returning();
+    return result;
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    const result = await db.select()
+      .from(passwordResetTokens)
+      .where(
+        and(
+          eq(passwordResetTokens.token, token),
+          isNull(passwordResetTokens.usedAt),
+          gte(passwordResetTokens.expiresAt, new Date())
+        )
+      );
+    
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async markPasswordResetTokenAsUsed(token: string): Promise<boolean> {
+    const result = await db.update(passwordResetTokens)
+      .set({ usedAt: new Date() })
+      .where(eq(passwordResetTokens.token, token))
+      .returning();
+    
+    return result.length > 0;
+  }
+
+  async deleteExpiredPasswordResetTokens(): Promise<number> {
+    const result = await db.delete(passwordResetTokens)
+      .where(
+        or(
+          lte(passwordResetTokens.expiresAt, new Date()),
+          not(isNull(passwordResetTokens.usedAt))
+        )
+      )
+      .returning();
+    
+    return result.length;
   }
 }
 
