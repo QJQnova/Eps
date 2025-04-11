@@ -112,61 +112,78 @@ export default function ProductDetails() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
       {/* Breadcrumbs */}
-      <Breadcrumb className="mb-6">
+      <Breadcrumb className="mb-6 text-sm">
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href="/">
-              <Home className="h-4 w-4 mr-1" />
+            <Link href="/" className="text-gray-500 hover:text-orange-600 flex items-center transition-colors">
+              <Home className="h-3.5 w-3.5 mr-1.5" />
               Главная
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator>
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-3 w-3 text-gray-400" />
         </BreadcrumbSeparator>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href={`/category/${categories.find(cat => cat.id === product.categoryId)?.slug || ''}`}>
+            <Link href={`/category/${categories.find(cat => cat.id === product.categoryId)?.slug || ''}`} className="text-gray-500 hover:text-orange-600 transition-colors">
               {categoryName}
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator>
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-3 w-3 text-gray-400" />
         </BreadcrumbSeparator>
-        <BreadcrumbItem className="text-gray-500 max-w-[200px] truncate">
+        <BreadcrumbItem className="text-gray-400 max-w-[200px] truncate">
           {product.name}
         </BreadcrumbItem>
       </Breadcrumb>
 
       {/* Product Details */}
-      <div className="grid md:grid-cols-2 gap-8 mb-12">
-        {/* Product Image */}
-        <div className="bg-white rounded-lg overflow-hidden shadow-sm">
-          <img 
-            src={product.imageUrl || "https://placehold.co/800x600?text=No+Image"} 
-            alt={product.name}
-            className="w-full h-auto object-cover"
-          />
-        </div>
-
-        {/* Product Info */}
-        <div className="relative">
-          {/* Promotional Banner */}
-          <div className="absolute right-0 top-0 w-1/3 h-auto hidden md:block">
-            <div 
-              className="w-full h-auto rounded-lg p-3 bg-gradient-to-r from-orange-500 to-red-500 text-white overflow-hidden"
-            >
-              <h3 className="text-sm font-bold mb-1">Коллекция профессиональных инструментов</h3>
-              <p className="text-xs mb-2">Для любых задач</p>
+      <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-12">
+        {/* Product Images Section */}
+        <div className="flex flex-col space-y-5">
+          {/* Main Product Image with Shadow and Border */}
+          <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 p-4 md:p-6 transition-all duration-300 hover:shadow-lg">
+            <div className="relative aspect-square bg-gray-50 rounded-md flex items-center justify-center overflow-hidden product-image-container">
+              <img
+                src={product.imageUrl || "https://placehold.co/600x400?text=Нет+изображения"}
+                alt={product.name}
+                className="max-w-full max-h-full object-contain transition-transform duration-700 product-image"
+              />
               
-              {/* Анимированный слайдер с инструментами */}
-              <div className="relative h-16 bg-white/10 rounded p-1 overflow-hidden">
+              {/* Badge for sale or discount if available */}
+              {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
+                <div className="absolute top-3 left-3 bg-orange-600 text-white text-xs font-bold px-2.5 py-1.5 rounded-md shadow-sm">
+                  -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Тематический баннер */}
+          <div className="bg-gradient-to-r from-orange-600 via-orange-500 to-yellow-500 rounded-lg overflow-hidden shadow-md">
+            <div className="p-5 pb-0 flex md:flex-row flex-col">
+              <div className="md:w-1/2">
+                <h3 className="text-xl font-bold text-white mb-2">Коллекция профессиональных инструментов</h3>
+                <p className="text-white/90 text-sm mb-4">Качество, надежность и долговечность для настоящих профессионалов</p>
+                <div className="inline-block mb-6 md:mb-0">
+                  <Button 
+                    variant="secondary" 
+                    className="bg-white/90 hover:bg-white text-orange-600 hover:text-orange-700 border-0 font-medium"
+                    asChild
+                  >
+                    <Link href="/products">Смотреть все инструменты</Link>
+                  </Button>
+                </div>
+              </div>
+              <div className="md:w-1/2 relative md:h-auto h-20 overflow-hidden">
+                {/* Анимированный слайдер с инструментами */}
                 <div className="absolute inset-0 flex items-center animate-slider">
                   {/* Инструмент 1: Дрель */}
-                  <div className="flex-shrink-0 w-14 h-14 mx-2 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-20 h-20 mx-2 bg-white/10 rounded-full backdrop-blur-sm flex items-center justify-center">
                     <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M5 15V9C5 7.89543 5.89543 7 7 7H15C16.1046 7 17 7.89543 17 9V15C17 16.1046 16.1046 17 15 17H7C5.89543 17 5 16.1046 5 15Z" stroke="white" strokeWidth="1.5"/>
                       <path d="M17 12H20C20.5523 12 21 11.5523 21 11V10C21 9.44772 20.5523 9 20 9H17V12Z" stroke="white" strokeWidth="1.5"/>
@@ -176,7 +193,7 @@ export default function ProductDetails() {
                   </div>
                   
                   {/* Инструмент 2: Пила */}
-                  <div className="flex-shrink-0 w-14 h-14 mx-2 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-20 h-20 mx-2 bg-white/10 rounded-full backdrop-blur-sm flex items-center justify-center">
                     <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M2 12H20" stroke="white" strokeWidth="1.5"/>
                       <path d="M5 9V15" stroke="white" strokeWidth="1.5"/>
@@ -189,7 +206,7 @@ export default function ProductDetails() {
                   </div>
                   
                   {/* Инструмент 3: Отвертка */}
-                  <div className="flex-shrink-0 w-14 h-14 mx-2 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-20 h-20 mx-2 bg-white/10 rounded-full backdrop-blur-sm flex items-center justify-center">
                     <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M17 3L21 7" stroke="white" strokeWidth="1.5"/>
                       <path d="M15 5L19 9" stroke="white" strokeWidth="1.5"/>
@@ -198,18 +215,8 @@ export default function ProductDetails() {
                     </svg>
                   </div>
                   
-                  {/* Инструмент 4: Молоток */}
-                  <div className="flex-shrink-0 w-14 h-14 mx-2 flex items-center justify-center">
-                    <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 6V10" stroke="white" strokeWidth="1.5"/>
-                      <path d="M12 10L19 17" stroke="white" strokeWidth="1.5"/>
-                      <path d="M9 7H15" stroke="white" strokeWidth="1.5"/>
-                      <path d="M7 4H17V7C17 8.65685 15.6569 10 14 10H10C8.34315 10 7 8.65685 7 7V4Z" stroke="white" strokeWidth="1.5"/>
-                    </svg>
-                  </div>
-                  
                   {/* Повторяем инструменты для бесконечной анимации */}
-                  <div className="flex-shrink-0 w-14 h-14 mx-2 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-20 h-20 mx-2 bg-white/10 rounded-full backdrop-blur-sm flex items-center justify-center">
                     <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M5 15V9C5 7.89543 5.89543 7 7 7H15C16.1046 7 17 7.89543 17 9V15C17 16.1046 16.1046 17 15 17H7C5.89543 17 5 16.1046 5 15Z" stroke="white" strokeWidth="1.5"/>
                       <path d="M17 12H20C20.5523 12 21 11.5523 21 11V10C21 9.44772 20.5523 9 20 9H17V12Z" stroke="white" strokeWidth="1.5"/>
@@ -221,22 +228,34 @@ export default function ProductDetails() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Product Info */}
+        <div className="flex flex-col">
+          {/* SKU and category info */}
+          <div className="flex items-center text-sm text-gray-500 mb-2">
+            <span>Артикул: {product.sku}</span>
+            <span className="mx-2">•</span>
+            <span>Категория: {categoryName}</span>
+          </div>
           
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
+          {/* Product Title */}
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight">{product.name}</h1>
           
-          <div className="flex items-center mb-4">
+          {/* Ratings */}
+          <div className="flex items-center mb-6">
             <div className="flex items-center">
-              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-              <Star className="h-4 w-4 fill-gray-200 text-gray-200" />
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star 
+                  key={i} 
+                  className={`h-5 w-5 ${i < (Number(product.rating) || 0) ? 'fill-amber-400 text-amber-400' : 'text-gray-200'}`} 
+                />
+              ))}
             </div>
-            <span className="text-sm ml-2 text-gray-500">
-              {product.rating} ({product.reviewCount} отзывов)
-            </span>
-            <span className="mx-2 text-gray-300">|</span>
-            <span className="text-sm text-gray-500">Артикул: {product.sku}</span>
+            <span className="text-sm text-gray-500 ml-2">{product.rating || 0} из 5</span>
+            {product.reviewCount && (
+              <span className="text-sm text-gray-500 ml-2">({product.reviewCount} отзывов)</span>
+            )}
           </div>
 
           <div className="mb-6">
