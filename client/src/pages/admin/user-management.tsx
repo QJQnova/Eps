@@ -126,7 +126,7 @@ export default function UserManagement() {
     },
   });
 
-  // Запрос на получение списка пользователей
+  // Запрос на получение списка пользователей с оптимизированным кешированием
   const { 
     data, 
     isLoading, 
@@ -140,9 +140,13 @@ export default function UserManagement() {
         limit: searchParams.limit.toString(),
       }).toString();
 
+      console.log("Users search params:", Object.fromEntries(new URLSearchParams(queryString).entries()));
       const response = await apiRequest("GET", `/api/admin/users?${queryString}`);
       return response;
     },
+    // Оптимизация кеширования для списка пользователей
+    staleTime: 60000, // 1 минута - список пользователей меняется не так часто
+    gcTime: 300000, // 5 минут - сохраняем в памяти
   });
 
   const users = data?.users || [];

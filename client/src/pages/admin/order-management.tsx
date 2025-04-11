@@ -159,7 +159,7 @@ export default function OrderManagement() {
   const [newStatus, setNewStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
-  // Получение списка заказов
+  // Получение списка заказов с оптимизированным кешированием
   const { 
     data, 
     isLoading: isOrdersLoading, 
@@ -173,9 +173,13 @@ export default function OrderManagement() {
         limit: searchParams.limit.toString(),
       }).toString();
 
+      console.log("Orders search params:", Object.fromEntries(new URLSearchParams(queryString).entries()));
       const response = await apiRequest("GET", `/api/orders?${queryString}`);
       return response;
     },
+    // Заказы могут меняться чаще, поэтому используем меньшее время кеширования
+    staleTime: 30000, // 30 секунд
+    gcTime: 120000, // 2 минуты
   });
 
   const orders = data?.orders || [];

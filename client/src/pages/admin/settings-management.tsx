@@ -49,24 +49,30 @@ export default function SettingsManagement() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("shop");
 
-  // Запрос настроек магазина
+  // Запрос настроек магазина с оптимизированным кешированием
   const { 
     data: shopSettingsData, 
     isLoading: isLoadingShopSettings,
     error: shopSettingsError
   } = useQuery({
     queryKey: ["/api/admin/settings/shop"],
-    queryFn: getQueryFn({ on401: "throw" })
+    queryFn: getQueryFn({ on401: "throw" }),
+    // Настройки меняются редко, поэтому можно кешировать дольше
+    staleTime: 300000, // 5 минут
+    gcTime: 900000 // 15 минут
   });
 
-  // Запрос SEO настроек
+  // Запрос SEO настроек с оптимизированным кешированием
   const { 
     data: seoSettingsData, 
     isLoading: isLoadingSeoSettings,
     error: seoSettingsError
   } = useQuery({
     queryKey: ["/api/admin/settings/seo"],
-    queryFn: getQueryFn({ on401: "throw" })
+    queryFn: getQueryFn({ on401: "throw" }),
+    // Настройки меняются редко, поэтому можно кешировать дольше
+    staleTime: 300000, // 5 минут
+    gcTime: 900000 // 15 минут
   });
   
   // Обработка ошибок загрузки настроек магазина
