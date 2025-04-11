@@ -54,15 +54,20 @@ export function setupAuth(app: Express) {
           return done(null, false, { message: "Неверное имя пользователя" });
         }
         
-        // Для тестирования, пока у нас нет хеширования
+        // Проверяем сначала обычное сравнение для тестовых аккаунтов
         if (user.password === password) {
           return done(null, user);
         }
         
-        // Раскомментируйте этот код после реализации хеширования паролей
-        // if (await comparePasswords(password, user.password)) {
-        //   return done(null, user);
-        // }
+        // Проверяем хешированный пароль
+        try {
+          if (await comparePasswords(password, user.password)) {
+            return done(null, user);
+          }
+        } catch (error) {
+          // Если произошла ошибка при сравнении хеша, продолжаем
+          console.log("Ошибка сравнения паролей:", error);
+        }
         
         return done(null, false, { message: "Неверный пароль" });
       } catch (err) {
@@ -98,13 +103,13 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ message: "Пользователь с таким именем уже существует" });
       }
       
-      // Для реального приложения раскомментируйте следующую строку:
-      // const hashedPassword = await hashPassword(password);
+      // Хешируем пароль
+      const hashedPassword = await hashPassword(password);
       
       const user = await storage.createUser({
         username,
         email,
-        password, // В реальном приложении: hashedPassword
+        password: hashedPassword,
         role: "user",
         isActive: true
       });
