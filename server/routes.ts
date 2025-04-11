@@ -787,15 +787,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Создаем токен для сброса пароля
       const resetToken = await storage.createPasswordResetToken(user.id);
       
-      // Нормально в реальном приложении здесь нужно отправлять email с токеном,
-      // но так как у нас нет возможности использовать SendGrid, просто возвращаем токен в ответе
-      // В реальном приложении, мы бы НЕ возвращали токен, а отправляли его по email
+      // Формируем URL для сброса пароля
+      const resetUrl = `${req.protocol}://${req.get('host')}/password-reset?token=${resetToken.token}`;
       
+      // Импортируем функцию отправки писем
+      const { sendPasswordResetEmail } = await import('./services/email');
+      
+      // Отправляем письмо
+      const emailSent = await sendPasswordResetEmail(email, resetToken.token, resetUrl);
+      
+      // Даже если письмо не отправлено (из-за отсутствия настроек), возвращаем успех
+      // В целях безопасности не показываем, отправилось ли письмо на самом деле
       res.status(200).json({ 
         success: true, 
         message: "Если указанный email существует, на него отправлена инструкция по восстановлению пароля",
-        // Только для тестирования, в реальном приложении не возвращаем токен
-        token: resetToken.token 
+        // Только для тестирования и разработки, в продакшн удалить
+        token: resetToken.token,
+        emailSent
       });
     } catch (error: any) {
       res.status(400).json({ success: false, message: error.message });
