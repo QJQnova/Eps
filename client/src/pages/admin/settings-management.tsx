@@ -81,7 +81,7 @@ export default function SettingsManagement() {
   // Мутация для сохранения основных настроек
   const saveShopSettingsMutation = useMutation({
     mutationFn: async (data: ShopSettingsFormValues) => {
-      return await apiRequest("POST", "/api/admin/settings/shop", data);
+      return await apiRequest("PUT", "/api/admin/settings/shop", data);
     },
     onSuccess: () => {
       toast({
@@ -101,7 +101,7 @@ export default function SettingsManagement() {
   // Мутация для сохранения настроек SEO
   const saveSeoSettingsMutation = useMutation({
     mutationFn: async (data: SeoSettingsFormValues) => {
-      return await apiRequest("POST", "/api/admin/settings/seo", data);
+      return await apiRequest("PUT", "/api/admin/settings/seo", data);
     },
     onSuccess: () => {
       toast({

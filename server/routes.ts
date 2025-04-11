@@ -5,7 +5,8 @@ import { z } from "zod";
 import { 
   insertUserSchema, insertCategorySchema, insertProductSchema, 
   insertCartItemSchema, productSearchSchema, bulkImportSchema,
-  orderInputSchema, orderSearchSchema, userSearchSchema
+  orderInputSchema, orderSearchSchema, userSearchSchema,
+  shopSettingsSchema, seoSettingsSchema
 } from "@shared/schema";
 import { hashPassword } from "./auth";
 import { parseImportFile } from "./utils/file-parser";
@@ -699,6 +700,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.status(200).json(order);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Маршруты для настроек
+  // Получить настройки магазина
+  app.get("/api/admin/settings/shop", isAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getShopSettings();
+      res.status(200).json(settings);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Обновить настройки магазина
+  app.put("/api/admin/settings/shop", isAdmin, async (req, res) => {
+    try {
+      const settingsData = validateData(shopSettingsSchema, req.body);
+      const success = await storage.updateShopSettings(settingsData);
+      
+      if (!success) {
+        return res.status(500).json({ message: "Не удалось обновить настройки магазина" });
+      }
+      
+      res.status(200).json({ message: "Настройки магазина успешно обновлены" });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Получить настройки SEO
+  app.get("/api/admin/settings/seo", isAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getSeoSettings();
+      res.status(200).json(settings);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Обновить настройки SEO
+  app.put("/api/admin/settings/seo", isAdmin, async (req, res) => {
+    try {
+      const settingsData = validateData(seoSettingsSchema, req.body);
+      const success = await storage.updateSeoSettings(settingsData);
+      
+      if (!success) {
+        return res.status(500).json({ message: "Не удалось обновить SEO настройки" });
+      }
+      
+      res.status(200).json({ message: "SEO настройки успешно обновлены" });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
