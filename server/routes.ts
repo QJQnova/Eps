@@ -6,7 +6,8 @@ import {
   insertUserSchema, insertCategorySchema, insertProductSchema, 
   insertCartItemSchema, productSearchSchema, bulkImportSchema,
   orderInputSchema, orderSearchSchema, userSearchSchema,
-  shopSettingsSchema, seoSettingsSchema
+  shopSettingsSchema, seoSettingsSchema, passwordResetRequestSchema,
+  passwordResetSchema
 } from "@shared/schema";
 import { hashPassword } from "./auth";
 import { parseImportFile } from "./utils/file-parser";
@@ -763,6 +764,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json({ message: "SEO настройки успешно обновлены" });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Маршруты для восстановления пароля
+  // 1. Запрос на восстановление пароля - требует только email
+  app.post("/api/password-reset/request", async (req, res) => {
+    try {
+      const { email } = validateData(passwordResetRequestSchema, req.body);
+      
+      // Найти пользователя по email
+      const user = await storage.getUserByEmail(email);
+      
+      if (!user) {
+        // В целях безопасности не сообщаем, что пользователь не найден
+        return res.status(200).json({ 
+          success: true, 
+          message: "Если указанный email существует, на него отправлена инструкция по восстановлению пароля" 
+        });
+      }
+      
+      // Создаем токен для сброса пароля
+      const resetToken = await storage.createPasswordResetToken(user.id);
+      
+      // Нормально в реальном приложении здесь нужно отправлять email с токеном,
+      // но так как у нас нет возможности использовать SendGrid, просто возвращаем токен в ответе
+      // В реальном приложении, мы бы НЕ возвращали токен, а отправляли его по email
+      
+      res.status(200).json({ 
+        success: true, 
+        message: "Если указанный email существует, на него отправлена инструкция по восстановлению пароля",
+        // Только для тестирования, в реальном приложении не возвращаем токен
+        token: resetToken.token 
+      });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  });
+  
+  // 2. Проверка токена сброса пароля
+  app.get("/api/password-reset/verify/:token", async (req, res) => {
+    try {
+      const { token } = req.params;
+      
+      const resetToken = await storage.getPasswordResetToken(token);
+      
+      if (!resetToken) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Недействительный или истекший токен сброса пароля" 
+        });
+      }
+      
+      res.status(200).json({ 
+        success: true, 
+        message: "Токен действителен" 
+      });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  });
+  
+  // 3. Установка нового пароля
+  app.post("/api/password-reset/reset", async (req, res) => {
+    try {
+      const { token, password } = validateData(passwordResetSchema, req.body);
+      
+      // Проверяем токен
+      const resetToken = await storage.getPasswordResetToken(token);
+      
+      if (!resetToken) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Недействительный или истекший токен сброса пароля" 
+        });
+      }
+      
+      // Хешируем новый пароль
+      const hashedPassword = await hashPassword(password);
+      
+      // Обновляем пароль пользователя
+      await storage.updateUser(resetToken.userId, { password: hashedPassword });
+      
+      // Помечаем токен как использованный
+      await storage.markPasswordResetTokenAsUsed(token);
+      
+      // Удаляем все истекшие токены для очистки базы данных
+      await storage.deleteExpiredPasswordResetTokens();
+      
+      res.status(200).json({ 
+        success: true, 
+        message: "Пароль успешно обновлен" 
+      });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
     }
   });
 
