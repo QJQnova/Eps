@@ -20,28 +20,33 @@ export default function Home() {
   
   return (
     <div>
-      {/* Hero Section */}
-      <section className="bg-eps-gradient text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div>
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-                Профессиональные инструменты для любых задач
+      {/* Hero Section - Обновленный современный дизайн */}
+      <section className="relative bg-gradient-to-r from-orange-600 via-orange-500 to-yellow-500 text-white overflow-hidden">
+        <div className="absolute inset-0 opacity-15">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC40Ij48cGF0aCBkPSJNMzYgMzRoLTJWMmgtMnYzMmgtMlYwaC0ydjM0aC0yVjhoLTJ2MjZoLTJWMTNoLTJ2MjFoLTJWMThoLTJ2MTZILjk0bC0uMTQgMkgwdjJoMnYtMS45NHptMCAwIi8+PC9nPjwvZz48L3N2Zz4=')] bg-center"></div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative z-10">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="text-center md:text-left">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                <span className="inline-block text-white drop-shadow-md">Коллекция</span>
+                <span className="block mt-2 bg-clip-text text-transparent bg-gradient-to-r from-white to-yellow-200">профессиональных инструментов</span>
               </h1>
-              <p className="text-lg mb-6">
-                Качественные инструменты для профессионалов и любителей. Найдите подходящее оборудование для вашего следующего проекта.
+              <p className="text-lg md:text-xl mb-8 text-white/90 max-w-lg mx-auto md:mx-0">
+                Высококачественные инструменты для профессионалов и любителей. Создавайте с лучшим оборудованием.
               </p>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-4 justify-center md:justify-start">
                 <Button 
-                  variant="secondary"
-                  className="bg-white text-eps-orange hover:bg-gray-100 font-medium"
+                  size="lg"
+                  className="bg-white text-orange-600 hover:bg-orange-50 transition-all font-semibold transform hover:scale-105 duration-200 shadow-lg"
                   asChild
                 >
                   <Link href="#products">Купить сейчас</Link>
                 </Button>
                 <Button 
                   variant="outline"
-                  className="bg-transparent hover:bg-white/10 border border-white font-medium"
+                  size="lg"
+                  className="bg-transparent hover:bg-white/20 border-2 border-white text-white font-semibold transition-all transform hover:scale-105 duration-200"
                   asChild
                 >
                   <Link href="#categories">Посмотреть категории</Link>

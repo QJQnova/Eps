@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --color-eps-orange: 25 95% 53%;
+    --color-eps-orange: 24 100% 50%;
     --color-eps-red: 0 91% 58%;
     --color-eps-yellow: 43 96% 58%;
   }
@@ -15,6 +15,50 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Фирменный градиент */
+  .bg-eps-gradient {
+    @apply bg-gradient-to-r from-orange-600 via-orange-500 to-yellow-500;
+  }
+  
+  /* Фирменный градиент для текста */
+  .text-eps-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-500;
+  }
+  
+  /* Карточка продукта с эффектами */
+  .product-card {
+    @apply transition-all duration-300 bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg;
+  }
+  
+  .product-card .product-image {
+    @apply transition-transform duration-500;
+  }
+  
+  .product-card:hover .product-image {
+    @apply scale-105;
+  }
+  
+  /* Стилизация кнопок действий */
+  .action-button {
+    @apply transition-all duration-200 transform hover:scale-105;
+  }
+  
+  /* Навигационные ссылки с подчеркиванием */
+  .nav-link {
+    @apply relative inline-block;
+  }
+  
+  .nav-link::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300;
+  }
+  
+  .nav-link:hover::after {
+    @apply w-full;
   }
 }
 
