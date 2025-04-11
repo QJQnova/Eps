@@ -11,9 +11,11 @@ export default function Home() {
   const queryParams = new URLSearchParams(location.split('?')[1] || '');
   const searchQuery = queryParams.get('query') || '';
   
-  // Fetch categories
+  // Fetch categories с увеличенным временем кеширования
   const { data: categories = [] } = useQuery<Category[]>({ 
     queryKey: ["/api/categories"],
+    staleTime: 300000, // 5 минут
+    gcTime: 900000, // 15 минут кеширования в памяти
   });
   
   return (

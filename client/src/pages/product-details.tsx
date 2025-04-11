@@ -34,14 +34,16 @@ export default function ProductDetails() {
   const { addToCart, isLoading: isAddingToCart } = useCart();
   const { toast } = useToast();
 
-  // Fetch product details
+  // Fetch product details с улучшенным кешированием
   const { data: product, isLoading: isLoadingProduct } = useQuery<Product>({
     queryKey: [`/api/products/slug/${slug}`],
+    staleTime: 120000, // 2 минуты кеширования для деталей товара
   });
 
-  // Fetch categories for breadcrumbs
+  // Fetch categories for breadcrumbs с минимальными обновлениями (категории меняются редко)
   const { data: categories = [] } = useQuery<Category[]>({
-    queryKey: ["/api/categories"]
+    queryKey: ["/api/categories"],
+    staleTime: 300000, // 5 минут кеширования для категорий
   });
   
   // Fetch related products based on category - с оптимизацией кеширования
@@ -250,7 +252,7 @@ export default function ProductDetails() {
               )}
             </div>
             <p className="text-sm text-gray-500 mt-1">
-              {product.stock > 0 ? (
+              {(product.stock && product.stock > 0) ? (
                 <span className="text-emerald-600 font-medium">В наличии ({product.stock} шт.)</span>
               ) : (
                 <span className="text-rose-600 font-medium">Нет в наличии</span>
@@ -298,7 +300,7 @@ export default function ProductDetails() {
             <Button 
               className="flex-1" 
               onClick={handleAddToCart} 
-              disabled={isAddingToCart || product.stock === 0}
+              disabled={isAddingToCart || !product.stock || product.stock === 0}
             >
               <ShoppingCart className="h-5 w-5 mr-2" />
               В корзину
@@ -354,7 +356,7 @@ export default function ProductDetails() {
                   </div>
                   <div className="border-b pb-2">
                     <div className="text-sm text-gray-500">Количество на складе</div>
-                    <div className="font-medium">{product.stock} шт.</div>
+                    <div className="font-medium">{product.stock || 0} шт.</div>
                   </div>
                   <div className="border-b pb-2">
                     <div className="text-sm text-gray-500">Вес</div>

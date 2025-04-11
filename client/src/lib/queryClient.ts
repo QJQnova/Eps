@@ -72,7 +72,11 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      // Устанавливаем разумное значение для staleTime, чтобы данные кешировались,
+      // но не блокировали загрузку новых данных навсегда
+      staleTime: 30000, // 30 секунд
+      // Добавляем кеширование для повышения производительности
+      gcTime: 300000, // 5 минут - в TanStack Query v5 cacheTime переименовано в gcTime
       retry: false,
     },
     mutations: {
