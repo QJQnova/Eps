@@ -162,6 +162,11 @@ export default function AuthPage() {
                     </Button>
                   </form>
                 </Form>
+                <div className="mt-4 text-center">
+                  <Link href="/password-reset">
+                    <span className="text-sm text-blue-600 hover:underline">Забыли пароль?</span>
+                  </Link>
+                </div>
               </TabsContent>
 
               {/* Форма регистрации */}

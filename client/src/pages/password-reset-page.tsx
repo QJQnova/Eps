@@ -1,34 +1,26 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
+import { useState, useEffect } from "react";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Link } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Loader2 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-// Определение схем для валидации форм
+// Схема для валидации данных формы запроса сброса пароля
 const requestResetSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: "Email обязателен" })
-    .email({ message: "Введите корректный email" }),
+  email: z.string().email({ message: "Введите корректный email" }),
 });
 
+// Схема для валидации данных формы сброса пароля
 const resetPasswordSchema = z.object({
-  token: z.string(),
-  password: z
-    .string()
-    .min(6, { message: "Пароль должен содержать минимум 6 символов" }),
-  confirmPassword: z
-    .string()
-    .min(6, { message: "Пароль должен содержать минимум 6 символов" }),
+  password: z.string().min(6, { message: "Пароль должен содержать минимум 6 символов" }),
+  confirmPassword: z.string().min(1, { message: "Подтвердите пароль" }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Пароли не совпадают",
   path: ["confirmPassword"],
@@ -37,13 +29,11 @@ const resetPasswordSchema = z.object({
 type RequestResetForm = z.infer<typeof requestResetSchema>;
 type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
 
-// Компонент формы запроса сброса пароля
 function RequestResetForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [token, setToken] = useState("");
   const { toast } = useToast();
-
+  const [isLoading, setIsLoading] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
+  
   const form = useForm<RequestResetForm>({
     resolver: zodResolver(requestResetSchema),
     defaultValues: {
@@ -54,281 +44,260 @@ function RequestResetForm() {
   async function onSubmit(data: RequestResetForm) {
     setIsLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/password-reset/request", data);
-      const result = await response.json();
+      const res = await apiRequest("POST", "/api/password-reset/request", data);
+      const result = await res.json();
       
-      // В реальном приложении токен будет отправлен по email
-      // Для тестирования сохраняем токен, полученный от API
-      if (result.token) {
-        setToken(result.token);
+      if (res.ok) {
+        setRequestSent(true);
+        toast({
+          title: "Запрос отправлен",
+          description: "Инструкции по восстановлению пароля отправлены на ваш email.",
+        });
+      } else {
+        toast({
+          title: "Ошибка",
+          description: result.message || "Не удалось отправить запрос на восстановление пароля",
+          variant: "destructive",
+        });
       }
-      
-      setSuccess(true);
+    } catch (error) {
       toast({
-        title: "Запрос отправлен",
-        description: result.message,
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
         title: "Ошибка",
-        description: error.message || "Произошла ошибка при запросе сброса пароля",
+        description: "Произошла ошибка при отправке запроса",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   }
 
-  return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Восстановление пароля</CardTitle>
-        <CardDescription>
-          Введите ваш email для получения инструкций по сбросу пароля
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {success ? (
-          <div className="space-y-4">
-            <p className="text-green-600">
-              Инструкции по сбросу пароля отправлены на указанный email.
-            </p>
-            {token && (
-              <div className="p-3 bg-gray-100 rounded">
-                <p className="text-sm text-gray-600 mb-1">Для тестирования используйте этот токен:</p>
-                <p className="text-xs break-all font-mono bg-white p-2 rounded border">{token}</p>
-                <div className="mt-2">
-                  <Link href={`/password-reset/reset?token=${token}`}>
-                    <Button variant="link" className="p-0">Сбросить пароль с этим токеном</Button>
-                  </Link>
-                </div>
-              </div>
-            )}
+  if (requestSent) {
+    return (
+      <Alert className="bg-green-50 border-green-200 text-green-800">
+        <AlertDescription>
+          Запрос на восстановление пароля отправлен. Пожалуйста, следуйте инструкциям в полученном письме.
+          <div className="mt-4">
+            <Link href="/auth">
+              <span className="text-blue-600 hover:underline">Вернуться на страницу входа</span>
+            </Link>
           </div>
-        ) : (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="your@email.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Отправка...
-                  </>
-                ) : (
-                  "Отправить инструкции"
-                )}
-              </Button>
-            </form>
-          </Form>
-        )}
-      </CardContent>
-      <CardFooter className="flex justify-center">
-        <Link href="/auth">
-          <Button variant="link">Вернуться к авторизации</Button>
-        </Link>
-      </CardFooter>
-    </Card>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="Введите ваш email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button 
+          type="submit" 
+          className="w-full" 
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Отправка...
+            </>
+          ) : "Восстановить пароль"}
+        </Button>
+      </form>
+    </Form>
   );
 }
 
-// Компонент формы установки нового пароля
 function ResetPasswordForm({ token }: { token: string }) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const { toast } = useToast();
-  const [, navigate] = useLocation();
-
+  const [location, setLocation] = useLocation();
+  const [isLoading, setIsLoading] = useState(false);
+  const [tokenValid, setTokenValid] = useState<boolean | null>(null);
+  const [isVerifying, setIsVerifying] = useState(true);
+  
   const form = useForm<ResetPasswordForm>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
-      token,
       password: "",
       confirmPassword: "",
     },
   });
 
+  // Проверяем валидность токена при загрузке компонента
+  useEffect(() => {
+    verifyToken();
+  }, [token]);
+
+  async function verifyToken() {
+    setIsVerifying(true);
+    try {
+      const res = await apiRequest("GET", `/api/password-reset/verify?token=${token}`);
+      const result = await res.json();
+      
+      if (res.ok) {
+        setTokenValid(true);
+      } else {
+        setTokenValid(false);
+        toast({
+          title: "Недействительная ссылка",
+          description: result.message || "Ссылка для восстановления пароля недействительна или истекла",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      setTokenValid(false);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось проверить ссылку восстановления",
+        variant: "destructive",
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  }
+
   async function onSubmit(data: ResetPasswordForm) {
     setIsLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/password-reset/reset", {
-        token: data.token,
-        password: data.password,
-      });
-      const result = await response.json();
+      const { confirmPassword, ...resetData } = data;
       
-      if (result.success) {
-        setSuccess(true);
+      const res = await apiRequest("POST", "/api/password-reset/reset", {
+        token,
+        password: resetData.password
+      });
+      
+      const result = await res.json();
+      
+      if (res.ok) {
         toast({
-          title: "Успех!",
-          description: "Ваш пароль был успешно обновлен",
+          title: "Пароль изменен",
+          description: "Ваш пароль был успешно изменен. Теперь вы можете войти с новым паролем.",
         });
-        
-        // Перенаправление на страницу авторизации через 2 секунды
         setTimeout(() => {
-          navigate("/auth");
-        }, 2000);
+          setLocation("/auth");
+        }, 1500);
       } else {
-        throw new Error(result.message || "Не удалось сбросить пароль");
+        toast({
+          title: "Ошибка",
+          description: result.message || "Не удалось сбросить пароль",
+          variant: "destructive",
+        });
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
-        variant: "destructive",
         title: "Ошибка",
-        description: error.message || "Произошла ошибка при сбросе пароля",
+        description: "Произошла ошибка при сбросе пароля",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   }
 
-  async function verifyToken() {
-    try {
-      const response = await apiRequest("GET", `/api/password-reset/verify/${token}`);
-      const result = await response.json();
-      
-      if (!result.success) {
-        toast({
-          variant: "destructive",
-          title: "Недействительный токен",
-          description: "Токен сброса пароля недействителен или истек",
-        });
-        navigate("/password-reset");
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Ошибка",
-        description: "Не удалось проверить токен сброса пароля",
-      });
-      navigate("/password-reset");
-    }
+  if (isVerifying) {
+    return (
+      <div className="flex flex-col items-center justify-center p-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+        <p>Проверка ссылки восстановления...</p>
+      </div>
+    );
   }
 
-  // Проверяем токен при монтировании компонента
-  useState(() => {
-    verifyToken();
-  });
+  if (tokenValid === false) {
+    return (
+      <Alert className="bg-red-50 border-red-200 text-red-800">
+        <AlertDescription>
+          Ссылка для восстановления пароля недействительна или истекла. Пожалуйста, запросите новую ссылку.
+          <div className="mt-4">
+            <Link href="/password-reset">
+              <span className="text-blue-600 hover:underline">Запросить новую ссылку</span>
+            </Link>
+          </div>
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Установка нового пароля</CardTitle>
-        <CardDescription>
-          Введите новый пароль для вашего аккаунта
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {success ? (
-          <div className="text-center space-y-4">
-            <p className="text-green-600">
-              Ваш пароль был успешно обновлен!
-            </p>
-            <p>Сейчас вы будете перенаправлены на страницу авторизации.</p>
-            <Loader2 className="h-5 w-5 animate-spin mx-auto" />
-          </div>
-        ) : (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Новый пароль</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Подтверждение пароля</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Сохранение...
-                  </>
-                ) : (
-                  "Обновить пароль"
-                )}
-              </Button>
-            </form>
-          </Form>
-        )}
-      </CardContent>
-      <CardFooter className="flex justify-center">
-        <Link href="/password-reset">
-          <Button variant="link">Вернуться к форме восстановления</Button>
-        </Link>
-      </CardFooter>
-    </Card>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Новый пароль</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Введите новый пароль" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Подтверждение нового пароля</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Подтвердите новый пароль" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button 
+          type="submit" 
+          className="w-full" 
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Сохранение...
+            </>
+          ) : "Сохранить новый пароль"}
+        </Button>
+      </form>
+    </Form>
   );
 }
 
-// Главный компонент страницы
 export default function PasswordResetPage() {
-  const { user } = useAuth();
-  const [, navigate] = useLocation();
-  const location = useLocation()[0];
-  
-  // Если пользователь уже авторизован, перенаправляем на главную
-  if (user) {
-    navigate("/");
-    return null;
-  }
-  
-  // Получаем токен из URL, если он есть
-  const searchParams = new URLSearchParams(location.split("?")[1] || "");
-  const token = searchParams.get("token");
-  
-  // Разделяем логику на две части - запрос сброса и установка нового пароля
-  const isReset = location.includes("/reset") && token;
-  
+  // Проверяем наличие token в URL для определения, какую форму показать
+  const [, params] = window.location.search.match(/token=([^&]+)/) || [];
+  const token = params;
+
   return (
-    <div className="container mx-auto py-10 px-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-        <div className="flex flex-col justify-center">
-          {isReset ? (
-            <ResetPasswordForm token={token} />
-          ) : (
-            <RequestResetForm />
-          )}
-        </div>
-        <div className="hidden md:block">
-          <div className="p-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 text-white">
-            <h2 className="text-3xl font-bold mb-4">ЭПС</h2>
-            <h3 className="text-xl font-semibold mb-4">Восстановление доступа</h3>
-            <p className="mb-4">Забыли пароль? Не беспокойтесь! Мы поможем вам восстановить доступ к вашему аккаунту.</p>
-            <p className="text-sm opacity-80">
-              Для восстановления пароля вам потребуется указать email, который использовался при регистрации.
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="flex min-h-screen items-center justify-center p-4 bg-gray-50">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">
+            {token ? "Сброс пароля" : "Восстановление пароля"}
+          </CardTitle>
+          <CardDescription>
+            {token 
+              ? "Введите и подтвердите новый пароль" 
+              : "Введите ваш email для получения инструкций по восстановлению пароля"
+            }
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {token ? <ResetPasswordForm token={token} /> : <RequestResetForm />}
+        </CardContent>
+      </Card>
     </div>
   );
 }
