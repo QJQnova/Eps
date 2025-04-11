@@ -641,20 +641,28 @@ export class DatabaseStorage implements IStorage {
   
   async updateShopSettings(settings: z.infer<typeof shopSettingsSchema>): Promise<boolean> {
     try {
+      // Проверяем наличие обязательных полей
+      const validSettings = {
+        ...settings,
+        enableRegistration: settings.enableRegistration ?? true,
+        enableCheckout: settings.enableCheckout ?? true,
+        maintenanceMode: settings.maintenanceMode ?? false
+      };
+      
       const result = await db.select().from(shopSettings).where(eq(shopSettings.key, 'shop_settings'));
       
       if (result.length === 0) {
         // Если настроек еще нет, создаем их
         await db.insert(shopSettings).values({
           key: 'shop_settings',
-          value: settings as any,
+          value: validSettings as any,
           updatedAt: new Date()
         });
       } else {
         // Иначе обновляем существующие
         await db.update(shopSettings)
           .set({ 
-            value: settings as any,
+            value: validSettings as any,
             updatedAt: new Date()
           })
           .where(eq(shopSettings.key, 'shop_settings'));

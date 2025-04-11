@@ -719,13 +719,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Обновить настройки магазина
   app.put("/api/admin/settings/shop", isAdmin, async (req, res) => {
     try {
-      const settingsData = validateData(shopSettingsSchema, {
+      // Убедимся что все булевы поля определены
+      const data = {
         ...req.body,
-        enableRegistration: req.body.enableRegistration ?? true,
-        enableCheckout: req.body.enableCheckout ?? true,
-        maintenanceMode: req.body.maintenanceMode ?? false
-      });
+        enableRegistration: typeof req.body.enableRegistration === 'boolean' ? req.body.enableRegistration : true,
+        enableCheckout: typeof req.body.enableCheckout === 'boolean' ? req.body.enableCheckout : true,
+        maintenanceMode: typeof req.body.maintenanceMode === 'boolean' ? req.body.maintenanceMode : false
+      };
       
+      const settingsData = validateData(shopSettingsSchema, data);
       const success = await storage.updateShopSettings(settingsData);
       
       if (!success) {

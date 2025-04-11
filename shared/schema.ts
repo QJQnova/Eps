@@ -306,9 +306,9 @@ export const shopSettingsSchema = z.object({
   contactPhone: z.string().min(1, "Телефон обязателен"),
   address: z.string().min(1, "Адрес обязателен"),
   workingHours: z.string().optional(),
-  enableRegistration: z.boolean().default(true),
-  enableCheckout: z.boolean().default(true),
-  maintenanceMode: z.boolean().default(false),
+  enableRegistration: z.boolean().optional().default(true),
+  enableCheckout: z.boolean().optional().default(true),
+  maintenanceMode: z.boolean().optional().default(false),
 });
 
 // Схема для настроек SEO
