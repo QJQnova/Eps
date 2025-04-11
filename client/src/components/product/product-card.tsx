@@ -112,7 +112,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             size="sm"
             className="bg-primary hover:bg-primary/90 text-white rounded-lg transition duration-200"
             onClick={handleAddToCart}
-            disabled={isLoading}
+            disabled={isLoading || !product.stock || product.stock === 0}
           >
             <ShoppingCart className="h-4 w-4 mr-1" />
             В корзину

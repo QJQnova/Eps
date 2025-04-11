@@ -27,7 +27,10 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
   queryParams.append("page", page.toString());
   queryParams.append("limit", limit.toString());
   
-  // Fetch products
+  // Параметры поиска в консоль для отладки
+  console.log("Search params:", Object.fromEntries(queryParams.entries()));
+  
+  // Fetch products с оптимизированным кешированием
   const { data, isLoading } = useQuery<{
     products: Product[],
     pagination: {
@@ -38,6 +41,8 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
     }
   }>({ 
     queryKey: [`/api/products?${queryParams.toString()}`],
+    staleTime: 60000, // 1 минута - разумное время для кеширования списка товаров
+    gcTime: 300000, // 5 минут - сохраняем в памяти после исчезновения со страницы
   });
   
   const handleSortChange = (value: string) => {

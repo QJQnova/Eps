@@ -14,9 +14,11 @@ export default function CategoryPage() {
   const { slug } = useParams();
   const [, navigate] = useLocation();
   
-  // Fetch category details
+  // Fetch category details с оптимизированным кешированием
   const { data: categories = [] } = useQuery<Category[]>({
-    queryKey: ["/api/categories"]
+    queryKey: ["/api/categories"],
+    staleTime: 300000, // 5 минут - категории меняются редко
+    gcTime: 900000, // 15 минут в памяти
   });
   
   const category = categories.find(cat => cat.slug === slug);
