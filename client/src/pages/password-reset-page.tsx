@@ -44,21 +44,18 @@ function RequestResetForm() {
   async function onSubmit(data: RequestResetForm) {
     setIsLoading(true);
     try {
-      const res = await apiRequest("POST", "/api/password-reset/request", data);
-      const result = await res.json();
+      const result = await apiRequest("POST", "/api/password-reset/request", data);
       
-      if (res.ok) {
-        setRequestSent(true);
-        toast({
-          title: "Запрос отправлен",
-          description: "Инструкции по восстановлению пароля отправлены на ваш email.",
-        });
-      } else {
-        toast({
-          title: "Ошибка",
-          description: result.message || "Не удалось отправить запрос на восстановление пароля",
-          variant: "destructive",
-        });
+      setRequestSent(true);
+      toast({
+        title: "Запрос отправлен",
+        description: "Инструкции по восстановлению пароля отправлены на ваш email.",
+      });
+      
+      // Для тестовых целей: отображаем токен в консоли, если он возвращается с сервера
+      if (result && result.token) {
+        console.log("Reset token for testing:", result.token);
+        console.log(`Reset URL: ${window.location.origin}/password-reset?token=${result.token}`);
       }
     } catch (error) {
       toast({
@@ -142,16 +139,15 @@ function ResetPasswordForm({ token }: { token: string }) {
   async function verifyToken() {
     setIsVerifying(true);
     try {
-      const res = await apiRequest("GET", `/api/password-reset/verify?token=${token}`);
-      const result = await res.json();
+      const result = await apiRequest("GET", `/api/password-reset/verify?token=${token}`);
       
-      if (res.ok) {
+      if (result && result.success) {
         setTokenValid(true);
       } else {
         setTokenValid(false);
         toast({
           title: "Недействительная ссылка",
-          description: result.message || "Ссылка для восстановления пароля недействительна или истекла",
+          description: result?.message || "Ссылка для восстановления пароля недействительна или истекла",
           variant: "destructive",
         });
       }
@@ -172,14 +168,12 @@ function ResetPasswordForm({ token }: { token: string }) {
     try {
       const { confirmPassword, ...resetData } = data;
       
-      const res = await apiRequest("POST", "/api/password-reset/reset", {
+      const result = await apiRequest("POST", "/api/password-reset/reset", {
         token,
         password: resetData.password
       });
       
-      const result = await res.json();
-      
-      if (res.ok) {
+      if (result && result.success) {
         toast({
           title: "Пароль изменен",
           description: "Ваш пароль был успешно изменен. Теперь вы можете войти с новым паролем.",
@@ -190,7 +184,7 @@ function ResetPasswordForm({ token }: { token: string }) {
       } else {
         toast({
           title: "Ошибка",
-          description: result.message || "Не удалось сбросить пароль",
+          description: result?.message || "Не удалось сбросить пароль",
           variant: "destructive",
         });
       }
