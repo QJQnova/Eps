@@ -26,7 +26,10 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="animate-fadeIn" style={{ animationDelay: '0.1s' }}>
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-                <span className="animate-text-gradient">Профессиональные инструменты</span> для любых задач
+                <span className="relative inline-block">
+                  <span className="animate-text-gradient">Профессиональные инструменты</span>
+                  <span className="absolute inset-0 animate-text-gradient opacity-70 blur-sm">Профессиональные инструменты</span>
+                </span> для любых задач
               </h1>
               <p className="text-lg mb-6 opacity-90">
                 Качественные инструменты для профессионалов и любителей. Найдите подходящее оборудование для вашего следующего проекта.
