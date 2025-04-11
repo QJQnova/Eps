@@ -164,13 +164,13 @@ export default function ProductDetails() {
           {/* Promotional Banner */}
           <div className="absolute right-0 top-0 w-1/3 h-auto hidden md:block">
             <div 
-              className="w-full h-auto rounded-lg p-3 bg-gray-800 border-2 border-orange-500 text-white overflow-hidden shadow-lg"
+              className="w-full h-auto rounded-lg p-3 bg-gradient-to-r from-orange-500 to-red-500 text-white overflow-hidden"
             >
-              <h3 className="text-sm font-bold mb-1 text-orange-400">Коллекция профессиональных инструментов</h3>
-              <p className="text-xs mb-2 text-gray-300">Для любых задач</p>
+              <h3 className="text-sm font-bold mb-1">Коллекция профессиональных инструментов</h3>
+              <p className="text-xs mb-2">Для любых задач</p>
               
               {/* Анимированный слайдер с инструментами */}
-              <div className="relative h-16 bg-gray-700 rounded p-1 overflow-hidden">
+              <div className="relative h-16 bg-white/10 rounded p-1 overflow-hidden">
                 <div className="absolute inset-0 flex items-center animate-slider">
                   {/* Инструмент 1: Дрель */}
                   <div className="flex-shrink-0 w-14 h-14 mx-2 flex items-center justify-center">
