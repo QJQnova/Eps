@@ -26,10 +26,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="animate-fadeIn" style={{ animationDelay: '0.1s' }}>
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-                <span className="relative inline-block">
-                  <span className="animate-text-gradient">Профессиональные инструменты</span>
-                  <span className="absolute inset-0 animate-text-gradient opacity-70 blur-sm">Профессиональные инструменты</span>
-                </span> для любых задач
+                <span className="px-2 py-1 bg-gray-900 text-white rounded-lg">Профессиональные инструменты</span> для любых задач
               </h1>
               <p className="text-lg mb-6 opacity-90">
                 Качественные инструменты для профессионалов и любителей. Найдите подходящее оборудование для вашего следующего проекта.
@@ -184,7 +181,7 @@ export default function Home() {
       {!searchQuery && (
         <section id="categories" className="py-12 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-bold mb-8 animate-text-gradient inline-block">Каталог по категориям</h2>
+            <h2 className="text-2xl font-bold mb-8 inline-block bg-gray-900 text-white rounded-lg px-4 py-2">Каталог по категориям</h2>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {categories.map((category, index) => (
@@ -200,7 +197,7 @@ export default function Home() {
       {/* Products Section */}
       <section id="products" className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold mb-8 animate-text-gradient inline-block">Популярные товары</h2>
+          <h2 className="text-2xl font-bold mb-8 inline-block bg-gray-900 text-white rounded-lg px-4 py-2">Популярные товары</h2>
           <ProductList query={searchQuery} />
         </div>
       </section>
