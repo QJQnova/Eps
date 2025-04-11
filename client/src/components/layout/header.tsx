@@ -95,38 +95,38 @@ export default function Header() {
               {/* Кнопки авторизации, профиля и корзины */}
               <div className="flex items-center space-x-4">
                 {/* Корзина (для всех пользователей) */}
-                <Link href="/cart" className="flex items-center text-gray-800 hover:text-eps-orange relative group transition-all duration-300 transform hover:scale-105">
+                <Link href="/cart" className="flex items-center text-gray-800 hover:text-eps-orange relative">
                   <div className="flex flex-col sm:flex-row sm:items-center">
                     <div className="relative mx-auto sm:mx-0">
-                      <ShoppingCart className="h-5 w-5 transition-transform duration-300 transform group-hover:rotate-12" />
+                      <ShoppingCart className="h-5 w-5" />
                       {itemCount > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-eps-red text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full animate-pulse-slow">
+                        <span className="absolute -top-2 -right-2 bg-eps-red text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
                           {itemCount}
                         </span>
                       )}
                     </div>
-                    <span className="text-xs mt-1 sm:mt-0 sm:ml-1.5 sm:text-sm font-medium">Корзина</span>
+                    <span className="text-xs mt-1 sm:mt-0 sm:ml-1.5 sm:text-sm">Корзина</span>
                   </div>
                 </Link>
                 
                 {user ? (
                   // Для авторизованных пользователей - Профиль
                   <>
-                    <Link href="/profile" className="flex items-center text-gray-800 hover:text-eps-orange relative group transition-all duration-300 transform hover:scale-105">
+                    <Link href="/profile" className="flex items-center text-gray-800 hover:text-eps-orange">
                       <div className="flex flex-col sm:flex-row sm:items-center">
-                        <User className="h-5 w-5 mx-auto sm:mx-0 transition-transform duration-300 transform group-hover:rotate-12" />
-                        <span className="text-xs mt-1 sm:mt-0 sm:ml-1.5 sm:text-sm font-medium">Профиль</span>
+                        <User className="h-5 w-5 mx-auto sm:mx-0" />
+                        <span className="text-xs mt-1 sm:mt-0 sm:ml-1.5 sm:text-sm">Профиль</span>
                       </div>
                     </Link>
                     
                     <button 
                       onClick={handleLogout}
-                      className="flex items-center text-gray-800 hover:text-eps-orange relative group transition-all duration-300 transform hover:scale-105"
+                      className="flex items-center text-gray-800 hover:text-eps-orange"
                       disabled={logoutMutation.isPending}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center">
-                        <LogOut className="h-5 w-5 mx-auto sm:mx-0 transition-transform duration-300 transform group-hover:-translate-x-1" />
-                        <span className="text-xs mt-1 sm:mt-0 sm:ml-1.5 sm:text-sm font-medium">
+                        <LogOut className="h-5 w-5 mx-auto sm:mx-0" />
+                        <span className="text-xs mt-1 sm:mt-0 sm:ml-1.5 sm:text-sm">
                           {logoutMutation.isPending ? "Выход..." : "Выйти"}
                         </span>
                       </div>
@@ -134,10 +134,10 @@ export default function Header() {
                   </>
                 ) : (
                   // Для неавторизованных пользователей - только кнопка Войти
-                  <Link href="/auth" className="flex items-center text-gray-800 hover:text-eps-orange relative group transition-all duration-300 transform hover:scale-105">
+                  <Link href="/auth" className="flex items-center text-gray-800 hover:text-eps-orange">
                     <div className="flex flex-col sm:flex-row sm:items-center">
-                      <LogIn className="h-5 w-5 mx-auto sm:mx-0 transition-transform duration-300 transform group-hover:translate-x-1" />
-                      <span className="text-xs mt-1 sm:mt-0 sm:ml-1.5 sm:text-sm font-medium">Войти</span>
+                      <LogIn className="h-5 w-5 mx-auto sm:mx-0" />
+                      <span className="text-xs mt-1 sm:mt-0 sm:ml-1.5 sm:text-sm">Войти</span>
                     </div>
                   </Link>
                 )}
@@ -168,32 +168,29 @@ export default function Header() {
                   <DropdownMenuTrigger asChild>
                     <Button 
                       variant="ghost" 
-                      className="flex items-center gap-1 text-gray-800 hover:text-eps-orange font-medium px-3 py-1.5 h-auto rounded-md group transition-all duration-300"
+                      className="flex items-center gap-1 text-gray-800 hover:text-eps-orange font-medium px-3 py-1.5 h-auto rounded-md"
                     >
-                      <Package className="h-4 w-4 transition-all duration-300 group-hover:rotate-12" />
-                      <span className="relative">
-                        Товары
-                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-eps-orange transition-all duration-300 group-hover:w-full"></span>
-                      </span>
-                      <ChevronDown className="h-4 w-4 ml-1 transition-transform duration-300 group-hover:rotate-180" />
+                      <Package className="h-4 w-4" />
+                      Товары
+                      <ChevronDown className="h-4 w-4 ml-1" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-56 max-h-[70vh] overflow-y-auto animate-in fade-in-80 zoom-in-95">
-                    {categories.map((category, index) => (
-                      <DropdownMenuItem key={category.id} asChild className="animate-in slide-in-from-left-1" style={{ animationDelay: `${index * 30}ms` }}>
+                  <DropdownMenuContent align="start" className="w-56 max-h-[70vh] overflow-y-auto">
+                    {categories.map((category) => (
+                      <DropdownMenuItem key={category.id} asChild>
                         <Link 
                           href={`/category/${category.slug}`} 
-                          className="w-full cursor-pointer transition-colors duration-300 hover:text-eps-orange"
+                          className="w-full cursor-pointer"
                         >
                           {category.name}
                         </Link>
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild className="animate-in slide-in-from-left-1" style={{ animationDelay: `${categories.length * 30}ms` }}>
+                    <DropdownMenuItem asChild>
                       <Link 
                         href="/products" 
-                        className="w-full cursor-pointer font-medium transition-colors duration-300 hover:text-eps-orange"
+                        className="w-full cursor-pointer font-medium"
                       >
                         Все товары
                       </Link>
@@ -204,13 +201,10 @@ export default function Header() {
               <li className="group relative">
                 <Link 
                   href="/admin" 
-                  className="flex items-center gap-1 text-gray-800 hover:text-eps-orange font-medium px-3 py-1.5 group transition-all duration-300"
+                  className="flex items-center gap-1 text-gray-800 hover:text-eps-orange font-medium px-3 py-1.5"
                 >
-                  <User className="h-4 w-4 transition-all duration-300 group-hover:rotate-12" />
-                  <span className="relative">
-                    Администратор
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-eps-orange transition-all duration-300 group-hover:w-full"></span>
-                  </span>
+                  <User className="h-4 w-4" />
+                  Администратор
                 </Link>
               </li>
             </ul>

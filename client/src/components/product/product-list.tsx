@@ -110,18 +110,18 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
       </div>
       
       {isLoading ? (
-        // Анимированный скелетон загрузки
+        // Loading skeleton
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="bg-white rounded-lg overflow-hidden shadow-md animate-fadeIn" style={{ animationDelay: `${0.05 * i}s` }}>
-              <Skeleton className="w-full h-56 animate-pulse" />
+            <div key={i} className="bg-white rounded-lg overflow-hidden shadow">
+              <Skeleton className="w-full h-56" />
               <div className="p-4">
                 <Skeleton className="h-4 w-24 mb-2" />
                 <Skeleton className="h-6 w-5/6 mb-1" />
                 <Skeleton className="h-4 w-full mb-3" />
                 <div className="flex justify-between">
                   <Skeleton className="h-6 w-16" />
-                  <Skeleton className="h-9 w-20 rounded-lg" />
+                  <Skeleton className="h-9 w-20" />
                 </div>
               </div>
             </div>
@@ -134,10 +134,8 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
               ? "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6" 
               : "grid-cols-1 gap-4"
           }`}>
-            {data.products.map((product, index) => (
-              <div key={product.id} className="animate-fadeIn" style={{ animationDelay: `${0.05 * index}s` }}>
-                <ProductCard product={product} />
-              </div>
+            {data.products.map((product) => (
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
           

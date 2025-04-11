@@ -144,19 +144,12 @@ export default function ProductDetails() {
       {/* Product Details */}
       <div className="grid md:grid-cols-2 gap-8 mb-12">
         {/* Product Image */}
-        <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-500 animate-fadeIn" style={{ animationDelay: '0.1s' }}>
-          <div className="relative group">
-            <img 
-              src={product.imageUrl || "https://placehold.co/800x600?text=No+Image"} 
-              alt={product.name}
-              className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-              <div className="p-4 text-white w-full">
-                <p className="text-sm font-medium">Нажмите для увеличения</p>
-              </div>
-            </div>
-          </div>
+        <div className="bg-white rounded-lg overflow-hidden shadow-sm">
+          <img 
+            src={product.imageUrl || "https://placehold.co/800x600?text=No+Image"} 
+            alt={product.name}
+            className="w-full h-auto object-cover"
+          />
         </div>
 
         {/* Product Info */}
@@ -305,33 +298,27 @@ export default function ProductDetails() {
               </Button>
             </div>
             <Button 
-              className="flex-1 transition-all duration-300 transform hover:scale-105 hover:shadow-md bg-primary hover:bg-primary/90" 
+              className="flex-1" 
               onClick={handleAddToCart} 
               disabled={isAddingToCart || !product.stock || product.stock === 0}
             >
-              <ShoppingCart className="h-5 w-5 mr-2 animate-pulse-slow" />
-              {isAddingToCart ? "Добавляем..." : "В корзину"}
+              <ShoppingCart className="h-5 w-5 mr-2" />
+              В корзину
             </Button>
           </div>
 
           {/* Преимущества */}
-          <div className="space-y-3 mb-6 animate-fadeIn" style={{ animationDelay: '0.3s' }}>
-            <div className="flex items-center text-gray-600 p-2 hover:bg-primary/5 rounded-lg transition-colors duration-300">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 transition-transform duration-300 hover:scale-110">
-                <Truck className="h-5 w-5 text-primary" />
-              </div>
+          <div className="space-y-3 mb-6">
+            <div className="flex items-center text-gray-600">
+              <Truck className="h-5 w-5 mr-3 text-primary" />
               <span>Бесплатная доставка при заказе от 5000 ₽</span>
             </div>
-            <div className="flex items-center text-gray-600 p-2 hover:bg-primary/5 rounded-lg transition-colors duration-300">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 transition-transform duration-300 hover:scale-110">
-                <ShieldCheck className="h-5 w-5 text-primary" />
-              </div>
+            <div className="flex items-center text-gray-600">
+              <ShieldCheck className="h-5 w-5 mr-3 text-primary" />
               <span>Гарантия производителя 2 года</span>
             </div>
-            <div className="flex items-center text-gray-600 p-2 hover:bg-primary/5 rounded-lg transition-colors duration-300">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 transition-transform duration-300 hover:scale-110">
-                <RefreshCw className="h-5 w-5 text-primary" />
-              </div>
+            <div className="flex items-center text-gray-600">
+              <RefreshCw className="h-5 w-5 mr-3 text-primary" />
               <span>Возврат в течение 30 дней</span>
             </div>
           </div>
@@ -395,16 +382,14 @@ export default function ProductDetails() {
 
       {/* Похожие товары */}
       {relatedProducts.length > 1 && (
-        <div className="animate-fadeIn" style={{ animationDelay: '0.5s' }}>
-          <h2 className="text-2xl font-bold mb-6 animate-text-gradient inline-block">Похожие товары</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Похожие товары</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {relatedProducts
               .filter(p => p.id !== product.id)
               .slice(0, 4)
-              .map((relatedProduct, index) => (
-                <div key={relatedProduct.id} className="animate-fadeIn" style={{ animationDelay: `${0.6 + index * 0.1}s` }}>
-                  <ProductCard product={relatedProduct} />
-                </div>
+              .map(relatedProduct => (
+                <ProductCard key={relatedProduct.id} product={relatedProduct} />
               ))}
           </div>
         </div>

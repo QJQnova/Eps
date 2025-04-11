@@ -24,24 +24,24 @@ export default function Home() {
       <section className="bg-eps-gradient text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
           <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="animate-fadeIn" style={{ animationDelay: '0.1s' }}>
+            <div>
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-                <span className="animate-text-gradient">Профессиональные инструменты</span> для любых задач
+                Профессиональные инструменты для любых задач
               </h1>
-              <p className="text-lg mb-6 opacity-90">
+              <p className="text-lg mb-6">
                 Качественные инструменты для профессионалов и любителей. Найдите подходящее оборудование для вашего следующего проекта.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Button 
                   variant="secondary"
-                  className="bg-white text-eps-orange hover:bg-gray-100 font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover-wiggle"
+                  className="bg-white text-eps-orange hover:bg-gray-100 font-medium"
                   asChild
                 >
                   <Link href="#products">Купить сейчас</Link>
                 </Button>
                 <Button 
                   variant="outline"
-                  className="bg-transparent hover:bg-white/20 border border-white font-medium transition-all duration-300 transform hover:scale-105"
+                  className="bg-transparent hover:bg-white/10 border border-white font-medium"
                   asChild
                 >
                   <Link href="#categories">Посмотреть категории</Link>
@@ -145,30 +145,30 @@ export default function Home() {
       <section className="py-10 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="flex flex-col items-center text-center p-4 animate-fadeIn rounded-lg transition-all duration-300 hover:shadow-md hover:bg-eps-orange/5" style={{ animationDelay: '0.2s' }}>
-              <div className="w-12 h-12 rounded-full bg-eps-orange/10 flex items-center justify-center mb-3 transition-all duration-300 transform group-hover:scale-110">
-                <Wrench className="h-6 w-6 text-eps-orange animate-pulse-slow" />
+            <div className="flex flex-col items-center text-center p-4">
+              <div className="w-12 h-12 rounded-full bg-eps-orange/10 flex items-center justify-center mb-3">
+                <Wrench className="h-6 w-6 text-eps-orange" />
               </div>
               <h3 className="font-medium">Высокое качество</h3>
               <p className="text-sm text-gray-500 mt-1">Профессиональные инструменты</p>
             </div>
-            <div className="flex flex-col items-center text-center p-4 animate-fadeIn rounded-lg transition-all duration-300 hover:shadow-md hover:bg-eps-red/5" style={{ animationDelay: '0.3s' }}>
-              <div className="w-12 h-12 rounded-full bg-eps-red/10 flex items-center justify-center mb-3 transition-all duration-300 transform group-hover:scale-110">
-                <Drill className="h-6 w-6 text-eps-red animate-pulse-slow" />
+            <div className="flex flex-col items-center text-center p-4">
+              <div className="w-12 h-12 rounded-full bg-eps-red/10 flex items-center justify-center mb-3">
+                <Drill className="h-6 w-6 text-eps-red" />
               </div>
               <h3 className="font-medium">Гарантия</h3>
               <p className="text-sm text-gray-500 mt-1">На все инструменты</p>
             </div>
-            <div className="flex flex-col items-center text-center p-4 animate-fadeIn rounded-lg transition-all duration-300 hover:shadow-md hover:bg-eps-yellow/5" style={{ animationDelay: '0.4s' }}>
-              <div className="w-12 h-12 rounded-full bg-eps-yellow/10 flex items-center justify-center mb-3 transition-all duration-300 transform group-hover:scale-110">
-                <Ruler className="h-6 w-6 text-eps-yellow animate-pulse-slow" />
+            <div className="flex flex-col items-center text-center p-4">
+              <div className="w-12 h-12 rounded-full bg-eps-yellow/10 flex items-center justify-center mb-3">
+                <Ruler className="h-6 w-6 text-eps-yellow" />
               </div>
               <h3 className="font-medium">Доставка</h3>
               <p className="text-sm text-gray-500 mt-1">По всей России</p>
             </div>
-            <div className="flex flex-col items-center text-center p-4 animate-fadeIn rounded-lg transition-all duration-300 hover:shadow-md hover:bg-eps-orange/5" style={{ animationDelay: '0.5s' }}>
-              <div className="w-12 h-12 rounded-full bg-eps-orange/10 flex items-center justify-center mb-3 transition-all duration-300 transform group-hover:scale-110">
-                <HardHat className="h-6 w-6 text-eps-orange animate-pulse-slow" />
+            <div className="flex flex-col items-center text-center p-4">
+              <div className="w-12 h-12 rounded-full bg-eps-orange/10 flex items-center justify-center mb-3">
+                <HardHat className="h-6 w-6 text-eps-orange" />
               </div>
               <h3 className="font-medium">Консультации</h3>
               <p className="text-sm text-gray-500 mt-1">Профессиональная помощь</p>
@@ -181,13 +181,11 @@ export default function Home() {
       {!searchQuery && (
         <section id="categories" className="py-12 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-bold mb-8 animate-text-gradient inline-block">Каталог по категориям</h2>
+            <h2 className="text-2xl font-bold mb-8 text-eps-gradient">Каталог по категориям</h2>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {categories.map((category, index) => (
-                <div key={category.id} className="animate-fadeIn" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
-                  <CategoryCard category={category} />
-                </div>
+              {categories.map((category) => (
+                <CategoryCard key={category.id} category={category} />
               ))}
             </div>
           </div>
@@ -197,7 +195,6 @@ export default function Home() {
       {/* Products Section */}
       <section id="products" className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold mb-8 animate-text-gradient inline-block">Популярные товары</h2>
           <ProductList query={searchQuery} />
         </div>
       </section>
