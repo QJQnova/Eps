@@ -23,28 +23,36 @@ export default function ProductCard({ product }: ProductCardProps) {
     setIsWishlisted(!isWishlisted);
   };
   
+  // Безопасное форматирование цены с проверкой на null/undefined
+  const formatPrice = (price: string | number | null | undefined) => {
+    if (price == null) return "0 ₽";
+    return Number(price).toLocaleString('ru-RU') + " ₽";
+  };
+  
   return (
-    <Card className="overflow-hidden shadow-sm hover:shadow-md transition duration-200 group h-full">
-      <div className="relative">
+    <Card className="product-card group h-full flex flex-col bg-white border-0">
+      <div className="relative overflow-hidden">
         <Link href={`/product/${product.slug}`}>
-          <img 
-            src={product.imageUrl || "https://placehold.co/400x300?text=No+Image"} 
-            alt={product.name}
-            className="w-full h-56 object-cover"
-          />
+          <div className="bg-gray-50 pt-6 px-6 pb-4 flex items-center justify-center">
+            <img 
+              src={product.imageUrl || "https://placehold.co/400x300?text=Нет+изображения"} 
+              alt={product.name}
+              className="w-full h-48 object-contain product-image"
+            />
+          </div>
         </Link>
         
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-3 right-3 z-10">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="ghost"
                   size="icon"
-                  className="w-8 h-8 rounded-full bg-white shadow flex items-center justify-center text-gray-500 hover:text-primary transition duration-200"
+                  variant="ghost"
+                  className="bg-white/90 shadow-sm text-gray-500 hover:text-orange-500 h-8 w-8 rounded-full action-button"
                   onClick={toggleWishlist}
                 >
-                  <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-primary text-primary' : ''}`} />
+                  <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-orange-500 text-orange-500' : ''}`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -54,67 +62,76 @@ export default function ProductCard({ product }: ProductCardProps) {
           </TooltipProvider>
         </div>
         
-        {product.tag && (
-          <div className="absolute top-2 left-2">
-            <span className={`text-white text-xs font-bold px-2 py-1 rounded ${
-              product.tag === 'Best Seller' || product.tag === 'Хит продаж' ? 'bg-amber-500' : 
-              product.tag === 'New' || product.tag === 'Новинка' ? 'bg-emerald-500' : 
-              product.tag === 'Sale' || product.tag === 'Скидка' ? 'bg-rose-500' : 
-              'bg-blue-500'
-            }`}>
-              {product.tag === 'Best Seller' ? 'Хит продаж' : 
-               product.tag === 'New' ? 'Новинка' : 
-               product.tag === 'Sale' ? 'Скидка' : 
-               product.tag}
-            </span>
-          </div>
-        )}
-      </div>
-      
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-1">
-          <p className="text-sm text-gray-500">
-            {/* Category would normally be fetched by joining with categories table */}
-            Категория
-          </p>
+        {/* Бейджи для тегов и скидок */}
+        <div className="absolute top-3 left-3 flex flex-col gap-2">
+          {product.tag && (
+            <div className="inline-block">
+              <span className={`text-white text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-sm ${
+                product.tag === 'Best Seller' || product.tag === 'Хит продаж' ? 'bg-amber-500' : 
+                product.tag === 'New' || product.tag === 'Новинка' ? 'bg-emerald-500' : 
+                product.tag === 'Sale' || product.tag === 'Скидка' ? 'bg-rose-500' : 
+                'bg-orange-500'
+              }`}>
+                {product.tag === 'Best Seller' ? 'Хит продаж' : 
+                 product.tag === 'New' ? 'Новинка' : 
+                 product.tag === 'Sale' ? 'Скидка' : 
+                 product.tag}
+              </span>
+            </div>
+          )}
           
-          {product.rating && (
-            <div className="flex items-center">
-              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-              <span className="text-sm ml-1 text-gray-700">{product.rating}</span>
-              <span className="text-xs ml-1 text-gray-500">({product.reviewCount})</span>
+          {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
+            <div className="inline-block">
+              <span className="bg-red-500 text-white text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-sm">
+                -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
+              </span>
             </div>
           )}
         </div>
+      </div>
+      
+      <CardContent className="p-5 flex flex-col flex-grow">
+        {/* Отзывы и рейтинг */}
+        <div className="mb-2 flex items-center space-x-1">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star 
+              key={i} 
+              className={`h-4 w-4 ${i < (Number(product.rating) || 0) ? 'fill-amber-400 text-amber-400' : 'text-gray-200'}`} 
+            />
+          ))}
+          <span className="text-xs text-gray-500 ml-1.5">{product.rating || 0}</span>
+          {product.reviewCount && <span className="text-xs text-gray-500">({product.reviewCount})</span>}
+        </div>
         
-        <Link href={`/product/${product.slug}`}>
-          <h3 className="font-medium text-gray-900 hover:text-primary transition duration-200 mb-1">
+        {/* Название товара */}
+        <Link href={`/product/${product.slug}`} className="group">
+          <h3 className="font-medium text-base sm:text-lg mb-1.5 line-clamp-2 group-hover:text-orange-600 transition-colors duration-300">
             {product.name}
           </h3>
         </Link>
         
-        <p className="text-sm text-gray-500 h-10 overflow-hidden mb-3">
-          {product.shortDescription || product.description?.substring(0, 80) || ""}
+        {/* Короткое описание */}
+        <p className="text-sm text-gray-600 mb-3 line-clamp-2 flex-grow">
+          {product.shortDescription || (product.description ? product.description.substring(0, 80) : "")}
         </p>
         
-        <div className="flex justify-between items-center">
-          <div>
-            <span className="text-lg font-medium text-gray-900">{Number(product.price).toLocaleString('ru-RU')} ₽</span>
+        {/* Цена и кнопка добавления в корзину */}
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
+          <div className="flex flex-col">
             {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
-              <span className="text-sm line-through text-gray-500 ml-2">
-                {Number(product.originalPrice).toLocaleString('ru-RU')} ₽
+              <span className="text-sm line-through text-gray-500">
+                {formatPrice(product.originalPrice)}
               </span>
             )}
+            <span className="font-bold text-lg text-orange-600">{formatPrice(product.price)}</span>
           </div>
           
-          <Button
-            variant="default"
-            size="sm"
-            className="bg-primary hover:bg-primary/90 text-white rounded-lg transition duration-200"
+          <Button 
+            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white action-button shadow-sm"
             onClick={handleAddToCart}
             disabled={isLoading || !product.stock || product.stock === 0}
           >
-            <ShoppingCart className="h-4 w-4 mr-1" />
+            <ShoppingCart className="h-4 w-4 mr-1.5" />
             В корзину
           </Button>
         </div>
