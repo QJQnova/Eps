@@ -76,7 +76,7 @@ export default function AdminSidebar() {
     {
       icon: Users,
       label: "Клиенты",
-      href: "/admin/customers",
+      href: "/admin/users",
     },
     {
       icon: Settings,

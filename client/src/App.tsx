@@ -28,6 +28,7 @@ import BulkImport from "@/pages/admin/bulk-import";
 import ProductFormPage from "@/pages/admin/product-form-page";
 import CategoryManagement from "@/pages/admin/category-management";
 import OrderManagement from "@/pages/admin/order-management";
+import UserManagement from "@/pages/admin/user-management";
 
 function Router() {
   const [location] = useLocation();
@@ -61,6 +62,7 @@ function Router() {
           <ProtectedRoute path="/admin/import" component={BulkImport} />
           <ProtectedRoute path="/admin/categories" component={CategoryManagement} />
           <ProtectedRoute path="/admin/orders" component={OrderManagement} />
+          <ProtectedRoute path="/admin/users" component={UserManagement} />
           
           {/* Fallback to 404 */}
           <Route component={NotFound} />
