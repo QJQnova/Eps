@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Trash2, Minus, Plus } from "lucide-react";
 import { useCart } from "@/lib/cart";
+import { formatPrice } from "@/lib/format";
 
 interface CartItemProps {
   item: {
@@ -75,7 +76,7 @@ export default function CartItem({ item }: CartItemProps) {
             </p>
           </div>
           <p className="text-right font-medium text-gray-900">
-            ${itemTotal.toFixed(2)}
+            {formatPrice(itemTotal)}
           </p>
         </div>
         
@@ -110,7 +111,7 @@ export default function CartItem({ item }: CartItemProps) {
           {/* Unit Price + Remove */}
           <div className="flex items-center space-x-2">
             <p className="text-sm text-gray-500">
-              ${Number(item.product.price).toFixed(2)} each
+              {formatPrice(item.product.price)} за шт.
             </p>
             <Button
               variant="ghost"

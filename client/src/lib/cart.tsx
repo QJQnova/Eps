@@ -106,13 +106,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       await fetchCart();
       
       toast({
-        title: "Added to cart",
-        description: "The item has been added to your cart",
+        title: "Добавлено в корзину",
+        description: "Товар успешно добавлен в вашу корзину",
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to add item to cart",
+        title: "Ошибка",
+        description: "Не удалось добавить товар в корзину",
         variant: "destructive",
       });
     } finally {
@@ -130,8 +130,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       await fetchCart();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update item quantity",
+        title: "Ошибка",
+        description: "Не удалось обновить количество товара",
         variant: "destructive",
       });
     } finally {
@@ -149,13 +149,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       await fetchCart();
       
       toast({
-        title: "Item removed",
-        description: "The item has been removed from your cart",
+        title: "Товар удален",
+        description: "Товар был удален из вашей корзины",
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to remove item from cart",
+        title: "Ошибка",
+        description: "Не удалось удалить товар из корзины",
         variant: "destructive",
       });
     } finally {
