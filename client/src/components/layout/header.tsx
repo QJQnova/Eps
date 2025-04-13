@@ -112,7 +112,7 @@ export default function Header() {
                       type="submit" 
                       variant="ghost" 
                       size="icon" 
-                      className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500 transition-colors"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 hover:text-eps-red transition-colors"
                     >
                       <Search className="h-4 w-4" />
                     </Button>
@@ -122,14 +122,14 @@ export default function Header() {
                 {/* Кнопки корзины, профиля и авторизации с улучшенным дизайном */}
                 <div className="flex items-center space-x-6">
                   {/* Корзина (для всех пользователей) */}
-                  <Link href="/cart" className="flex items-center text-gray-700 hover:text-orange-600 relative group">
+                  <Link href="/cart" className="flex items-center text-gray-700 hover:text-eps-red relative group">
                     <div className="flex items-center">
                       <div className="relative">
-                        <div className="p-2 bg-gray-100 rounded-full group-hover:bg-orange-50 transition-colors duration-300">
+                        <div className="p-2 bg-gray-100 rounded-full group-hover:bg-red-50 transition-colors duration-300">
                           <ShoppingCart className="h-5 w-5" />
                         </div>
                         {itemCount > 0 && (
-                          <span className="absolute -top-1 -right-1 bg-orange-600 text-white text-xs font-medium w-5 h-5 flex items-center justify-center rounded-full shadow-sm">
+                          <span className="absolute -top-1 -right-1 bg-eps-red text-white text-xs font-medium w-5 h-5 flex items-center justify-center rounded-full shadow-sm">
                             {itemCount}
                           </span>
                         )}
@@ -186,7 +186,7 @@ export default function Header() {
               <Link href="/cart" className="text-gray-700 relative">
                 <ShoppingCart className="h-6 w-6" />
                 {itemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-orange-600 text-white text-xs font-medium w-5 h-5 flex items-center justify-center rounded-full">
+                  <span className="absolute -top-1 -right-1 bg-eps-red text-white text-xs font-medium w-5 h-5 flex items-center justify-center rounded-full">
                     {itemCount}
                   </span>
                 )}
@@ -196,7 +196,7 @@ export default function Header() {
               <Button
                 variant="ghost" 
                 size="icon"
-                className="text-gray-700 hover:text-orange-600 hover:bg-gray-100"
+                className="text-gray-700 hover:text-eps-red hover:bg-gray-100"
                 onClick={toggleMobileMenu}
               >
                 {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
