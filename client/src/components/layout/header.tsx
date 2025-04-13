@@ -56,7 +56,7 @@ export default function Header() {
   };
   
   return (
-    <header className="bg-white sticky top-0 z-30 shadow-sm border-b border-orange-100">
+    <header className="bg-white sticky top-0 z-30 shadow-sm border-b border-red-100">
       {/* Top bar с контактами */}
       <div className="bg-gradient-to-r from-gray-800 to-gray-900 py-2 text-xs text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

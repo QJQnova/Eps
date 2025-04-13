@@ -157,7 +157,7 @@ export default function ProductDetails() {
               
               {/* Badge for sale or discount if available */}
               {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
-                <div className="absolute top-3 left-3 bg-orange-600 text-white text-xs font-bold px-2.5 py-1.5 rounded-md shadow-sm">
+                <div className="absolute top-3 left-3 bg-eps-red text-white text-xs font-bold px-2.5 py-1.5 rounded-md shadow-sm">
                   -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
                 </div>
               )}
