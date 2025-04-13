@@ -49,10 +49,10 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="bg-white/90 shadow-sm text-gray-500 hover:text-orange-500 h-8 w-8 rounded-full action-button"
+                  className="bg-white/90 shadow-sm text-gray-500 hover:text-eps-red h-8 w-8 rounded-full action-button"
                   onClick={toggleWishlist}
                 >
-                  <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-orange-500 text-orange-500' : ''}`} />
+                  <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-eps-red text-eps-red' : ''}`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -67,10 +67,10 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.tag && (
             <div className="inline-block">
               <span className={`text-white text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-sm ${
-                product.tag === 'Best Seller' || product.tag === 'Хит продаж' ? 'bg-amber-500' : 
-                product.tag === 'New' || product.tag === 'Новинка' ? 'bg-emerald-500' : 
-                product.tag === 'Sale' || product.tag === 'Скидка' ? 'bg-rose-500' : 
-                'bg-orange-500'
+                product.tag === 'Best Seller' || product.tag === 'Хит продаж' ? 'bg-eps-yellow' : 
+                product.tag === 'New' || product.tag === 'Новинка' ? 'bg-eps-red' : 
+                product.tag === 'Sale' || product.tag === 'Скидка' ? 'bg-eps-red' : 
+                'bg-eps-yellow'
               }`}>
                 {product.tag === 'Best Seller' ? 'Хит продаж' : 
                  product.tag === 'New' ? 'Новинка' : 
@@ -82,7 +82,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           
           {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
             <div className="inline-block">
-              <span className="bg-red-500 text-white text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-sm">
+              <span className="bg-eps-red text-white text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-sm">
                 -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
               </span>
             </div>
@@ -96,7 +96,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           {Array.from({ length: 5 }).map((_, i) => (
             <Star 
               key={i} 
-              className={`h-4 w-4 ${i < (Number(product.rating) || 0) ? 'fill-amber-400 text-amber-400' : 'text-gray-200'}`} 
+              className={`h-4 w-4 ${i < (Number(product.rating) || 0) ? 'fill-eps-yellow text-eps-yellow' : 'text-gray-200'}`} 
             />
           ))}
           <span className="text-xs text-gray-500 ml-1.5">{product.rating || 0}</span>
@@ -105,7 +105,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         
         {/* Название товара */}
         <Link href={`/product/${product.slug}`} className="group">
-          <h3 className="font-medium text-base sm:text-lg mb-1.5 line-clamp-2 group-hover:text-orange-600 transition-colors duration-300">
+          <h3 className="font-medium text-base sm:text-lg mb-1.5 line-clamp-2 group-hover:text-eps-red transition-colors duration-300">
             {product.name}
           </h3>
         </Link>
@@ -123,11 +123,11 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {formatPrice(product.originalPrice)}
               </span>
             )}
-            <span className="font-bold text-lg text-orange-600">{formatPrice(product.price)}</span>
+            <span className="font-bold text-lg text-eps-red">{formatPrice(product.price)}</span>
           </div>
           
           <Button 
-            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white action-button shadow-sm"
+            className="bg-eps-gradient hover:from-eps-red hover:to-eps-yellow text-white action-button shadow-sm"
             onClick={handleAddToCart}
             disabled={isLoading || !product.stock || product.stock === 0}
           >
