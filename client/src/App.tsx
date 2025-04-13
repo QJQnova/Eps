@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { CartProvider } from "@/lib/cart";
+import InstallAppPrompt from "@/components/pwa/InstallAppPrompt";
 
 // Layout Components
 import Header from "@/components/layout/header";
@@ -85,6 +86,7 @@ function App() {
       <AuthProvider>
         <CartProvider>
           <Router />
+          <InstallAppPrompt />
           <Toaster />
         </CartProvider>
       </AuthProvider>

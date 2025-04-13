@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Drill, Hammer, Ruler, HardHat, Wrench } from "lucide-react";
 import CategoryCard from "@/components/category/category-card";
 import ProductList from "@/components/product/product-list";
+import AppInstallBanner from "@/components/pwa/AppInstallBanner";
 import { Category } from "@shared/schema";
 
 export default function Home() {
