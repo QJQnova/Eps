@@ -165,7 +165,7 @@ export default function ProductDetails() {
           </div>
 
           {/* Тематический баннер */}
-          <div className="bg-gradient-to-r from-orange-600 via-orange-500 to-yellow-500 rounded-lg overflow-hidden shadow-md">
+          <div className="bg-gradient-to-r from-eps-red via-red-600 to-eps-yellow rounded-lg overflow-hidden shadow-md">
             <div className="p-5 pb-0 flex md:flex-row flex-col">
               <div className="md:w-1/2">
                 <h3 className="text-xl font-bold text-white mb-2">Коллекция профессиональных инструментов</h3>
@@ -173,7 +173,7 @@ export default function ProductDetails() {
                 <div className="inline-block mb-6 md:mb-0">
                   <Button 
                     variant="secondary" 
-                    className="bg-white/90 hover:bg-white text-orange-600 hover:text-orange-700 border-0 font-medium"
+                    className="bg-white/90 hover:bg-white text-eps-red hover:text-red-700 border-0 font-medium"
                     asChild
                   >
                     <Link href="/products">Смотреть все инструменты</Link>
@@ -261,7 +261,7 @@ export default function ProductDetails() {
 
           {/* Price Section with Animation */}
           <div className="bg-gray-50 rounded-lg p-4 mb-6 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-100/50 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-red-100/50 to-transparent"></div>
             <div className="relative z-10">
               {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
                 <div className="mb-1">
@@ -369,7 +369,7 @@ export default function ProductDetails() {
             <div className="flex items-center">
               <span className="text-sm font-medium text-gray-700 mr-3">Опция:</span>
               <Select value={option} onValueChange={setOption}>
-                <SelectTrigger className="w-36 border-gray-300 focus:ring-orange-500 focus:border-orange-500 bg-white">
+                <SelectTrigger className="w-36 border-gray-300 focus:ring-eps-red focus:border-eps-red bg-white">
                   <SelectValue placeholder="Опция" />
                 </SelectTrigger>
                 <SelectContent>
@@ -384,7 +384,7 @@ export default function ProductDetails() {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
             <Button 
-              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white w-full h-12 text-base font-medium shadow-md hover:shadow-lg transition-all duration-200 border-0"
+              className="bg-gradient-to-r from-eps-red to-red-700 hover:from-red-700 hover:to-red-800 text-white w-full h-12 text-base font-medium shadow-md hover:shadow-lg transition-all duration-200 border-0"
               onClick={handleAddToCart}
               disabled={isAddingToCart || !product.stock || product.stock === 0}
             >
@@ -394,7 +394,7 @@ export default function ProductDetails() {
             
             <Button 
               variant="outline"
-              className="border-orange-500 text-orange-600 hover:bg-orange-50 w-full h-12 text-base font-medium transition-all duration-200"
+              className="border-eps-red text-eps-red hover:bg-red-50 w-full h-12 text-base font-medium transition-all duration-200"
               onClick={() => {}}
             >
               Купить сейчас
@@ -406,29 +406,29 @@ export default function ProductDetails() {
       {/* Вкладки с информацией о товаре */}
       <div className="mb-12">
         <h2 className="text-2xl font-bold mb-6 text-gray-900 flex items-center">
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-orange-500">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-eps-red to-eps-yellow">
             Дополнительная информация
           </span>
-          <div className="h-px flex-grow bg-gradient-to-r from-orange-300 to-transparent ml-4"></div>
+          <div className="h-px flex-grow bg-gradient-to-r from-red-300 to-transparent ml-4"></div>
         </h2>
         
         <Tabs defaultValue="description" className="w-full">
           <TabsList className="w-full md:w-auto bg-gray-100 p-1 rounded-lg mb-6 border border-gray-200">
             <TabsTrigger 
               value="description" 
-              className="data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm rounded-md text-sm font-medium"
+              className="data-[state=active]:bg-white data-[state=active]:text-eps-red data-[state=active]:shadow-sm rounded-md text-sm font-medium"
             >
               Описание
             </TabsTrigger>
             <TabsTrigger 
               value="specifications" 
-              className="data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm rounded-md text-sm font-medium"
+              className="data-[state=active]:bg-white data-[state=active]:text-eps-red data-[state=active]:shadow-sm rounded-md text-sm font-medium"
             >
               Характеристики
             </TabsTrigger>
             <TabsTrigger 
               value="reviews" 
-              className="data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm rounded-md text-sm font-medium"
+              className="data-[state=active]:bg-white data-[state=active]:text-eps-red data-[state=active]:shadow-sm rounded-md text-sm font-medium"
             >
               Отзывы
             </TabsTrigger>
@@ -496,14 +496,14 @@ export default function ProductDetails() {
             <Card className="border-gray-200 shadow-sm overflow-hidden">
               <CardContent className="p-6 bg-gradient-to-br from-white to-gray-50">
                 <div className="text-center py-10">
-                  <div className="mb-4 inline-flex items-center justify-center w-16 h-16 bg-orange-100 text-orange-500 rounded-full">
+                  <div className="mb-4 inline-flex items-center justify-center w-16 h-16 bg-red-100 text-eps-red rounded-full">
                     <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M11.0489 3.92705C11.3483 3.00574 12.6517 3.00574 12.9511 3.92705L14.2451 7.90983C14.379 8.32185 14.763 8.60081 15.1962 8.60081H19.3839C20.3527 8.60081 20.7554 9.84043 19.9717 10.4098L16.5838 12.8713C16.2333 13.126 16.0866 13.5773 16.2205 13.9894L17.5146 17.9721C17.8139 18.8934 16.7595 19.6596 15.9757 19.0902L12.5878 16.6287C12.2373 16.374 11.7627 16.374 11.4122 16.6287L8.02426 19.0902C7.24054 19.6596 6.18607 18.8934 6.48542 17.9721L7.77949 13.9894C7.91338 13.5773 7.76672 13.126 7.41623 12.8713L4.02827 10.4098C3.24455 9.84043 3.64732 8.60081 4.61606 8.60081H8.8038C9.23703 8.60081 9.62099 8.32185 9.75488 7.90983L11.0489 3.92705Z" stroke="currentColor" strokeWidth="2"/>
                     </svg>
                   </div>
                   <h3 className="text-xl font-semibold mb-2 text-gray-900">Ещё нет отзывов</h3>
                   <p className="text-gray-500 mb-6 max-w-lg mx-auto">Будьте первым, кто оставит отзыв об этом товаре. Ваше мнение поможет другим покупателям сделать правильный выбор.</p>
-                  <Button className="bg-orange-500 hover:bg-orange-600">
+                  <Button className="bg-eps-red hover:bg-red-700 text-white">
                     <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
