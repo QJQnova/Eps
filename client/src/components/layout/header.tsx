@@ -62,17 +62,17 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between">
             <div className="flex items-center">
-              <span className="inline-block hover:text-orange-300 transition-colors">
+              <span className="inline-block hover:text-eps-yellow transition-colors">
                 Телефон: +7 8442 50-58-57
               </span>
             </div>
             <div className="hidden md:flex items-center space-x-6">
-              <span className="hover:text-orange-300 transition-colors">пн. - пт.: 8:00 - 19:00</span>
-              <span className="hover:text-orange-300 transition-colors">сб.: 9:00 - 15:00</span>
-              <span className="hover:text-orange-300 transition-colors">вс: выходной</span>
+              <span className="hover:text-eps-yellow transition-colors">пн. - пт.: 8:00 - 19:00</span>
+              <span className="hover:text-eps-yellow transition-colors">сб.: 9:00 - 15:00</span>
+              <span className="hover:text-eps-yellow transition-colors">вс: выходной</span>
             </div>
             <div className="md:hidden">
-              <span className="hover:text-orange-300 transition-colors">г. Волгоград</span>
+              <span className="hover:text-eps-yellow transition-colors">г. Волгоград</span>
             </div>
           </div>
         </div>
@@ -86,10 +86,10 @@ export default function Header() {
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center group">
                 <div className="relative">
-                  <span className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-orange-500 group-hover:from-orange-500 group-hover:to-orange-400 transition-all duration-300">
+                  <span className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-eps-red to-eps-yellow group-hover:from-red-600 group-hover:to-eps-yellow transition-all duration-300">
                     ЭПС
                   </span>
-                  <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-orange-500 group-hover:w-full transition-all duration-300"></span>
+                  <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-eps-red group-hover:w-full transition-all duration-300"></span>
                 </div>
                 <span className="ml-2 text-lg font-medium text-gray-800 group-hover:text-gray-600 transition-colors">Инструменты</span>
               </Link>
@@ -207,7 +207,7 @@ export default function Header() {
       </div>
       
       {/* Навигационное меню с градиентным фоном */}
-      <nav className="bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md hidden md:block">
+      <nav className="bg-gradient-to-r from-eps-red to-red-700 text-white shadow-md hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-12 items-center">
             {/* Домашняя страница */}
