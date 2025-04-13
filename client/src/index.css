@@ -4,9 +4,9 @@
 
 @layer base {
   :root {
-    --color-eps-orange: 24 100% 50%;
-    --color-eps-red: 0 91% 58%;
-    --color-eps-yellow: 43 96% 58%;
+    --color-eps-red: 0 100% 50%;
+    --color-eps-yellow: 50 100% 50%;
+    --color-eps-white: 0 0% 100%;
   }
 
   * {
@@ -21,12 +21,12 @@
 @layer components {
   /* Фирменный градиент */
   .bg-eps-gradient {
-    @apply bg-gradient-to-r from-orange-600 via-orange-500 to-yellow-500;
+    @apply bg-gradient-to-r from-eps-red via-eps-red to-eps-yellow;
   }
   
   /* Фирменный градиент для текста */
   .text-eps-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-500;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-eps-red to-eps-yellow;
   }
   
   /* Карточка продукта с эффектами */
@@ -53,7 +53,7 @@
   
   .product-image-container::after {
     content: '';
-    @apply absolute inset-0 opacity-0 transition-opacity duration-500 bg-gradient-to-tr from-orange-500/10 to-transparent pointer-events-none;
+    @apply absolute inset-0 opacity-0 transition-opacity duration-500 bg-gradient-to-tr from-eps-red/10 to-transparent pointer-events-none;
   }
   
   .product-image-container:hover::after {
@@ -79,15 +79,15 @@
   @keyframes pulse-ring {
     0% {
       transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(255, 138, 0, 0.6);
+      box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.6);
     }
     70% {
       transform: scale(1);
-      box-shadow: 0 0 0 6px rgba(255, 138, 0, 0);
+      box-shadow: 0 0 0 6px rgba(255, 0, 0, 0);
     }
     100% {
       transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(255, 138, 0, 0);
+      box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
     }
   }
   
@@ -118,22 +118,18 @@
 
 @layer utilities {
   .bg-eps-gradient {
-    background: linear-gradient(to right, hsl(var(--color-eps-orange)), hsl(var(--color-eps-red)));
+    background: linear-gradient(to right, hsl(var(--color-eps-red)), hsl(var(--color-eps-yellow)));
   }
   
   .text-eps-gradient {
-    background: linear-gradient(to right, hsl(var(--color-eps-orange)), hsl(var(--color-eps-red)));
+    background: linear-gradient(to right, hsl(var(--color-eps-red)), hsl(var(--color-eps-yellow)));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   
   .border-eps-gradient {
-    border-image: linear-gradient(to right, hsl(var(--color-eps-orange)), hsl(var(--color-eps-red))) 1;
-  }
-  
-  .bg-eps-orange {
-    background-color: hsl(var(--color-eps-orange));
+    border-image: linear-gradient(to right, hsl(var(--color-eps-red)), hsl(var(--color-eps-yellow))) 1;
   }
   
   .bg-eps-red {
@@ -144,8 +140,8 @@
     background-color: hsl(var(--color-eps-yellow));
   }
   
-  .text-eps-orange {
-    color: hsl(var(--color-eps-orange));
+  .bg-eps-white {
+    background-color: hsl(var(--color-eps-white));
   }
   
   .text-eps-red {
@@ -154,6 +150,10 @@
   
   .text-eps-yellow {
     color: hsl(var(--color-eps-yellow));
+  }
+  
+  .text-eps-white {
+    color: hsl(var(--color-eps-white));
   }
   
   /* Дополнительные стили */
