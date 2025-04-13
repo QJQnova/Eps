@@ -56,7 +56,7 @@ export default function Header() {
   };
   
   return (
-    <header className="bg-white sticky top-0 z-30 shadow-sm border-b border-red-100">
+    <header className="bg-white z-30 shadow-sm border-b border-red-100">
       {/* Top bar с контактами */}
       <div className="bg-gradient-to-r from-gray-800 to-gray-900 py-2 text-xs text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -79,7 +79,7 @@ export default function Header() {
       </div>
       
       {/* Основная часть шапки с логотипом и поиском */}
-      <div className="relative bg-white">
+      <div className="relative bg-white md:static">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-20 items-center justify-between">
             {/* Логотип с эффектами */}
@@ -104,7 +104,7 @@ export default function Header() {
                     <Input 
                       type="text"
                       placeholder="Поиск товаров..."
-                      className="pr-10 border-orange-200 focus:border-orange-400 focus:ring-orange-400"
+                      className="pr-10 border-red-200 focus:border-eps-red focus:ring-eps-red"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -284,7 +284,7 @@ export default function Header() {
       
       {/* Мобильное меню с обновленным дизайном */}
       <div 
-        className={`md:hidden ${mobileMenuOpen ? 'block' : 'hidden'} bg-white absolute w-full shadow-lg z-20 border-t border-orange-100`}
+        className={`md:hidden ${mobileMenuOpen ? 'block' : 'hidden'} bg-white fixed top-0 w-full shadow-lg z-40 border-t border-orange-100 max-h-screen overflow-y-auto pb-20`}
       >
         <div className="px-2 pt-4 pb-6">
           {/* Поиск в мобильном меню */}
@@ -390,6 +390,65 @@ export default function Header() {
               <p>Режим работы: пн. - пт.: 8:00 - 19:00, сб.: 9:00 - 15:00, вс: выходной</p>
             </div>
           </div>
+        </div>
+      </div>
+      
+      {/* Фиксированное мобильное меню внизу */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg md:hidden z-30">
+        <div className="flex justify-around py-2">
+          <Link href="/" className="flex flex-col items-center p-2 text-gray-600 hover:text-eps-red transition-colors">
+            <div className="p-1.5 rounded-full bg-gray-50">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </div>
+            <span className="text-xs mt-1">Главная</span>
+          </Link>
+          
+          <Link href="/products" className="flex flex-col items-center p-2 text-gray-600 hover:text-eps-red transition-colors">
+            <div className="p-1.5 rounded-full bg-gray-50">
+              <Package className="w-5 h-5" />
+            </div>
+            <span className="text-xs mt-1">Товары</span>
+          </Link>
+          
+          <Link href="/cart" className="flex flex-col items-center p-2 text-gray-600 hover:text-eps-red transition-colors">
+            <div className="p-1.5 rounded-full bg-gray-50 relative">
+              <ShoppingCart className="w-5 h-5" />
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-eps-red text-white text-xs font-medium w-4 h-4 flex items-center justify-center rounded-full shadow-sm">
+                  {itemCount}
+                </span>
+              )}
+            </div>
+            <span className="text-xs mt-1">Корзина</span>
+          </Link>
+          
+          {user ? (
+            <Link href="/profile" className="flex flex-col items-center p-2 text-gray-600 hover:text-eps-red transition-colors">
+              <div className="p-1.5 rounded-full bg-gray-50">
+                <User className="w-5 h-5" />
+              </div>
+              <span className="text-xs mt-1">Профиль</span>
+            </Link>
+          ) : (
+            <Link href="/auth" className="flex flex-col items-center p-2 text-gray-600 hover:text-eps-red transition-colors">
+              <div className="p-1.5 rounded-full bg-gray-50">
+                <LogIn className="w-5 h-5" />
+              </div>
+              <span className="text-xs mt-1">Войти</span>
+            </Link>
+          )}
+          
+          <button 
+            onClick={toggleMobileMenu}
+            className="flex flex-col items-center p-2 text-gray-600 hover:text-eps-red transition-colors"
+          >
+            <div className="p-1.5 rounded-full bg-gray-50">
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </div>
+            <span className="text-xs mt-1">Меню</span>
+          </button>
         </div>
       </div>
     </header>
