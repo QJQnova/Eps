@@ -118,7 +118,7 @@ export default function ProductDetails() {
       <Breadcrumb className="mb-6 text-sm">
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href="/" className="text-gray-500 hover:text-orange-600 flex items-center transition-colors">
+            <Link href="/" className="text-gray-500 hover:text-eps-red flex items-center transition-colors">
               <Home className="h-3.5 w-3.5 mr-1.5" />
               Главная
             </Link>
@@ -129,7 +129,7 @@ export default function ProductDetails() {
         </BreadcrumbSeparator>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href={`/category/${categories.find(cat => cat.id === product.categoryId)?.slug || ''}`} className="text-gray-500 hover:text-orange-600 transition-colors">
+            <Link href={`/category/${categories.find(cat => cat.id === product.categoryId)?.slug || ''}`} className="text-gray-500 hover:text-eps-red transition-colors">
               {categoryName}
             </Link>
           </BreadcrumbLink>
@@ -293,8 +293,8 @@ export default function ProductDetails() {
           
           {/* Features Section */}
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="flex items-start p-3 bg-orange-50 rounded-lg">
-              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3 text-orange-600 feature-icon">
+            <div className="flex items-start p-3 bg-red-50 rounded-lg">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3 text-eps-red feature-icon">
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <div>
@@ -303,8 +303,8 @@ export default function ProductDetails() {
               </div>
             </div>
             
-            <div className="flex items-start p-3 bg-orange-50 rounded-lg">
-              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3 text-orange-600 feature-icon">
+            <div className="flex items-start p-3 bg-yellow-50 rounded-lg">
+              <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3 text-eps-yellow feature-icon">
                 <Truck className="h-5 w-5" />
               </div>
               <div>
@@ -313,8 +313,8 @@ export default function ProductDetails() {
               </div>
             </div>
             
-            <div className="flex items-start p-3 bg-orange-50 rounded-lg">
-              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3 text-orange-600 feature-icon">
+            <div className="flex items-start p-3 bg-red-50 rounded-lg">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3 text-eps-red feature-icon">
                 <RefreshCw className="h-5 w-5" />
               </div>
               <div>
@@ -324,8 +324,8 @@ export default function ProductDetails() {
             </div>
             
             {/* Extra feature slot */}
-            <div className="flex items-start p-3 bg-orange-50 rounded-lg">
-              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3 text-orange-600 feature-icon">
+            <div className="flex items-start p-3 bg-yellow-50 rounded-lg">
+              <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3 text-eps-yellow feature-icon">
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 6V10" stroke="currentColor" strokeWidth="1.5"/>
                   <path d="M12 10L19 17" stroke="currentColor" strokeWidth="1.5"/>
