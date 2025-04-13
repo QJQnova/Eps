@@ -45,8 +45,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
+// Компоненты Header и Footer уже добавляются в App.tsx
 
 // Схема валидации формы регистрации
 const registerSchema = z.object({
@@ -256,7 +255,6 @@ export default function Checkout() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
       <main className="flex-1 bg-gray-50 py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-6">
@@ -525,7 +523,6 @@ export default function Checkout() {
           </div>
         </div>
       </main>
-      <Footer />
       
       {/* Диалоговое окно для быстрой регистрации */}
       <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
