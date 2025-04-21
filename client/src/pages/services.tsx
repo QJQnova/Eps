@@ -3,7 +3,7 @@ import Footer from "@/components/layout/footer";
 import { Helmet } from 'react-helmet';
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
-import { Wrench, Truck, Tool, Shield, CircleDollarSign, Clock } from "lucide-react";
+import { Wrench, Truck, Package, Shield, CircleDollarSign, Clock } from "lucide-react";
 
 export default function ServicesPage() {
   // Прокрутка вверх страницы при загрузке
@@ -77,7 +77,7 @@ export default function ServicesPage() {
             {/* Аренда инструмента */}
             <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
               <div className="bg-gradient-to-r from-eps-red to-red-700 p-4 text-white">
-                <Tool className="h-8 w-8 mb-2" />
+                <Package className="h-8 w-8 mb-2" />
                 <h3 className="text-xl font-semibold">Аренда инструмента</h3>
               </div>
               <div className="p-6">
@@ -285,31 +285,43 @@ export default function ServicesPage() {
             </div>
           </div>
           
-          {/* Консультация */}
-          <div className="mt-16 bg-gray-50 rounded-xl p-8 md:p-12 shadow-inner">
+          {/* Форма обратной связи */}
+          <div className="mt-16 p-8 bg-gray-50 rounded-xl shadow-inner">
             <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="md:w-2/3">
-                <h2 className="text-2xl md:text-3xl font-bold mb-4">Нужна консультация?</h2>
+                <h2 className="text-2xl md:text-3xl font-bold mb-4">Получите бесплатную консультацию</h2>
                 <p className="text-gray-600 mb-6">
-                  Наши специалисты готовы ответить на все ваши вопросы и помочь выбрать оптимальную услугу. Оставьте заявку и мы свяжемся с вами в ближайшее время.
+                  Оставьте свои контактные данные, и наши специалисты свяжутся с вами для консультации по услугам компании ЭПС.
                 </p>
-                <Button size="lg" className="bg-gradient-to-r from-eps-red to-red-700 hover:from-red-700 hover:to-eps-red text-white">
-                  Получить консультацию
-                </Button>
+                
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input 
+                      type="text" 
+                      placeholder="Ваше имя" 
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                    <input 
+                      type="tel" 
+                      placeholder="Ваш телефон" 
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                  </div>
+                  <textarea 
+                    placeholder="Ваш вопрос или комментарий" 
+                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  ></textarea>
+                  <Button className="w-full md:w-auto bg-gradient-to-r from-eps-red to-red-700 hover:from-red-700 hover:to-eps-red text-white">
+                    Отправить запрос
+                  </Button>
+                </div>
               </div>
+              
               <div className="md:w-1/3 flex justify-center">
                 <div className="w-32 h-32 md:w-48 md:h-48 rounded-full bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center">
-                  <img 
-                    src="/img/tools-icon.png" 
-                    alt="Консультация по инструментам" 
-                    className="w-20 h-20 md:w-32 md:h-32 object-contain"
-                    onError={(e) => {
-                      // Если изображение не найдено, используем значок
-                      e.currentTarget.src = '';
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.parentElement.innerHTML = '<svg class="w-16 h-16 md:w-24 md:h-24 text-eps-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>';
-                    }}
-                  />
+                  <svg className="w-16 h-16 md:w-24 md:h-24 text-eps-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                  </svg>
                 </div>
               </div>
             </div>

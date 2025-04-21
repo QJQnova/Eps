@@ -215,6 +215,21 @@ export default function Header() {
               Главная
             </Link>
             
+            {/* Услуги */}
+            <Link href="/services" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
+              Услуги
+            </Link>
+            
+            {/* Акции */}
+            <Link href="/promotions" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
+              Акции
+            </Link>
+            
+            {/* Публикации */}
+            <Link href="/publications" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
+              Публикации
+            </Link>
+            
             {/* Выпадающий список категорий */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
