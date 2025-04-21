@@ -239,6 +239,21 @@ export default function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
             
+            {/* Ссылка на страницу услуг */}
+            <Link href="/services" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
+              Услуги
+            </Link>
+            
+            {/* Ссылка на страницу акций */}
+            <Link href="/promotions" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
+              Акции
+            </Link>
+            
+            {/* Ссылка на страницу публикаций */}
+            <Link href="/publications" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
+              Публикации
+            </Link>
+            
             {/* Ссылка на страницу контактов */}
             <Link href="/contacts" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
               Контакты
@@ -366,11 +381,23 @@ export default function Header() {
               </div>
             </div>
             
-            <Link href="/contacts" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors">
+            <Link href="/services" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-red-50 hover:text-eps-red rounded-lg transition-colors">
+              Услуги
+            </Link>
+            
+            <Link href="/promotions" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-red-50 hover:text-eps-red rounded-lg transition-colors">
+              Акции
+            </Link>
+            
+            <Link href="/publications" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-red-50 hover:text-eps-red rounded-lg transition-colors">
+              Публикации
+            </Link>
+            
+            <Link href="/contacts" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-red-50 hover:text-eps-red rounded-lg transition-colors">
               Контакты
             </Link>
             
-            <Link href="/about" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors">
+            <Link href="/about" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-red-50 hover:text-eps-red rounded-lg transition-colors">
               О компании
             </Link>
             
@@ -440,15 +467,14 @@ export default function Header() {
             </Link>
           )}
           
-          <button 
-            onClick={toggleMobileMenu}
-            className="flex flex-col items-center p-2 text-gray-600 hover:text-eps-red transition-colors"
-          >
+          <Link href="/publications" className="flex flex-col items-center p-2 text-gray-600 hover:text-eps-red transition-colors">
             <div className="p-1.5 rounded-full bg-gray-50">
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+              </svg>
             </div>
-            <span className="text-xs mt-1">Меню</span>
-          </button>
+            <span className="text-xs mt-1">Статьи</span>
+          </Link>
         </div>
       </div>
     </header>
