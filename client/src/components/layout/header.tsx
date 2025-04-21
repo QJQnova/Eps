@@ -209,70 +209,72 @@ export default function Header() {
       {/* Навигационное меню с градиентным фоном */}
       <nav className="bg-gradient-to-r from-eps-red to-red-700 text-white shadow-md hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-12 items-center">
-            {/* Домашняя страница */}
-            <Link href="/" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-              Главная
-            </Link>
-            
-            {/* Услуги */}
-            <Link href="/services" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-              Услуги
-            </Link>
-            
-            {/* Акции */}
-            <Link href="/promotions" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-              Акции
-            </Link>
-            
-            {/* Публикации */}
-            <Link href="/publications" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-              Публикации
-            </Link>
-            
-            {/* Выпадающий список категорий */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-                  Товары <ChevronDown className="h-4 w-4 ml-1 opacity-75" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white p-2 shadow-xl rounded-md border-orange-200 min-w-[200px]">
-                {categories.map((category) => (
-                  <DropdownMenuItem key={category.id} asChild className="rounded-sm hover:bg-orange-50 focus:bg-orange-50">
-                    <Link href={`/category/${category.slug}`} className="w-full p-2 text-gray-700 hover:text-orange-600">
-                      {category.name}
+          <div className="flex h-12 items-center justify-between">
+            <div className="flex space-x-3">
+              {/* Домашняя страница */}
+              <Link href="/" className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
+                Главная
+              </Link>
+              
+              {/* Услуги */}
+              <Link href="/services" className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
+                Услуги
+              </Link>
+              
+              {/* Акции */}
+              <Link href="/promotions" className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
+                Акции
+              </Link>
+              
+              {/* Публикации */}
+              <Link href="/publications" className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
+                Публикации
+              </Link>
+              
+              {/* Выпадающий список категорий */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
+                    Товары <ChevronDown className="h-4 w-4 ml-1 opacity-75" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-white p-2 shadow-xl rounded-md border-orange-200 min-w-[200px]">
+                  {categories.map((category) => (
+                    <DropdownMenuItem key={category.id} asChild className="rounded-sm hover:bg-orange-50 focus:bg-orange-50">
+                      <Link href={`/category/${category.slug}`} className="w-full p-2 text-gray-700 hover:text-orange-600">
+                        {category.name}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator className="bg-orange-100" />
+                  <DropdownMenuItem asChild className="rounded-sm hover:bg-orange-50 focus:bg-orange-50">
+                    <Link href="/products" className="w-full p-2 text-gray-700 hover:text-orange-600 font-medium">
+                      Все товары
                     </Link>
                   </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator className="bg-orange-100" />
-                <DropdownMenuItem asChild className="rounded-sm hover:bg-orange-50 focus:bg-orange-50">
-                  <Link href="/products" className="w-full p-2 text-gray-700 hover:text-orange-600 font-medium">
-                    Все товары
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            {/* Ссылка на страницу контактов */}
-            <Link href="/contacts" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-              Контакты
-            </Link>
-            
-            {/* Ссылка на страницу о компании */}
-            <Link href="/about" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-              О компании
-            </Link>
-            
-            {/* Ссылка на admin-панель для администраторов */}
-            {user?.role === 'admin' && (
-              <Link href="/admin" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-                Админ-панель
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              {/* Ссылка на страницу контактов */}
+              <Link href="/contacts" className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
+                Контакты
               </Link>
-            )}
+              
+              {/* Ссылка на страницу о компании */}
+              <Link href="/about" className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
+                О компании
+              </Link>
+              
+              {/* Ссылка на admin-панель для администраторов */}
+              {user?.role === 'admin' && (
+                <Link href="/admin" className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
+                  Админ-панель
+                </Link>
+              )}
+            </div>
             
-            {/* Поиск для мобильной версии */}
-            <div className="flex items-center ml-auto lg:hidden">
+            {/* Поиск для десктопной версии */}
+            <div className="flex items-center">
               <form onSubmit={handleSearch} className="w-64">
                 <div className="relative">
                   <Input 
