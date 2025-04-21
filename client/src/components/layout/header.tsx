@@ -254,21 +254,6 @@ export default function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
             
-            {/* Ссылка на страницу услуг */}
-            <Link href="/services" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-              Услуги
-            </Link>
-            
-            {/* Ссылка на страницу акций */}
-            <Link href="/promotions" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-              Акции
-            </Link>
-            
-            {/* Ссылка на страницу публикаций */}
-            <Link href="/publications" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-              Публикации
-            </Link>
-            
             {/* Ссылка на страницу контактов */}
             <Link href="/contacts" className="nav-link flex items-center px-4 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
               Контакты
