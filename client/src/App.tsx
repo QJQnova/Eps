@@ -25,6 +25,8 @@ import PasswordResetPage from "@/pages/password-reset-page";
 import ServicesPage from "@/pages/services";
 import PromotionsPage from "@/pages/promotions";
 import PublicationsPage from "@/pages/publications";
+import AboutPage from "@/pages/about";
+import ContactsPage from "@/pages/contacts";
 
 // Admin Pages
 import AdminDashboard from "@/pages/admin/dashboard";
@@ -59,6 +61,8 @@ function Router() {
           <Route path="/services" component={ServicesPage} />
           <Route path="/promotions" component={PromotionsPage} />
           <Route path="/publications" component={PublicationsPage} />
+          <Route path="/about" component={AboutPage} />
+          <Route path="/contacts" component={ContactsPage} />
           
           {/* Protected Routes (требуют авторизации) */}
           <ProtectedRoute path="/checkout" component={Checkout} />
