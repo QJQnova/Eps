@@ -741,6 +741,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Прямое получение списка товаров без Zod-валидации
+  app.get("/api/admin/products-raw-list", async (req, res) => {
+    try {
+      // Прямой запрос к базе данных для получения списка товаров
+      const result = await db.select().from(products).limit(50);
+      res.json(result);
+    } catch (error) {
+      console.error("Ошибка при получении сырого списка продуктов:", error);
+      res.status(500).json({ message: "Внутренняя ошибка сервера" });
+    }
+  });
+  
   // Экстренный маршрут для принудительного удаления товара
   // Использовать только в крайнем случае, когда стандартное удаление не работает
   app.delete("/api/emergency-delete-product/:id", async (req, res) => {

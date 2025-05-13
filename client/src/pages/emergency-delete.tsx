@@ -19,13 +19,25 @@ export default function EmergencyDeletePage() {
   // Простая функция загрузки продуктов
   const fetchProducts = async () => {
     try {
-      const response = await fetch("/api/products?page=1&limit=10");
+      // Используем сырой запрос к базе данных чтобы обойти слой валидации
+      const response = await fetch("/api/admin/products-raw-list");
       if (response.ok) {
         const data = await response.json();
-        setProducts(data.products || []);
+        setProducts(data || []);
+      } else {
+        toast({
+          title: "Ошибка загрузки",
+          description: "Не удалось загрузить список товаров",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Ошибка при загрузке продуктов:", error);
+      toast({
+        title: "Ошибка загрузки",
+        description: "Произошла ошибка при загрузке списка товаров",
+        variant: "destructive",
+      });
     }
   };
 
@@ -36,6 +48,8 @@ export default function EmergencyDeletePage() {
     setLoading(true);
     
     try {
+      console.log(`Удаление товара с ID: ${productId}`);
+      
       // Используем экстренный маршрут для удаления
       const response = await fetch(`/api/emergency-delete-product/${productId}`, {
         method: "DELETE",
@@ -47,15 +61,29 @@ export default function EmergencyDeletePage() {
           description: `Товар с ID ${productId} был успешно удален.`,
         });
         
-        // Сбросить поле ввода и обновить список
+        // Удаляем товар из локального списка для мгновенного обновления UI
+        setProducts(prev => prev.filter(product => product.id !== parseInt(productId)));
+        
+        // Сбросить поле ввода
         setProductId("");
-        setCounter(prev => prev + 1);
+        
+        // Обновить список через небольшую задержку для синхронизации с БД
+        setTimeout(() => {
+          setCounter(prev => prev + 1);
+        }, 500);
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Ошибка при удалении товара");
+        let errorMessage = "Ошибка при удалении товара";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          // Если не удалось распарсить JSON - используем стандартное сообщение
+        }
+        
+        throw new Error(errorMessage);
       }
     } catch (error) {
-      console.error("Ошибка:", error);
+      console.error("Ошибка при удалении:", error);
       toast({
         title: "Ошибка!",
         description: error instanceof Error ? error.message : "Не удалось удалить товар",
