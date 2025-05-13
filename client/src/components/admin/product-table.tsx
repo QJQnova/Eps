@@ -73,13 +73,15 @@ export default function ProductTable() {
   const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // Полностью переработанный метод принудительного удаления
+  // Полностью переработанный метод принудительного удаления через SQL
   const handleDeleteProduct = async (id: number) => {
     if (!id || isDeleting) return;
     
     setIsDeleting(true);
     
     try {
+      console.log(`Удаление товара ID: ${id} через SQL маршрут...`);
+      
       // Визуально удаляем элемент немедленно
       if (data && data.products) {
         const updatedProducts = data.products.filter(product => product.id !== id);
@@ -98,40 +100,49 @@ export default function ProductTable() {
         );
       }
       
-      // Используем экстренный маршрут удаления, который гарантированно работает
-      await fetch(`/api/emergency-delete-product/${id}`, {
+      // Используем SQL маршрут удаления, который гарантированно работает
+      const response = await fetch(`/api/admin/hard-delete-product/${id}`, {
         method: 'DELETE',
         credentials: 'include'
       });
       
-      // Показываем уведомление об успехе
-      toast({
-        title: "Успешно удалено",
-        description: "Товар был успешно удален из системы."
-      });
+      const result = await response.json();
       
-      // Перезагружаем все данные после небольшой задержки
-      setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: ["/api/products"]
+      if (result.success) {
+        console.log(`Товар ID: ${id} успешно удален через SQL`);
+        // Показываем уведомление об успехе
+        toast({
+          title: "Успешно удалено",
+          description: "Товар был успешно удален из базы данных."
         });
-      }, 1000);
+      } else {
+        throw new Error(result.message || "Ошибка при удалении товара");
+      }
+      
+      // Обновляем все возможные запросы, связанные с продуктами
+      setTimeout(() => {
+        // Инвалидируем все запросы, связанные с продуктами
+        queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/categories"] }); // Обновляем счетчики категорий
+        // Принудительно обновляем текущий запрос
+        refetch();
+      }, 500);
       
     } catch (error) {
       console.error("Ошибка при удалении товара:", error);
       
-      // Даже при ошибке показываем, что товар удален успешно
+      // Обрабатываем ошибку и все равно обновляем интерфейс
       toast({
-        title: "Товар удален",
-        description: "Товар был удален из списка."
+        title: "Ошибка при удалении",
+        description: error instanceof Error ? error.message : "Ошибка при удалении товара из базы данных",
+        variant: "destructive"
       });
       
-      // В любом случае перезагружаем данные
+      // В любом случае обновляем данные
       setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: ["/api/products"]
-        });
-      }, 1000);
+        queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+        refetch();
+      }, 500);
     } finally {
       setIsDeleting(false);
       setDeletingProductId(null);
