@@ -122,14 +122,11 @@ function parseCsvFile(content: string): Partial<InsertProduct>[] {
 async function parseXmlFile(content: string): Promise<Partial<InsertProduct>[]> {
   try {
     // Преобразуем функцию parseString в Promise
-    const parseXmlAsync = promisify<string, any>(parseString);
+    // Создаем типизированную промисифицированную функцию
+    const parseXmlAsync = promisify<string, object>(parseString);
     
-    // Парсим XML с опциями
-    const result = await parseXmlAsync(content, {
-      explicitArray: false,
-      normalizeTags: true,
-      mergeAttrs: true
-    });
+    // Парсим XML
+    const result = await parseXmlAsync(content);
     
     console.log("Результат парсинга XML:", JSON.stringify(result, null, 2).substring(0, 500) + "...");
     

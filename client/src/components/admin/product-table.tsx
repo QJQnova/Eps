@@ -29,7 +29,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Pencil, Trash2, Plus, Search } from "lucide-react";
+import { Pencil, Trash2, Plus, Search, Loader2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Product, Category } from "@shared/schema";
@@ -69,45 +69,44 @@ export default function ProductTable() {
     queryKey: ["/api/categories"],
   });
   
+  // State для отслеживания товара на удаление
+  const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
+  
   // Delete product mutation
   const deleteProduct = useMutation({
     mutationFn: async (id: number) => {
+      // Запрос на удаление товара
       try {
-        const response = await apiRequest("DELETE", `/api/products/${id}`);
+        const response = await fetch(`/api/products/${id}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
         
-        // Проверка статуса ответа
-        if (response.status === 404) {
-          // Если товар не найден, считаем операцию успешной (он уже был удален)
-          return { success: true, alreadyDeleted: true };
+        // Для успешного удаления или если товар не найден (уже удален)
+        if (response.status === 204 || response.status === 404) {
+          return { success: true };
         }
         
-        return { success: true };
-      } catch (err: any) {
-        console.error("Ошибка при удалении товара:", err);
-        // В случае ошибки 404, считаем операцию успешной
-        if (err.status === 404) {
-          return { success: true, alreadyDeleted: true };
-        }
-        throw new Error(err.message || "Неизвестная ошибка при удалении товара");
+        // Для других ошибок
+        const errorData = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(errorData.message || `Ошибка: ${response.status}`);
+      } catch (error: any) {
+        console.error('Ошибка при удалении товара:', error);
+        throw new Error(error.message || 'Не удалось удалить товар');
       }
     },
-    onSuccess: (result) => {
-      // Независимо от того, был ли товар уже удален или удален сейчас,
-      // обновляем список товаров
+    onSuccess: () => {
+      // Обновляем список товаров
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       
-      // Показываем соответствующее сообщение
-      if (result.alreadyDeleted) {
-        toast({
-          title: "Товар уже удален",
-          description: "Товар был удален ранее или не существует.",
-        });
-      } else {
-        toast({
-          title: "Товар удален",
-          description: "Товар был успешно удален.",
-        });
-      }
+      // Показываем сообщение об успехе
+      toast({
+        title: "Товар удален",
+        description: "Товар был успешно удален из системы.",
+      });
+      
+      // Сбрасываем ID удаляемого товара
+      setDeletingProductId(null);
     },
     onError: (error: Error) => {
       toast({
@@ -115,6 +114,7 @@ export default function ProductTable() {
         description: error.message || "Не удалось удалить товар",
         variant: "destructive",
       });
+      setDeletingProductId(null);
     }
   });
   
@@ -304,30 +304,14 @@ export default function ProductTable() {
                         </Button>
                       </Link>
                       
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="icon" className="text-red-500 hover:text-red-600">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Удалить товар</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Вы уверены, что хотите удалить "{product.name}"? Это действие нельзя отменить.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Отмена</AlertDialogCancel>
-                            <AlertDialogAction 
-                              className="bg-red-500 hover:bg-red-600"
-                              onClick={() => deleteProduct.mutate(product.id)}
-                            >
-                              Удалить
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="text-red-500 hover:text-red-600"
+                        onClick={() => setDeletingProductId(product.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -369,6 +353,37 @@ export default function ProductTable() {
           </div>
         </div>
       )}
+      
+      {/* Глобальный диалог подтверждения удаления */}
+      <AlertDialog open={deletingProductId !== null} onOpenChange={(open) => !open && setDeletingProductId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Удалить товар</AlertDialogTitle>
+            <AlertDialogDescription>
+              Вы уверены, что хотите удалить этот товар? Это действие нельзя отменить.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeletingProductId(null)}>Отмена</AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-red-500 hover:bg-red-600"
+              onClick={() => {
+                if (deletingProductId !== null) {
+                  deleteProduct.mutate(deletingProductId);
+                }
+              }}
+              disabled={deleteProduct.isPending}
+            >
+              {deleteProduct.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                  Удаление...
+                </>
+              ) : "Удалить"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
