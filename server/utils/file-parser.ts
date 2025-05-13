@@ -71,15 +71,15 @@ function parseCsvFile(content: string): Partial<InsertProduct>[] {
         
         // Convert numeric fields
         if (key === 'price' || key === 'originalPrice') {
-          product[key as keyof InsertProduct] = parseFloat(value);
+          (product as any)[key] = parseFloat(value).toString();
         } 
         // Convert boolean fields
         else if (key === 'isActive' || key === 'isFeatured') {
-          product[key as keyof InsertProduct] = value.toLowerCase() === 'true';
+          (product as any)[key] = value.toLowerCase() === 'true';
         }
         // Convert integer fields
         else if (key === 'stock' || key === 'categoryId') {
-          product[key as keyof InsertProduct] = parseInt(value, 10);
+          (product as any)[key] = parseInt(value, 10);
         }
         // Keep string fields as is
         else {
@@ -99,12 +99,8 @@ function parseCsvFile(content: string): Partial<InsertProduct>[] {
  */
 async function parseXmlFile(content: string): Promise<Partial<InsertProduct>[]> {
   try {
-    const parseXmlPromise = promisify(parseString);
-    const result: any = await parseXmlPromise(content, { 
-      explicitArray: false,
-      normalizeTags: true,
-      mergeAttrs: true
-    });
+    const parseXmlPromise = promisify<string, any>(parseString);
+    const result: any = await parseXmlPromise(content);
     
     if (!result || !result.yml_catalog || !result.yml_catalog.shop || !result.yml_catalog.shop.offers || !result.yml_catalog.shop.offers.offer) {
       throw new Error('XML file does not contain valid product data structure');
@@ -138,9 +134,8 @@ async function parseXmlFile(content: string): Promise<Partial<InsertProduct>[]> 
       if (offer.name || offer._) product.name = offer.name || offer._;
       if (offer.model) product.name = offer.model; // Приоритет model над name
       if (offer.description) product.description = offer.description;
-      if (offer.price) product.price = parseFloat(offer.price);
-      if (offer.oldprice) product.originalPrice = parseFloat(offer.oldprice);
-      if (offer.currencyid && offer.currencyid === 'RUR') product.currency = '₽';
+      if (offer.price) product.price = parseFloat(offer.price).toString();
+      if (offer.oldprice) product.originalPrice = parseFloat(offer.oldprice).toString();
       if (offer.picture) product.imageUrl = offer.picture;
       if (offer.categoryid && categoriesMap[offer.categoryid]) {
         product.categoryId = categoriesMap[offer.categoryid];
@@ -153,6 +148,7 @@ async function parseXmlFile(content: string): Promise<Partial<InsertProduct>[]> 
       }
       
       // Доп. характеристики
+      // Параметры сохраняем в shortDescription в формате строки
       if (offer.param && Array.isArray(offer.param)) {
         const specs: Record<string, string> = {};
         offer.param.forEach((param: any) => {
@@ -161,15 +157,17 @@ async function parseXmlFile(content: string): Promise<Partial<InsertProduct>[]> 
           }
         });
         if (Object.keys(specs).length > 0) {
-          product.specs = JSON.stringify(specs);
+          const specsArr = Object.entries(specs).map(([name, value]) => `${name}: ${value}`);
+          product.shortDescription = specsArr.join(', ');
         }
       }
       
       // Создаем slug из названия
       if (product.name) {
+        const cyrillicPattern = /[^a-zA-Zа-яА-ЯёЁ0-9 ]/g;
         product.slug = product.name
           .toLowerCase()
-          .replace(/[^\wа-яё ]/gui, '')
+          .replace(cyrillicPattern, '')
           .replace(/\s+/g, '-');
       }
       
