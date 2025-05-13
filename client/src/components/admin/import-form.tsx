@@ -72,8 +72,15 @@ export default function ImportForm() {
     
     // Проверка типа файла
     const fileType = selectedFile.type;
-    if (fileType !== 'text/csv' && fileType !== 'application/json') {
-      setError("Пожалуйста, загрузите файл в формате CSV или JSON");
+    const fileExtension = selectedFile.name.split('.').pop()?.toLowerCase();
+    
+    // Проверяем тип файла и расширение
+    if (
+      (fileType !== 'text/csv' && fileType !== 'application/json' && 
+       fileType !== 'text/xml' && fileType !== 'application/xml') &&
+      (fileExtension !== 'csv' && fileExtension !== 'json' && fileExtension !== 'xml')
+    ) {
+      setError("Пожалуйста, загрузите файл в формате CSV, JSON или XML");
       return;
     }
     
@@ -168,7 +175,7 @@ export default function ImportForm() {
       <CardHeader>
         <CardTitle>Массовый импорт товаров</CardTitle>
         <CardDescription>
-          Загрузите файл CSV или JSON для импорта нескольких товаров одновременно.
+          Загрузите файл CSV, JSON или XML для импорта нескольких товаров одновременно.
         </CardDescription>
       </CardHeader>
       <CardContent>
