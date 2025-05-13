@@ -11,7 +11,8 @@ import {
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  Trash2
 } from "lucide-react";
 import { useState } from "react";
 
@@ -62,6 +63,11 @@ export default function AdminSidebar() {
       icon: Upload,
       label: "Импорт товаров",
       href: "/admin/import",
+    },
+    {
+      icon: Trash2,
+      label: "SQL Удаление товаров",
+      href: "/admin/sql-delete",
     },
     {
       icon: Tag,
