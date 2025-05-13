@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSearch } from "wouter/use-location";
+import { useLocation, Link } from "wouter";
 import { Helmet } from "react-helmet";
 
 import { Input } from "@/components/ui/input";
@@ -12,14 +12,21 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Category } from "@shared/schema";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@/components/ui/breadcrumb";
-import { Home } from "lucide-react";
+import { 
+  Breadcrumb, 
+  BreadcrumbItem, 
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+  BreadcrumbPage
+} from "@/components/ui/breadcrumb";
+import { Home, ChevronRight } from "lucide-react";
 import ProductList from "@/components/product/product-list";
 
 export default function Products() {
   // Получение параметров из URL
-  const search = useSearch();
-  const params = new URLSearchParams(search);
+  const [location] = useLocation();
+  const params = new URLSearchParams(location.split("?")[1] || "");
   const initialQuery = params.get("query") || "";
   const initialCategoryId = params.get("categoryId") || "";
   
@@ -36,9 +43,10 @@ export default function Products() {
   
   // При изменении URL обновляем состояние компонента
   useEffect(() => {
-    setQuery(params.get("query") || "");
-    setCategoryId(params.get("categoryId") ? parseInt(params.get("categoryId")) : undefined);
-  }, [search, params]);
+    const newParams = new URLSearchParams(location.split("?")[1] || "");
+    setQuery(newParams.get("query") || "");
+    setCategoryId(newParams.get("categoryId") ? parseInt(newParams.get("categoryId") || "") : undefined);
+  }, [location]);
   
   // Получение названия текущей категории если выбрана
   const categoryName = categoryId 
@@ -59,24 +67,34 @@ export default function Products() {
             {categoryName || "Каталог товаров"}
           </h1>
           <Breadcrumb className="text-gray-300">
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/" className="flex items-center gap-1">
-                <Home className="w-3.5 h-3.5" />
-                <span>Главная</span>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/products" isCurrentPage={!categoryId}>
-                Каталог
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            {categoryId && (
+            <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink isCurrentPage>
-                  {categoryName}
+                <BreadcrumbLink asChild>
+                  <Link href="/" className="flex items-center gap-1">
+                    <Home className="w-3.5 h-3.5" />
+                    <span>Главная</span>
+                  </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-            )}
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                {!categoryId ? (
+                  <BreadcrumbPage>Каталог</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink asChild>
+                    <Link href="/products">Каталог</Link>
+                  </BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
+              {categoryId && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>{categoryName}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </>
+              )}
+            </BreadcrumbList>
           </Breadcrumb>
         </div>
       </div>
