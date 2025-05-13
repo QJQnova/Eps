@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { 
@@ -18,7 +18,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { 
@@ -30,7 +29,6 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Pencil, Trash2, Plus, Search, Loader2 } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Product, Category } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -52,7 +50,7 @@ export default function ProductTable() {
   queryParams.append("limit", limit.toString());
   
   // Fetch products
-  const { data, isLoading } = useQuery<{
+  const { data, isLoading, refetch } = useQuery<{
     products: Product[],
     pagination: {
       page: number,
@@ -64,146 +62,174 @@ export default function ProductTable() {
     queryKey: [`/api/products?${queryParams.toString()}`],
   });
   
-  // Fetch categories for filter
-  const { data: categories = [] } = useQuery<Category[]>({ 
+  // Fetch categories
+  const { data: categoriesData } = useQuery<{ categories: Category[] }>({
     queryKey: ["/api/categories"],
   });
   
-  // State для отслеживания товара на удаление
-  const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
+  const categories = categoriesData?.categories || [];
   
-  // Delete product mutation
-  const deleteProduct = useMutation({
-    mutationFn: async (id: number) => {
-      // Запрос на удаление товара
-      try {
-        const response = await fetch(`/api/products/${id}`, {
-          method: 'DELETE',
-          credentials: 'include'
-        });
+  // State for product being deleted
+  const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Direct DELETE request instead of using useMutation
+  const handleDeleteProduct = async (id: number) => {
+    if (!id || isDeleting) return;
+    
+    setIsDeleting(true);
+    
+    try {
+      // Удаляем продукт напрямую через fetch
+      await fetch(`/api/products/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      
+      // Обновить UI путем локального обновления данных, а не через рефетч
+      if (data && data.products) {
+        // Удаляем товар из локального состояния
+        const updatedProducts = data.products.filter(product => product.id !== id);
         
-        // Для успешного удаления или если товар не найден (уже удален)
-        if (response.status === 204 || response.status === 404) {
-          return { success: true };
-        }
-        
-        // Для других ошибок
-        const errorData = await response.json().catch(() => ({ message: response.statusText }));
-        throw new Error(errorData.message || `Ошибка: ${response.status}`);
-      } catch (error: any) {
-        console.error('Ошибка при удалении товара:', error);
-        throw new Error(error.message || 'Не удалось удалить товар');
+        // Обновляем кэш TanStack Query с новыми данными
+        queryClient.setQueryData(
+          [`/api/products?${queryParams.toString()}`], 
+          {
+            ...data,
+            products: updatedProducts,
+            pagination: {
+              ...data.pagination,
+              total: Math.max(0, data.pagination.total - 1)
+            }
+          }
+        );
       }
-    },
-    onSuccess: () => {
-      // Обновляем список товаров
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       
       // Показываем сообщение об успехе
       toast({
         title: "Товар удален",
-        description: "Товар был успешно удален из системы.",
+        description: "Товар был успешно удален из системы."
       });
       
-      // Сбрасываем ID удаляемого товара
-      setDeletingProductId(null);
-    },
-    onError: (error: Error) => {
+      // Принудительно обновляем список товаров после небольшой задержки
+      setTimeout(() => {
+        refetch();
+      }, 500);
+      
+    } catch (error) {
+      console.error("Ошибка при удалении товара:", error);
       toast({
         title: "Ошибка удаления",
-        description: error.message || "Не удалось удалить товар",
-        variant: "destructive",
+        description: "Не удалось удалить товар. Пожалуйста, попробуйте еще раз.",
+        variant: "destructive"
       });
+    } finally {
+      setIsDeleting(false);
       setDeletingProductId(null);
     }
-  });
+  };
   
   // Toggle product status (active/inactive)
   const toggleProductStatus = useMutation({
-    mutationFn: async ({ id, isActive }: { id: number; isActive: boolean }) => {
-      await apiRequest("PATCH", `/api/products/${id}`, { isActive });
+    mutationFn: async ({ id, isActive }: { id: number, isActive: boolean }) => {
+      const response = await fetch(`/api/products/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ isActive })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP: ${response.status}`);
+      }
+      
+      return await response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+    onSuccess: (updatedProduct) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/products?${queryParams.toString()}`] });
       toast({
-        title: "Статус обновлен",
-        description: "Статус товара был успешно обновлен.",
+        title: "Статус изменен",
+        description: `Товар теперь ${updatedProduct.isActive ? 'активен' : 'неактивен'}.`,
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Ошибка",
-        description: `Не удалось обновить статус товара: ${error}`,
+        description: error.message || "Не удалось изменить статус товара",
         variant: "destructive",
       });
     }
   });
   
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setPage(1); // Reset to first page on new search
-  };
-  
-  const handleCategoryChange = (value: string) => {
-    // Если выбрано "all", очищаем фильтр
-    setCategoryFilter(value === "all" ? "" : value);
-    setPage(1); // Reset to first page on category change
-  };
-  
+  // Helper functions for product status display
   const getStatusBadgeClass = (product: Product) => {
-    if (!product.isActive) return "bg-gray-200 text-gray-800";
-    const stock = product.stock ?? 0;
-    if (stock === 0) return "bg-red-100 text-red-800";
-    if (stock < 10) return "bg-yellow-100 text-yellow-800";
+    if (!product.isActive) return "bg-gray-100 text-gray-800";
+    if (product.stock <= 0) return "bg-red-100 text-red-800";
+    if (product.stock <= 5) return "bg-yellow-100 text-yellow-800";
     return "bg-green-100 text-green-800";
   };
   
   const getStatusText = (product: Product) => {
     if (!product.isActive) return "Неактивен";
-    const stock = product.stock ?? 0;
-    if (stock === 0) return "Нет в наличии";
-    if (stock < 10) return "Мало на складе";
+    if (product.stock <= 0) return "Нет в наличии";
+    if (product.stock <= 5) return "Мало на складе";
     return "Активен";
   };
   
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1); // Reset to first page on new search
+  };
+
+  // Периодически обновляем данные для синхронизации с БД
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      refetch();
+    }, 30000); // Каждые 30 секунд
+    
+    return () => clearInterval(intervalId);
+  }, [refetch]);
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4 sm:mb-0">Управление товарами</h2>
-        
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Управление товарами</h2>
         <Link href="/admin/import">
-          <Button className="bg-primary hover:bg-primary/90">
-            <Plus className="mr-2 h-4 w-4" />
-            Импорт товаров
+          <Button className="bg-red-500 hover:bg-red-600">
+            <Plus className="mr-2 h-4 w-4" /> Импорт товаров
           </Button>
         </Link>
       </div>
       
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <form onSubmit={handleSearch} className="w-full sm:w-1/2">
+      <div className="flex flex-col md:flex-row gap-4">
+        <form onSubmit={handleSearch} className="flex-1">
           <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
             <Input
               type="text"
               placeholder="Поиск товаров..."
+              className="pl-9"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
             />
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
-            </div>
-            <Button type="submit" className="sr-only">Поиск</Button>
           </div>
         </form>
         
-        <div className="w-full sm:w-1/4">
-          <Select value={categoryFilter} onValueChange={handleCategoryChange}>
+        <div className="w-full md:w-64">
+          <Select 
+            value={categoryFilter} 
+            onValueChange={(value) => {
+              setCategoryFilter(value);
+              setPage(1); // Reset to first page on new filter
+            }}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Все категории" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Все категории</SelectItem>
+              <SelectItem value="">Все категории</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id.toString()}>
                   {category.name}
@@ -213,15 +239,13 @@ export default function ProductTable() {
           </Select>
         </div>
         
-        <Link href="/admin/products/create" className="w-full sm:w-auto flex-shrink-0">
-          <Button className="w-full">
-            <Plus className="mr-2 h-4 w-4" />
-            Добавить товар
+        <Link href="/admin/products/new">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" /> Добавить товар
           </Button>
         </Link>
       </div>
       
-      {/* Products Table */}
       <div className="overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
@@ -248,10 +272,10 @@ export default function ProductTable() {
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell"><Skeleton className="h-6 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-16" /></TableCell>
-                  <TableCell className="hidden md:table-cell"><Skeleton className="h-6 w-12" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                  <TableCell className="hidden md:table-cell"><Skeleton className="h-6 w-16" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
                 </TableRow>
               ))
             ) : data?.products && data.products.length > 0 ? (
@@ -331,7 +355,7 @@ export default function ProductTable() {
       {data?.pagination && data.pagination.totalPages > 1 && (
         <div className="flex justify-between items-center mt-6">
           <p className="text-sm text-gray-500">
-            Показано {(page - 1) * limit + 1}-
+           Показано {(page - 1) * limit + 1}-
             {Math.min(page * limit, data.pagination.total)} из {data.pagination.total} товаров
           </p>
           
@@ -369,12 +393,12 @@ export default function ProductTable() {
               className="bg-red-500 hover:bg-red-600"
               onClick={() => {
                 if (deletingProductId !== null) {
-                  deleteProduct.mutate(deletingProductId);
+                  handleDeleteProduct(deletingProductId);
                 }
               }}
-              disabled={deleteProduct.isPending}
+              disabled={isDeleting}
             >
-              {deleteProduct.isPending ? (
+              {isDeleting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
                   Удаление...
