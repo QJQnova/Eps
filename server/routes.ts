@@ -753,6 +753,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Супер-надежное прямое удаление товаров через SQL
+  app.delete("/api/admin/hard-delete-product/:id", async (req, res) => {
+    try {
+      // Получаем ID товара
+      const id = parseInt(req.params.id, 10);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ success: false, message: "Неверный ID товара" });
+      }
+      
+      console.log(`SQL удаление товара с ID: ${id}`);
+      
+      // Непосредственное выполнение SQL запроса
+      await db.execute(sql`DELETE FROM products WHERE id = ${id}`);
+      console.log(`Товар с ID ${id} успешно удален через SQL`);
+      
+      // Возвращаем успешный результат
+      return res.status(200).json({ 
+        success: true, 
+        message: `Товар с ID ${id} успешно удален`,
+        deletedId: id
+      });
+      
+    } catch (error: any) {
+      console.error("Ошибка при удалении товара:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Ошибка при удалении товара: " + (error.message || "Неизвестная ошибка")
+      });
+    }
+  });
+  
   // Экстренный маршрут для принудительного удаления товара
   // Использовать только в крайнем случае, когда стандартное удаление не работает
   app.delete("/api/emergency-delete-product/:id", async (req, res) => {

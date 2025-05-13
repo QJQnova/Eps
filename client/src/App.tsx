@@ -39,6 +39,7 @@ import CategoryManagement from "@/pages/admin/category-management";
 import OrderManagement from "@/pages/admin/order-management";
 import UserManagement from "@/pages/admin/user-management";
 import SettingsManagement from "@/pages/admin/settings-management";
+import SqlDeletePage from "@/pages/admin/sql-delete";
 
 function Router() {
   const [location] = useLocation();
@@ -83,6 +84,7 @@ function Router() {
           <ProtectedRoute path="/admin/orders" component={OrderManagement} />
           <ProtectedRoute path="/admin/users" component={UserManagement} />
           <ProtectedRoute path="/admin/settings" component={SettingsManagement} />
+          <ProtectedRoute path="/admin/sql-delete" component={SqlDeletePage} />
           
           {/* Fallback to 404 */}
           <Route component={NotFound} />
