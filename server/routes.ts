@@ -34,11 +34,15 @@ const upload = multer({
     fileSize: 5 * 1024 * 1024, // 5MB max size
   },
   fileFilter: (req, file, cb) => {
-    // Accept only CSV and JSON files
-    if (file.mimetype === "text/csv" || file.mimetype === "application/json") {
+    // Проверяем тип файла и расширение
+    const allowedMimeTypes = ["text/csv", "application/json", "text/xml", "application/xml"];
+    const fileExtension = file.originalname.split('.').pop()?.toLowerCase();
+    
+    if (allowedMimeTypes.includes(file.mimetype) || 
+        (fileExtension && ['csv', 'json', 'xml'].includes(fileExtension))) {
       cb(null, true);
     } else {
-      cb(new Error("Only CSV and JSON files are allowed"));
+      cb(new Error("Разрешены только файлы в форматах CSV, JSON и XML"));
       // @ts-ignore
       cb(null, false);
     }
