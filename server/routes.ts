@@ -741,6 +741,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Экстренный маршрут для принудительного удаления товара
+  // Использовать только в крайнем случае, когда стандартное удаление не работает
+  app.delete("/api/emergency-delete-product/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Неверный ID товара" });
+      }
+      
+      console.log(`Экстренное удаление товара с ID: ${id}`);
+      
+      // Прямое удаление из базы данных, минуя все слои абстракции
+      try {
+        await db.delete(products).where(eq(products.id, id));
+        console.log(`Товар с ID ${id} успешно удален напрямую из БД`);
+        return res.status(200).json({ success: true, message: `Товар с ID ${id} успешно удален` });
+      } catch (dbErr) {
+        console.error("Ошибка при прямом удалении из БД:", dbErr);
+        // Крайний случай: попытка удаления через SQL запрос
+        try {
+          await db.execute(sql`DELETE FROM products WHERE id = ${id}`);
+          console.log(`Товар с ID ${id} удален с помощью сырого SQL`);
+          return res.status(200).json({ success: true, message: `Товар с ID ${id} успешно удален через SQL` });
+        } catch (sqlErr) {
+          console.error("Ошибка при удалении через SQL:", sqlErr);
+          throw new Error(`Невозможно удалить товар: ${sqlErr.message}`);
+        }
+      }
+    } catch (error) {
+      console.error("Критическая ошибка при экстренном удалении:", error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   // Путь к специфическим маршрутам должен быть перед путями с параметрами
   // Маршрут для получения заказов пользователя
   app.get("/api/orders/my-orders", async (req, res) => {
