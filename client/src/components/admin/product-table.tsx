@@ -72,19 +72,47 @@ export default function ProductTable() {
   // Delete product mutation
   const deleteProduct = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/products/${id}`);
+      try {
+        const response = await apiRequest("DELETE", `/api/products/${id}`);
+        
+        // Проверка статуса ответа
+        if (response.status === 404) {
+          // Если товар не найден, считаем операцию успешной (он уже был удален)
+          return { success: true, alreadyDeleted: true };
+        }
+        
+        return { success: true };
+      } catch (err: any) {
+        console.error("Ошибка при удалении товара:", err);
+        // В случае ошибки 404, считаем операцию успешной
+        if (err.status === 404) {
+          return { success: true, alreadyDeleted: true };
+        }
+        throw new Error(err.message || "Неизвестная ошибка при удалении товара");
+      }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      // Независимо от того, был ли товар уже удален или удален сейчас,
+      // обновляем список товаров
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      toast({
-        title: "Товар удален",
-        description: "Товар был успешно удален.",
-      });
+      
+      // Показываем соответствующее сообщение
+      if (result.alreadyDeleted) {
+        toast({
+          title: "Товар уже удален",
+          description: "Товар был удален ранее или не существует.",
+        });
+      } else {
+        toast({
+          title: "Товар удален",
+          description: "Товар был успешно удален.",
+        });
+      }
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
-        title: "Ошибка",
-        description: `Не удалось удалить товар: ${error}`,
+        title: "Ошибка удаления",
+        description: error.message || "Не удалось удалить товар",
         variant: "destructive",
       });
     }

@@ -465,14 +465,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/products/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const success = await storage.deleteProduct(id);
+      console.log(`Попытка удаления товара с ID: ${id}`);
       
-      if (!success) {
+      // Сначала проверяем, существует ли товар с таким ID
+      const product = await storage.getProductById(id);
+      
+      if (!product) {
+        console.log(`Товар с ID ${id} не найден`);
         return res.status(404).json({ message: "Product not found" });
       }
       
+      // Если товар существует, пытаемся его удалить
+      const success = await storage.deleteProduct(id);
+      
+      if (!success) {
+        console.log(`Не удалось удалить товар с ID ${id}`);
+        return res.status(400).json({ message: "Failed to delete product" });
+      }
+      
+      console.log(`Товар с ID ${id} успешно удален`);
       res.status(204).end();
     } catch (error: any) {
+      console.error(`Ошибка при удалении товара: ${error.message}`);
       res.status(500).json({ message: error.message });
     }
   });
@@ -495,7 +509,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Parsed ${parsedProducts.length} products from file`);
       
       try {
-        // Автодополняем недостающие поля для товаров
+        // Автодополняем недостающие поля для товаров и преобразуем типы
         const productsWithDefaults = parsedProducts.map(product => {
           // Если нет slug, генерируем его из названия
           if (!product.slug && product.name) {
@@ -519,12 +533,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
             product.sku = `${baseName}-${randomId}`;
           }
           
-          // Устанавливаем дефолтные значения для остальных полей
+          // Преобразуем все данные в нужные типы для Zod-схемы
+          // Парсим categoryId в число
+          let categoryId = 1; // По умолчанию 1
+          if (product.categoryId) {
+            if (typeof product.categoryId === 'string') {
+              categoryId = parseInt(product.categoryId, 10);
+              if (isNaN(categoryId)) categoryId = 1;
+            } else if (typeof product.categoryId === 'number') {
+              categoryId = product.categoryId;
+            }
+          }
+          
+          // Конвертируем цену в строку
+          let price = "0";
+          if (product.price) {
+            if (typeof product.price === 'number') {
+              price = product.price.toString();
+            } else if (typeof product.price === 'string') {
+              price = product.price;
+            }
+          }
+          
+          // Булевы значения
+          const isActive = product.isActive !== undefined 
+            ? typeof product.isActive === 'string'
+              ? product.isActive === 'true' || product.isActive === '1' || product.isActive === 'yes'
+              : Boolean(product.isActive)
+            : true;
+            
+          const isFeatured = product.isFeatured !== undefined
+            ? typeof product.isFeatured === 'string'
+              ? product.isFeatured === 'true' || product.isFeatured === '1' || product.isFeatured === 'yes'
+              : Boolean(product.isFeatured)
+            : false;
+          
+          // Возвращаем объект с преобразованными типами
           return {
-            ...product,
-            categoryId: product.categoryId || 1, // Категория по умолчанию
-            price: typeof product.price === 'number' ? product.price.toString() : product.price, // Конвертируем числа в строки
-            isActive: product.isActive ?? true,
+            sku: product.sku || "",
+            name: product.name || "",
+            slug: product.slug || "",
+            description: product.description || null,
+            shortDescription: product.shortDescription || null,
+            price: price,
+            originalPrice: product.originalPrice 
+              ? typeof product.originalPrice === 'number' 
+                ? product.originalPrice.toString() 
+                : product.originalPrice 
+              : null,
+            imageUrl: product.imageUrl || null,
+            stock: product.stock !== undefined ? product.stock : null,
+            categoryId: categoryId,
+            isActive: isActive,
+            isFeatured: isFeatured,
+            tag: product.tag || null
           };
         });
         
