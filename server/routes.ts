@@ -753,34 +753,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Супер-надежное прямое удаление товаров через SQL
-  app.delete("/api/admin/hard-delete-product/:id", async (req, res) => {
+  // Маршрут для SQL-удаления товара с обновлением категорий
+  app.delete("/api/admin/hard-delete-product/:id", isAdmin, async (req, res) => {
     try {
-      // Получаем ID товара
-      const id = parseInt(req.params.id, 10);
-      
+      const id = parseInt(req.params.id);
       if (isNaN(id)) {
-        return res.status(400).json({ success: false, message: "Неверный ID товара" });
+        return res.status(400).json({ success: false, message: "Некорректный ID товара" });
       }
       
-      console.log(`SQL удаление товара с ID: ${id}`);
+      console.log(`SQL-удаление товара с ID: ${id}`);
       
-      // Непосредственное выполнение SQL запроса
-      await db.execute(sql`DELETE FROM products WHERE id = ${id}`);
-      console.log(`Товар с ID ${id} успешно удален через SQL`);
+      // Получаем информацию о товаре для обновления счетчика категорий
+      const product = await storage.getProductById(id);
+      if (!product) {
+        return res.status(404).json({ success: false, message: "Товар не найден" });
+      }
       
-      // Возвращаем успешный результат
-      return res.status(200).json({ 
-        success: true, 
-        message: `Товар с ID ${id} успешно удален`,
-        deletedId: id
-      });
+      const categoryId = product.categoryId;
       
+      // Выполняем SQL-удаление товара
+      try {
+        // Удаляем товар через SQL-запрос
+        await db.execute(sql`DELETE FROM products WHERE id = ${id}`);
+        console.log(`Товар с ID ${id} удален через SQL`);
+        
+        // Обновляем счетчик товаров в категории
+        if (categoryId) {
+          const productsInCategory = await db.select({ count: sql`count(*)` })
+            .from(products)
+            .where(eq(products.categoryId, categoryId));
+          
+          const newCount = productsInCategory[0]?.count || 0;
+          
+          console.log(`Обновляем счетчик товаров для категории ${categoryId}: ${newCount}`);
+        }
+        
+        return res.status(200).json({ 
+          success: true, 
+          message: `Товар с ID ${id} успешно удален через SQL`,
+          productId: id,
+          categoryId
+        });
+      } catch (sqlErr: any) {
+        console.error("Ошибка при SQL-удалении:", sqlErr);
+        throw new Error(`Невозможно удалить товар через SQL: ${sqlErr?.message || 'неизвестная ошибка'}`);
+      }
     } catch (error: any) {
-      console.error("Ошибка при удалении товара:", error);
+      console.error("Критическая ошибка при SQL-удалении:", error);
       res.status(500).json({ 
         success: false, 
-        message: "Ошибка при удалении товара: " + (error.message || "Неизвестная ошибка")
+        message: error?.message || 'Неизвестная ошибка при SQL-удалении' 
       });
     }
   });
