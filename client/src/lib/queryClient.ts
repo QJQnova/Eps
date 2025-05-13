@@ -2,8 +2,19 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    // Для случая 404 при удалении объектов - возвращаем сам ответ без ошибки
+    if (res.status === 404) {
+      return;
+    }
+    
+    try {
+      const data = await res.json();
+      throw { status: res.status, message: data.message || res.statusText, data };
+    } catch (e) {
+      // Если не можем прочитать JSON
+      const text = await res.text();
+      throw { status: res.status, message: text || res.statusText };
+    }
   }
 }
 
@@ -21,6 +32,18 @@ export async function apiRequest(
       body: data ? JSON.stringify(data) : undefined,
       credentials: "include",
     });
+
+    // Специальная обработка для DELETE запросов
+    if (method === 'DELETE') {
+      // Для успешно удаленных ресурсов
+      if (res.status === 204) {
+        return { success: true };
+      }
+      // Для ресурсов, которые не найдены (уже удалены)
+      if (res.status === 404) {
+        return { success: true, alreadyDeleted: true };
+      }
+    }
 
     await throwIfResNotOk(res);
     

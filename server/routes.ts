@@ -533,60 +533,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
             product.sku = `${baseName}-${randomId}`;
           }
           
-          // Преобразуем все данные в нужные типы для Zod-схемы
-          // Парсим categoryId в число
-          let categoryId = 1; // По умолчанию 1
-          if (product.categoryId) {
-            if (typeof product.categoryId === 'string') {
-              categoryId = parseInt(product.categoryId, 10);
-              if (isNaN(categoryId)) categoryId = 1;
-            } else if (typeof product.categoryId === 'number') {
-              categoryId = product.categoryId;
+          // Преобразуем данные и устанавливаем корректные типы
+          const categoryId = (() => {
+            // Обязательное числовое поле categoryId
+            if (product.categoryId) {
+              if (typeof product.categoryId === 'string') {
+                const parsed = parseInt(product.categoryId, 10);
+                return isNaN(parsed) ? 1 : parsed;
+              }
+              if (typeof product.categoryId === 'number') {
+                return product.categoryId;
+              }
             }
-          }
+            return 1; // Значение по умолчанию
+          })();
           
-          // Конвертируем цену в строку
-          let price = "0";
-          if (product.price) {
-            if (typeof product.price === 'number') {
-              price = product.price.toString();
-            } else if (typeof product.price === 'string') {
-              price = product.price;
-            }
-          }
+          // Цена всегда как строка
+          const price = (() => {
+            if (!product.price) return "0";
+            return typeof product.price === 'number' 
+              ? String(product.price) 
+              : String(product.price);
+          })();
           
           // Булевы значения
-          const isActive = product.isActive !== undefined 
-            ? typeof product.isActive === 'string'
-              ? product.isActive === 'true' || product.isActive === '1' || product.isActive === 'yes'
-              : Boolean(product.isActive)
-            : true;
-            
-          const isFeatured = product.isFeatured !== undefined
-            ? typeof product.isFeatured === 'string'
-              ? product.isFeatured === 'true' || product.isFeatured === '1' || product.isFeatured === 'yes'
-              : Boolean(product.isFeatured)
-            : false;
+          const isActive = (() => {
+            if (product.isActive === undefined) return true;
+            if (typeof product.isActive === 'string') {
+              return product.isActive === 'true' || product.isActive === '1' || product.isActive === 'yes';
+            }
+            return Boolean(product.isActive);
+          })();
+          
+          const isFeatured = (() => {
+            if (product.isFeatured === undefined) return false;
+            if (typeof product.isFeatured === 'string') {
+              return product.isFeatured === 'true' || product.isFeatured === '1' || product.isFeatured === 'yes';
+            }
+            return Boolean(product.isFeatured);
+          })();
+          
+          const originalPrice = (() => {
+            if (!product.originalPrice) return null;
+            return typeof product.originalPrice === 'number'
+              ? String(product.originalPrice)
+              : String(product.originalPrice);
+          })();
+          
+          // Строковые поля
+          const sku = String(product.sku || "");
+          const name = String(product.name || "");
+          const slug = String(product.slug || "");
+          const description = product.description || null;
+          const shortDescription = product.shortDescription || null;
+          const imageUrl = product.imageUrl || null;
+          const tag = product.tag || null;
           
           // Возвращаем объект с преобразованными типами
           return {
-            sku: product.sku || "",
-            name: product.name || "",
-            slug: product.slug || "",
-            description: product.description || null,
-            shortDescription: product.shortDescription || null,
-            price: price,
-            originalPrice: product.originalPrice 
-              ? typeof product.originalPrice === 'number' 
-                ? product.originalPrice.toString() 
-                : product.originalPrice 
-              : null,
-            imageUrl: product.imageUrl || null,
+            sku,
+            name,
+            slug,
+            description,
+            shortDescription,
+            price,
+            originalPrice,
+            imageUrl,
             stock: product.stock !== undefined ? product.stock : null,
-            categoryId: categoryId,
-            isActive: isActive,
-            isFeatured: isFeatured,
-            tag: product.tag || null
+            categoryId,
+            isActive,
+            isFeatured,
+            tag
           };
         });
         
