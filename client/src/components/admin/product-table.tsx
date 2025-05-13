@@ -73,25 +73,20 @@ export default function ProductTable() {
   const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // Direct DELETE request instead of using useMutation
+  // Модифицированный метод удаления, который также удаляет товар в UI
   const handleDeleteProduct = async (id: number) => {
     if (!id || isDeleting) return;
     
     setIsDeleting(true);
     
     try {
-      // Удаляем продукт напрямую через fetch
-      await fetch(`/api/products/${id}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      
-      // Обновить UI путем локального обновления данных, а не через рефетч
+      // Сначала - оптимистично удаляем товар из UI перед запросом к серверу
       if (data && data.products) {
-        // Удаляем товар из локального состояния
-        const updatedProducts = data.products.filter(product => product.id !== id);
+        // Сохраняем список продуктов до удаления для восстановления в случае ошибки
+        const originalProducts = [...data.products];
+        const updatedProducts = originalProducts.filter(product => product.id !== id);
         
-        // Обновляем кэш TanStack Query с новыми данными
+        // Немедленно обновляем кэш данных для мгновенного отражения в UI
         queryClient.setQueryData(
           [`/api/products?${queryParams.toString()}`], 
           {
@@ -103,25 +98,51 @@ export default function ProductTable() {
             }
           }
         );
+        
+        // Затем - делаем запрос к серверу
+        const response = await fetch(`/api/products/${id}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+        
+        // Проверяем ответ
+        if (!response.ok && response.status !== 204) {
+          // Если сервер вернул ошибку, возвращаем исходные данные
+          queryClient.setQueryData(
+            [`/api/products?${queryParams.toString()}`], 
+            {
+              ...data,
+              products: originalProducts
+            }
+          );
+          
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Показываем уведомление об успехе
+        toast({
+          title: "Успешно удалено",
+          description: "Товар был успешно удален из системы."
+        });
+        
+        // Полностью обновляем данные через 500мс для синхронизации с сервером
+        setTimeout(() => {
+          queryClient.invalidateQueries({
+            queryKey: [`/api/products`]
+          });
+        }, 500);
       }
-      
-      // Показываем сообщение об успехе
-      toast({
-        title: "Товар удален",
-        description: "Товар был успешно удален из системы."
-      });
-      
-      // Принудительно обновляем список товаров после небольшой задержки
-      setTimeout(() => {
-        refetch();
-      }, 500);
-      
     } catch (error) {
       console.error("Ошибка при удалении товара:", error);
       toast({
         title: "Ошибка удаления",
         description: "Не удалось удалить товар. Пожалуйста, попробуйте еще раз.",
         variant: "destructive"
+      });
+      
+      // При ошибке обновляем данные сразу для синхронизации с сервером
+      queryClient.invalidateQueries({
+        queryKey: [`/api/products`]
       });
     } finally {
       setIsDeleting(false);
@@ -166,14 +187,14 @@ export default function ProductTable() {
   // Helper functions for product status display
   const getStatusBadgeClass = (product: Product) => {
     if (!product.isActive) return "bg-gray-100 text-gray-800";
-    if (product.stock <= 0) return "bg-red-100 text-red-800";
+    if (!product.stock || product.stock <= 0) return "bg-red-100 text-red-800";
     if (product.stock <= 5) return "bg-yellow-100 text-yellow-800";
     return "bg-green-100 text-green-800";
   };
   
   const getStatusText = (product: Product) => {
     if (!product.isActive) return "Неактивен";
-    if (product.stock <= 0) return "Нет в наличии";
+    if (!product.stock || product.stock <= 0) return "Нет в наличии";
     if (product.stock <= 5) return "Мало на складе";
     return "Активен";
   };
