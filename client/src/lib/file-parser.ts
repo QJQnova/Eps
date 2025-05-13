@@ -1,5 +1,7 @@
+import { XMLParser } from 'fast-xml-parser';
+
 /**
- * Converts product data from a CSV or JSON file to a standardized format
+ * Converts product data from a CSV, JSON or XML file to a standardized format
  */
 export async function parseFile(file: File): Promise<any[]> {
   return new Promise((resolve, reject) => {
@@ -20,8 +22,15 @@ export async function parseFile(file: File): Promise<any[]> {
         } else if (fileExtension === 'csv') {
           const products = parseCSV(content);
           resolve(products);
+        } else if (fileExtension === 'xml') {
+          try {
+            const products = parseXML(content);
+            resolve(products);
+          } catch (error) {
+            reject(new Error('Ошибка при разборе XML: ' + error.message));
+          }
         } else {
-          reject(new Error('Unsupported file format. Please use CSV or JSON.'));
+          reject(new Error('Неподдерживаемый формат файла. Пожалуйста, используйте CSV, JSON или XML.'));
         }
       } catch (error) {
         reject(error);
@@ -32,12 +41,18 @@ export async function parseFile(file: File): Promise<any[]> {
       reject(new Error('There was an error reading the file.'));
     };
     
-    if (file.type === 'application/json') {
-      fileReader.readAsText(file);
-    } else if (file.type === 'text/csv') {
+    // Проверка по типу файла и расширению
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (
+      file.type === 'application/json' || 
+      file.type === 'text/csv' || 
+      file.type === 'application/xml' || 
+      file.type === 'text/xml' ||
+      ['json', 'csv', 'xml'].includes(fileExtension || '')
+    ) {
       fileReader.readAsText(file);
     } else {
-      reject(new Error('Unsupported file type. Please upload a CSV or JSON file.'));
+      reject(new Error('Неподдерживаемый тип файла. Пожалуйста, загрузите файл CSV, JSON или XML.'));
     }
   });
 }

@@ -52,6 +52,54 @@ const JSON_TEMPLATE = `[
   }
 ]`;
 
+const XML_TEMPLATE = `<?xml version="1.0" encoding="UTF-8"?>
+<yml_catalog date="2025-05-05MSK16:29:50+03:00">
+<shop>
+  <name>ЭПС Инструменты</name>
+  <company>ООО "ЭПС Стор"</company>
+  <url>https://eps-tools.ru</url>
+  <currencies>
+    <currency id="RUR" rate="1"/>
+  </currencies>
+  <categories>
+    <category id="1">Электроинструменты</category>
+    <category id="2">Ручные инструменты</category>
+    <category id="3">Измерительное оборудование</category>
+    <category id="4">Безопасность и защита</category>
+  </categories>
+  <offers>
+    <offer id="TP001" available="true">
+      <name>Профессиональная Беспроводная Дрель</name>
+      <url>https://eps-tools.ru/product/professional-cordless-drill</url>
+      <price>12999</price>
+      <oldprice>15999</oldprice>
+      <currencyId>RUR</currencyId>
+      <categoryId>1</categoryId>
+      <picture>https://images.unsplash.com/photo-1572981779307-38b8cabb2407</picture>
+      <description>Профессиональная дрель с литий-ионным аккумулятором 18В и двухскоростным редуктором</description>
+      <param name="Бренд">ЭПС</param>
+      <param name="Напряжение">18В</param>
+      <param name="Тип аккумулятора">Li-Ion</param>
+      <param name="Скорости">2</param>
+    </offer>
+    <offer id="TP002" available="true">
+      <name>Цифровой Лазерный Дальномер</name>
+      <url>https://eps-tools.ru/product/digital-laser-measure</url>
+      <price>7999</price>
+      <oldprice>8999</oldprice>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://images.unsplash.com/photo-1586864387789-628af9feed72</picture>
+      <description>Точное лазерное измерение до 50м с расчетом площади и объема</description>
+      <param name="Бренд">ЭПС</param>
+      <param name="Дальность">50м</param>
+      <param name="Точность">±1мм</param>
+      <param name="Функции">Площадь, Объем</param>
+    </offer>
+  </offers>
+</shop>
+</yml_catalog>`;
+
 export default function ImportForm() {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -153,10 +201,22 @@ export default function ImportForm() {
     }
   };
   
-  const downloadTemplate = (type: "csv" | "json") => {
-    const template = type === "csv" ? CSV_TEMPLATE : JSON_TEMPLATE;
-    const fileName = type === "csv" ? "product-template.csv" : "product-template.json";
-    const mimeType = type === "csv" ? "text/csv" : "application/json";
+  const downloadTemplate = (type: "csv" | "json" | "xml") => {
+    let template, fileName, mimeType;
+    
+    if (type === "csv") {
+      template = CSV_TEMPLATE;
+      fileName = "product-template.csv";
+      mimeType = "text/csv";
+    } else if (type === "json") {
+      template = JSON_TEMPLATE;
+      fileName = "product-template.json";
+      mimeType = "application/json";
+    } else {
+      template = XML_TEMPLATE;
+      fileName = "product-template.xml";
+      mimeType = "application/xml";
+    }
     
     const blob = new Blob([template], { type: mimeType });
     const url = URL.createObjectURL(blob);
@@ -190,7 +250,7 @@ export default function ImportForm() {
             type="file" 
             ref={fileInputRef}
             onChange={handleFileChange}
-            accept=".csv,.json" 
+            accept=".csv,.json,.xml" 
             className="hidden" 
           />
           
@@ -209,7 +269,7 @@ export default function ImportForm() {
           <p className="text-gray-500 mb-4">
             {file 
               ? `${(file.size / 1024).toFixed(2)} KB · ${file.type}`
-              : "Перетащите файл CSV или JSON сюда, или нажмите для выбора файла"}
+              : "Перетащите файл CSV, JSON или XML сюда, или нажмите для выбора файла"}
           </p>
           
           {!file && (
@@ -238,6 +298,13 @@ export default function ImportForm() {
               onClick={() => downloadTemplate("json")}
             >
               Шаблон JSON
+            </Button>
+            <Button 
+              variant="link" 
+              className="text-primary"
+              onClick={() => downloadTemplate("xml")}
+            >
+              Шаблон XML
             </Button>
           </div>
         </div>
