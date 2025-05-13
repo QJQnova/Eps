@@ -167,25 +167,58 @@ async function parseXmlFile(content: string): Promise<Partial<InsertProduct>[]> 
         : [result.yml_catalog.shop.offers.offer];
       
       // Преобразуем каждый товар
-      return offers.map((offer: any) => {
+      return offers.map((offer: any, index: number) => {
         const product: Partial<InsertProduct> = {};
         
-        // Маппинг полей YML на поля нашей модели продукта
-        if (offer.id) product.sku = offer.id.toString();
-        if (offer.name || offer._) product.name = offer.name || offer._;
-        if (offer.model) product.name = offer.model; // Приоритет model над name
+        // Получаем название товара из разных возможных полей
+        if (offer.name) product.name = offer.name;
+        else if (offer.n) product.name = offer.n;
+        else if (offer._) product.name = offer._;
+        else if (offer.model) product.name = offer.model;
+        
+        // Если нет имени, пропускаем этот товар
+        if (!product.name) {
+          console.warn(`Товар #${index} пропущен - отсутствует название`);
+          return null;
+        }
+        
+        // Формируем SKU из имени, если нет ID
+        if (offer.id) {
+          product.sku = offer.id.toString();
+        } else if (offer.n) {
+          // Генерация SKU из названия
+          const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+          product.sku = `SKU-${randomPart}`;
+        } else if (product.name) {
+          // Генерация SKU из названия с добавлением уникального идентификатора
+          const cleanedName = product.name
+            .replace(/\s+/g, '-')
+            .replace(/[^a-zA-Zа-яА-ЯёЁ0-9-]/g, '')
+            .substring(0, 10);
+          const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+          product.sku = `${cleanedName}-${randomPart}`;
+        }
+        
+        // Парсим другие поля
         if (offer.description) product.description = offer.description;
         if (offer.price) product.price = parseFloat(offer.price).toString();
         if (offer.oldprice) product.originalPrice = parseFloat(offer.oldprice).toString();
         if (offer.picture) product.imageUrl = offer.picture;
         if (offer.categoryid && categoriesMap[offer.categoryid]) {
           product.categoryId = categoriesMap[offer.categoryid];
+        } else {
+          // Используем категорию по умолчанию, если не указана
+          product.categoryId = 1;
         }
         
         // Статус доступности
         if (offer.available) {
           product.isActive = offer.available.toLowerCase() === 'true';
           product.stock = product.isActive ? 100 : 0; // Примерное значение для наличия
+        } else {
+          // По умолчанию товар активен и в наличии
+          product.isActive = true;
+          product.stock = 100;
         }
         
         // Доп. характеристики
@@ -209,11 +242,16 @@ async function parseXmlFile(content: string): Promise<Partial<InsertProduct>[]> 
           product.slug = product.name
             .toLowerCase()
             .replace(cyrillicPattern, '')
-            .replace(/\s+/g, '-');
+            .replace(/\s+/g, '-')
+            .substring(0, 50); // Ограничиваем длину slug
+            
+          // Добавляем уникальный идентификатор к slug
+          const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+          product.slug = `${product.slug}-${randomPart}`;
         }
         
         return product;
-      });
+      }).filter(Boolean) as Partial<InsertProduct>[];
     } else {
       // Обработка других форматов XML
       console.log("XML не соответствует формату YML, пробуем другие форматы");

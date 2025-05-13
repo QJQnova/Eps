@@ -151,7 +151,24 @@ export const productSearchSchema = z.object({
   limit: z.coerce.number().default(12),
 });
 
-export const bulkImportSchema = z.array(insertProductSchema);
+// Создаем более гибкую схему для импорта
+export const bulkImportSchema = z.array(
+  z.object({
+    sku: z.string().min(1, "SKU обязателен"),
+    name: z.string().min(1, "Название обязательно"),
+    slug: z.string().min(1, "Slug обязателен"),
+    description: z.string().optional().nullable(),
+    shortDescription: z.string().optional().nullable(),
+    price: z.union([z.number(), z.string().transform(val => parseFloat(val))]).pipe(z.number().min(0)),
+    originalPrice: z.union([z.number(), z.string().transform(val => parseFloat(val)), z.null()]).optional().nullable(),
+    imageUrl: z.string().optional().nullable(),
+    stock: z.union([z.number(), z.string().transform(val => parseInt(val, 10)), z.null()]).optional().nullable(),
+    categoryId: z.union([z.number(), z.string().transform(val => parseInt(val, 10))]).pipe(z.number().min(1)).default(1),
+    isActive: z.union([z.boolean(), z.string().transform(val => val === "true")]).default(true),
+    isFeatured: z.union([z.boolean(), z.string().transform(val => val === "true")]).default(false),
+    tag: z.string().optional().nullable(),
+  })
+);
 
 export type ProductSearchParams = z.infer<typeof productSearchSchema>;
 
