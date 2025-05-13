@@ -487,15 +487,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const filePath = req.file.path;
       const fileExt = path.extname(req.file.originalname).toLowerCase();
       
+      console.log("Processing file:", req.file.originalname, "with extension:", fileExt);
+      
       // Parse the file based on its extension
       const parsedProducts = await parseImportFile(filePath, fileExt);
       
+      console.log(`Parsed ${parsedProducts.length} products from file`);
+      
       try {
+        // Автодополняем недостающие поля для товаров
+        const productsWithDefaults = parsedProducts.map(product => {
+          // Если нет slug, генерируем его из названия
+          if (!product.slug && product.name) {
+            const cleanedName = product.name
+              .toLowerCase()
+              .replace(/[^a-zA-Zа-яА-ЯёЁ0-9 ]/g, '')
+              .replace(/\s+/g, '-')
+              .substring(0, 40);
+            
+            // Добавляем уникальный идентификатор
+            const randomId = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            product.slug = `${cleanedName}-${randomId}`;
+          }
+          
+          // Если нет SKU, генерируем его
+          if (!product.sku) {
+            const baseName = product.name 
+              ? product.name.substring(0, 10).replace(/\s+/g, '-') 
+              : 'PROD';
+            const randomId = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            product.sku = `${baseName}-${randomId}`;
+          }
+          
+          // Устанавливаем дефолтные значения для остальных полей
+          return {
+            ...product,
+            categoryId: product.categoryId || 1, // Категория по умолчанию
+            price: typeof product.price === 'number' ? product.price.toString() : product.price, // Конвертируем числа в строки
+            isActive: product.isActive ?? true,
+          };
+        });
+        
         // Validate all products
-        const validatedProducts = validateData(bulkImportSchema, parsedProducts);
+        const validatedProducts = validateData(bulkImportSchema, productsWithDefaults);
+        
+        console.log(`Validated ${validatedProducts.length} products`);
         
         // Import products
         const result = await storage.bulkImportProducts(validatedProducts);
+        
+        console.log(`Import result: success=${result.success}, failed=${result.failed}`);
         
         // Clean up the temporary file
         await fs.unlink(filePath);
@@ -504,9 +545,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (validationError: any) {
         // Clean up the temporary file on error too
         await fs.unlink(filePath);
+        console.error("Validation error:", validationError);
         throw validationError;
       }
     } catch (error: any) {
+      console.error("Import error:", error);
       res.status(400).json({ message: error.message });
     }
   });
