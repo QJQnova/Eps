@@ -55,8 +55,8 @@ const JSON_TEMPLATE = `[
 const XML_TEMPLATE = `<?xml version="1.0" encoding="UTF-8"?>
 <yml_catalog date="2025-05-05MSK16:29:50+03:00">
 <shop>
-  <name>ЭПС Инструменты</name>
-  <company>ООО "ЭПС Стор"</company>
+  <name>ЭПС</name>
+  <company>ООО "ЭПС"</company>
   <url>https://eps-tools.ru</url>
   <currencies>
     <currency id="RUR" rate="1"/>
