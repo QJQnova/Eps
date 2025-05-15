@@ -412,9 +412,9 @@ export default function Header() {
           <div className="mt-6 px-3 pt-4 border-t border-gray-200">
             <p className="text-sm font-medium text-gray-600 mb-2">Контактная информация:</p>
             <div className="space-y-2 text-sm text-gray-500">
-              <p>Телефон: +7 8442 50-58-57</p>
+              <p>Телефон: 8 800 101 38 35</p>
               <p>Адрес: г. Волгоград, ул. им. Маршала Еременко 44</p>
-              <p>Режим работы: пн. - пт.: 8:00 - 19:00, сб.: 9:00 - 15:00, вс: выходной</p>
+              <p>Режим работы: пн. - пт.: 8:00 - 18:00</p>
             </div>
           </div>
         </div>
