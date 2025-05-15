@@ -36,9 +36,7 @@ export default function AboutPage() {
   ];
 
   const workingHours = {
-    weekdays: "8:00 - 19:00",
-    saturday: "9:00 - 15:00",
-    sunday: "выходной"
+    weekdays: "8:00 - 18:00"
   };
 
   return (
@@ -94,8 +92,6 @@ export default function AboutPage() {
                   <Clock className="h-4 w-4 mr-2 mt-1 text-eps-red" />
                   <span>
                     <span className="block">пн. - пт.: {workingHours.weekdays}</span>
-                    <span className="block">сб.: {workingHours.saturday}</span>
-                    <span className="block">вс: {workingHours.sunday}</span>
                   </span>
                 </p>
               </div>

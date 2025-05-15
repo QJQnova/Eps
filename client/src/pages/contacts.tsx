@@ -71,15 +71,13 @@ export default function ContactsPage() {
                   <div className="flex">
                     <Mail className="h-5 w-5 text-eps-red mr-3 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-gray-700">info@eps-tools.ru</p>
+                      <p className="text-gray-700">info@eps.su</p>
                     </div>
                   </div>
                   
                   <div className="border-t pt-4 mt-4">
                     <p className="font-medium text-gray-700 mb-2">Режим работы:</p>
-                    <p className="text-gray-600">Пн. - Пт.: 8:00 - 19:00</p>
-                    <p className="text-gray-600">Сб.: 9:00 - 15:00</p>
-                    <p className="text-gray-600">Вс.: выходной</p>
+                    <p className="text-gray-600">Пн. - Пт.: 8:00 - 18:00</p>
                   </div>
                 </div>
               </div>
@@ -87,7 +85,7 @@ export default function ContactsPage() {
             
             <div className="bg-white rounded-xl shadow-md overflow-hidden">
               <div className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-eps-red">Другие филиалы</h2>
+                <h2 className="text-xl font-semibold mb-4 text-eps-red">Филиалы</h2>
                 
                 <div className="space-y-5">
                   <div className="pb-3 border-b border-gray-100">
