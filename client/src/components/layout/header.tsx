@@ -85,7 +85,7 @@ export default function Header() {
               <Link href="/" className="flex items-center group">
                 <div className="relative">
                   <span className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-eps-red to-eps-yellow group-hover:from-red-600 group-hover:to-eps-yellow transition-all duration-300">
-                    ЭПС - ОБНОВЛЕНО
+                    ЭПС!!!
                   </span>
                   <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-eps-red group-hover:w-full transition-all duration-300"></span>
                 </div>
