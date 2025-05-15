@@ -14,7 +14,7 @@ export default function ServicesPage() {
   return (
     <>
       <Helmet>
-        <title>Услуги | ЭПС - Электроприбор-Сервис</title>
+        <title>Услуги | ЭПС</title>
         <meta name="description" content="Профессиональные услуги от компании ЭПС: ремонт, обслуживание, доставка и аренда инструмента" />
       </Helmet>
 
