@@ -91,7 +91,7 @@ export default function Header() {
                   </span>
                   <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-eps-red group-hover:w-full transition-all duration-300"></span>
                 </div>
-                <span className="ml-2 text-lg font-medium text-gray-800 group-hover:text-gray-600 transition-colors">Инструменты</span>
+                {/* Убираем "Инструменты", оставляем только ЭПС */}
               </Link>
             </div>
             
