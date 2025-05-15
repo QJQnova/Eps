@@ -31,12 +31,10 @@ export default function Footer() {
             <p className="text-gray-400 mb-4">Надежный поставщик профессиональных инструментов и оборудования.</p>
             
             <div className="mb-4">
-              <p className="text-gray-300 text-sm">Телефон: <a href="tel:+78442505857" className="text-eps-orange">+7 8442 50-58-57</a></p>
+              <p className="text-gray-300 text-sm">Телефон: <a href="tel:88001013835" className="text-eps-orange">8 800 101 38 35</a></p>
               <p className="text-gray-300 text-sm">Адрес: г. Волгоград, ул. им. Маршала Еременко 44</p>
               <p className="text-gray-300 text-sm">Режим работы:</p>
-              <p className="text-gray-400 text-xs">пн. - пт.: 8:00 - 19:00</p>
-              <p className="text-gray-400 text-xs">сб.: 9:00 - 15:00</p>
-              <p className="text-gray-400 text-xs">вс: выходной</p>
+              <p className="text-gray-400 text-xs">пн. - пт.: 8:00 - 18:00</p>
             </div>
             
             <div className="flex space-x-4">
@@ -140,7 +138,7 @@ export default function Footer() {
         </div>
         
         <div className="border-t border-gray-700 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">© {new Date().getFullYear()} ЭПС Инструменты. Все права защищены.</p>
+          <p className="text-gray-400 text-sm">© {new Date().getFullYear()} ЭПС. Все права защищены.</p>
           <div className="mt-4 md:mt-0">
             <Link href="/privacy" className="text-gray-400 hover:text-eps-orange text-sm mx-3 transition duration-200">
               Политика конфиденциальности

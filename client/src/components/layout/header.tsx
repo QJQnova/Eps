@@ -63,13 +63,11 @@ export default function Header() {
           <div className="flex justify-between">
             <div className="flex items-center">
               <span className="inline-block hover:text-eps-yellow transition-colors">
-                Телефон: +7 8442 50-58-57
+                Телефон: 8 800 101 38 35
               </span>
             </div>
             <div className="hidden md:flex items-center space-x-6">
-              <span className="hover:text-eps-yellow transition-colors">пн. - пт.: 8:00 - 19:00</span>
-              <span className="hover:text-eps-yellow transition-colors">сб.: 9:00 - 15:00</span>
-              <span className="hover:text-eps-yellow transition-colors">вс: выходной</span>
+              <span className="hover:text-eps-yellow transition-colors">пн. - пт.: 8:00 - 18:00</span>
             </div>
             <div className="md:hidden">
               <span className="hover:text-eps-yellow transition-colors">г. Волгоград</span>

@@ -50,7 +50,7 @@ export default function ContactsPage() {
           <div>
             <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
               <div className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-eps-red">Центральный офис</h2>
+                <h2 className="text-xl font-semibold mb-4 text-eps-red">Волгоград</h2>
                 
                 <div className="space-y-4">
                   <div className="flex">
