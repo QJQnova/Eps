@@ -10,6 +10,7 @@ import InstallAppPrompt from "@/components/pwa/InstallAppPrompt";
 // Layout Components
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import TopBanner from "@/components/layout/top-banner";
 
 // Pages
 import Home from "@/pages/home";
@@ -49,6 +50,7 @@ function Router() {
   
   return (
     <>
+      {!isAdminRoute && <TopBanner />}
       {!isAdminRoute && <Header />}
       
       <main className={isAdminRoute ? "bg-gray-50 min-h-screen" : ""}>
