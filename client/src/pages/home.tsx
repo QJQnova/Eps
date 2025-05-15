@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
+import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
 import { Drill, Hammer, Ruler, HardHat, Wrench } from "lucide-react";
 import CategoryCard from "@/components/category/category-card";
@@ -21,6 +22,10 @@ export default function Home() {
   
   return (
     <div>
+      <Helmet>
+        <title>ЭПС</title>
+        <meta name="description" content="Профессиональные инструменты и оборудование от компании ЭПС. Широкий ассортимент по выгодным ценам." />
+      </Helmet>
       {/* Hero Section - Обновленный современный дизайн */}
       <section className="relative bg-gradient-to-r from-eps-red via-red-600 to-eps-yellow text-white overflow-hidden">
         <div className="absolute inset-0 opacity-15">

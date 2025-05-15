@@ -85,6 +85,10 @@ export default function ProductDetails() {
   if (isLoadingProduct) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <Helmet>
+          <title>{pageTitle}</title>
+          <meta name="description" content="Загрузка информации о товаре - ЭПС" />
+        </Helmet>
         <div className="grid md:grid-cols-2 gap-8">
           <Skeleton className="h-96 w-full rounded-lg" />
           <div>
@@ -118,6 +122,11 @@ export default function ProductDetails() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={product.shortDescription || product.description?.substring(0, 160) || `${product.name} - Качественный инструмент от компании ЭПС`} />
+      </Helmet>
+      
       {/* Breadcrumbs */}
       <Breadcrumb className="mb-6 text-sm">
         <BreadcrumbItem>
