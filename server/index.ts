@@ -6,6 +6,15 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Отключение кеширования для всех ответов
+app.use((req, res, next) => {
+  res.header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.header('Pragma', 'no-cache');
+  res.header('Expires', '0');
+  res.header('Surrogate-Control', 'no-store');
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

@@ -1,5 +1,5 @@
 // Кэшировать приложение
-const CACHE_NAME = 'eps-tools-v1';
+const CACHE_NAME = 'eps-tools-v2-ОБНОВЛЕНО' + Date.now();  // Добавляем timestamp для гарантированного обновления кеша
 
 // Файлы и ресурсы для кэширования
 const urlsToCache = [
@@ -24,53 +24,58 @@ self.addEventListener('install', (event) => {
 // Активация Service Worker
 self.addEventListener('activate', (event) => {
   const cacheWhitelist = [CACHE_NAME];
+  
+  // Принудительный захват клиентов без ожидания перезагрузки
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
+    Promise.all([
+      // Очистка старых кешей
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            // Удаляем ВСЕ ранее созданные кеши
             return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+          })
+        );
+      }),
+      
+      // Заставляем Service Worker сразу же активироваться
+      self.clients.claim()
+    ])
   );
 });
 
 // Перехват запросов для кэширования и оффлайн-доступа
 self.addEventListener('fetch', (event) => {
+  // Стратегия "Network First" с кешированием на отказ сети
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then((response) => {
-        // Возвращаем кэшированный ответ, если он есть
-        if (response) {
-          return response;
+        // Если сетевой запрос успешен, обновляем кеш
+        if (response && response.status === 200 && response.type === 'basic') {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME)
+            .then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
         }
-
-        // В противном случае, делаем сетевой запрос
-        return fetch(event.request)
-          .then((response) => {
-            // Проверка, что ответ валидный
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Копируем ответ, так как он может использоваться только один раз
-            var responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          });
+        return response;
       })
       .catch(() => {
-        // Если все запросы завершились неудачно, показываем резервную страницу
-        if (event.request.url.indexOf('.html') > -1) {
-          return caches.match('/offline.html');
-        }
+        // При падении сети пробуем достать из кеша
+        return caches.match(event.request)
+          .then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            
+            // Если в кеше нет, показываем резервную страницу для HTML
+            if (event.request.url.indexOf('.html') > -1) {
+              return caches.match('/offline.html');
+            }
+            
+            // Или создаем пустой ответ
+            return new Response('Нет соединения с сетью');
+          });
       })
   );
 });
