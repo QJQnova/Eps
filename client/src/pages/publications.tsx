@@ -142,7 +142,7 @@ export default function PublicationsPage() {
   return (
     <>
       <Helmet>
-        <title>Публикации | ЭПС - Электроприбор-Сервис</title>
+        <title>Публикации | ЭПС</title>
         <meta name="description" content="Обзоры, советы, новости и полезная информация об инструментах и оборудовании от компании ЭПС" />
       </Helmet>
 

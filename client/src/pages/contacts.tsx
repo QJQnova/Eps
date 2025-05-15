@@ -38,7 +38,7 @@ export default function ContactsPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <Helmet>
-        <title>Контакты | ЭПС Профессиональный инструмент</title>
+        <title>Контакты | ЭПС</title>
         <meta name="description" content="Свяжитесь с нами для получения информации о продукции, ценах и доставке. Мы всегда рады помочь вам с выбором профессиональных инструментов." />
       </Helmet>
       

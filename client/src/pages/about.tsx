@@ -42,7 +42,7 @@ export default function AboutPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <Helmet>
-        <title>О компании ЭПС | Профессиональный инструмент</title>
+        <title>О компании | ЭПС</title>
         <meta name="description" content="Информация о компании ЭПС, наши филиалы, контакты и режим работы." />
       </Helmet>
 

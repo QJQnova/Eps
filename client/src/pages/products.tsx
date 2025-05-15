@@ -56,7 +56,7 @@ export default function Products() {
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
       <Helmet>
-        <title>{categoryName ? `${categoryName} - ЭПС Инструменты` : "Каталог товаров - ЭПС Инструменты"}</title>
+        <title>{categoryName ? `${categoryName} - ЭПС` : "Каталог товаров - ЭПС"}</title>
         <meta name="description" content="Широкий ассортимент инструментов и оборудования для профессионалов по доступным ценам" />
       </Helmet>
       

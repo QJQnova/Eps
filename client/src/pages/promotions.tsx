@@ -14,7 +14,7 @@ export default function PromotionsPage() {
   return (
     <>
       <Helmet>
-        <title>Акции и спецпредложения | ЭПС - Электроприбор-Сервис</title>
+        <title>Акции и спецпредложения | ЭПС</title>
         <meta name="description" content="Выгодные акции и специальные предложения на инструменты и оборудование от компании ЭПС" />
       </Helmet>
 
