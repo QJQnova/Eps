@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
+import { Helmet } from "react-helmet";
 import { 
   Card,
   CardContent,
@@ -77,6 +78,9 @@ export default function ProductDetails() {
       addToCart(product.id, quantity);
     }
   };
+
+  // Set page title and meta description
+  const pageTitle = product ? `${product.name} - ЭПС` : "Загрузка товара - ЭПС";
 
   if (isLoadingProduct) {
     return (
