@@ -97,6 +97,9 @@ function Router() {
 }
 
 function App() {
+  // Добавляем дату обновления для сброса кеша
+  const updateVersion = "15.05.2025.12:59"; // обновленная дата и время
+  
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -104,6 +107,8 @@ function App() {
           <Router />
           <InstallAppPrompt />
           <Toaster />
+          {/* Невидимый элемент с информацией о версии */}
+          <div style={{ display: "none" }} data-version={updateVersion}></div>
         </CartProvider>
       </AuthProvider>
     </QueryClientProvider>
