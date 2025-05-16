@@ -35,7 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProductTable() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("0");
   const [page, setPage] = useState(1);
   const limit = 10;
   
@@ -249,7 +249,7 @@ export default function ProductTable() {
               <SelectValue placeholder="Все категории" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Все категории</SelectItem>
+              <SelectItem value="0">Все категории</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id.toString()}>
                   {category.name}
