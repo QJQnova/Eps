@@ -358,7 +358,7 @@ export default function PublicationsPage() {
         </div>
       </main>
       
-      <Footer />
+      {/* Footer удален, так как он добавляется в App.tsx */}
     </>
   );
 }

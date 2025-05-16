@@ -188,15 +188,7 @@ export default function ContactsPage() {
         </div>
       </div>
       
-      <div className="mb-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Карта</h2>
-        <div className="bg-gray-100 rounded-xl h-[400px] flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-gray-500 mb-2">Интерактивная карта с местоположением магазинов</p>
-            <p className="text-sm text-gray-400">Для загрузки полной карты нажмите на эту область</p>
-          </div>
-        </div>
-      </div>
+      {/* Карта удалена по запросу клиента */}
     </div>
   );
 }
