@@ -25,12 +25,25 @@ export async function apiRequest(
 ): Promise<any> {
   console.log(`API Request: ${method} ${url}`, data);
   
+  // Добавляем параметр для обхода кэша
+  const noCacheUrl = url.includes('?') 
+    ? `${url}&_nocache=${Date.now()}` 
+    : `${url}?_nocache=${Date.now()}`;
+  
   try {
-    const res = await fetch(url, {
+    const res = await fetch(noCacheUrl, {
       method,
-      headers: data ? { "Content-Type": "application/json" } : {},
+      headers: {
+        ...data ? { "Content-Type": "application/json" } : {},
+        // Добавляем заголовки против кэширования
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      },
       body: data ? JSON.stringify(data) : undefined,
       credentials: "include",
+      // Отключаем кэширование в fetch
+      cache: 'no-store'
     });
 
     // Специальная обработка для DELETE запросов
@@ -77,8 +90,23 @@ export const getQueryFn: <T>(options?: {
   (options) =>
   async ({ queryKey }) => {
     const unauthorizedBehavior = options?.on401 || "throw";
-    const res = await fetch(queryKey[0] as string, {
+    
+    // Добавляем время к запросу для обхода кэширования
+    const url = queryKey[0] as string;
+    const noCacheUrl = url.includes('?') 
+      ? `${url}&_nocache=${Date.now()}` 
+      : `${url}?_nocache=${Date.now()}`;
+    
+    const res = await fetch(noCacheUrl, {
       credentials: "include",
+      headers: {
+        // Добавляем заголовки против кэширования
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      },
+      // Отключаем кэширование fetch
+      cache: 'no-store'
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
@@ -94,12 +122,12 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      refetchOnWindowFocus: false,
-      // Оптимизированные настройки кеширования для всего приложения
-      staleTime: 60000, // 1 минута - данные не будут перезапрашиваться чаще этого времени
-      gcTime: 300000, // 5 минут - данные хранятся в кеше после исчезновения с экрана
+      refetchOnWindowFocus: true,
+      // Настройки кеширования с отключенным длительным кэшированием
+      staleTime: 0, // Данные становятся устаревшими сразу после получения
+      gcTime: 1000, // Кэш сохраняется только 1 секунду после исчезновения с экрана
       retry: 1, // Одна повторная попытка при ошибке
-      refetchOnMount: true, // Запрашиваем данные при монтировании компонента если они устарели
+      refetchOnMount: "always", // Всегда запрашиваем свежие данные при монтировании компонента
     },
     mutations: {
       retry: false,

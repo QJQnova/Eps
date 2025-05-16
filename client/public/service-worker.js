@@ -1,38 +1,32 @@
-// Кэшировать приложение
-const CACHE_NAME = 'eps-tools-v2-ОБНОВЛЕНО' + Date.now();  // Добавляем timestamp для гарантированного обновления кеша
+// Service Worker с отключенным кэшированием
+const CACHE_NAME = 'eps-tools-v3-NO-CACHE-' + Date.now();  // Уникальное имя кеша
 
-// Файлы и ресурсы для кэширования
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/assets/index.css',
-  '/assets/index.js'
-];
-
-// Установка Service Worker
+// При установке сразу очищаем все кеши
 self.addEventListener('install', (event) => {
+  console.log('Service Worker: Установка без кеширования');
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Кэш открыт');
-        return cache.addAll(urlsToCache);
-      })
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          console.log(`Service Worker: Очищен кеш ${cacheName}`);
+          return caches.delete(cacheName);
+        })
+      );
+    }).then(() => self.skipWaiting())
   );
 });
 
-// Активация Service Worker
+// При активации снова очищаем все кеши и сразу активируемся
 self.addEventListener('activate', (event) => {
-  const cacheWhitelist = [CACHE_NAME];
+  console.log('Service Worker: Активация с очисткой кеша');
   
-  // Принудительный захват клиентов без ожидания перезагрузки
   event.waitUntil(
     Promise.all([
-      // Очистка старых кешей
+      // Очистка всех кешей
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            // Удаляем ВСЕ ранее созданные кеши
+            console.log(`Service Worker: Очищен кеш при активации: ${cacheName}`);
             return caches.delete(cacheName);
           })
         );
@@ -44,38 +38,34 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Перехват запросов для кэширования и оффлайн-доступа
+// Перехват запросов с отключенным кешированием
 self.addEventListener('fetch', (event) => {
-  // Стратегия "Network First" с кешированием на отказ сети
+  // Для API запросов всегда используем сеть и никогда не кешируем
+  if (event.request.url.includes('/api/')) {
+    console.log(`Service Worker: API запрос без кеширования: ${event.request.url}`);
+    
+    // Добавляем случайный параметр для обхода кеша
+    const url = new URL(event.request.url);
+    url.searchParams.append('_nocache', Date.now());
+    
+    const noCacheRequest = new Request(url.toString(), {
+      method: event.request.method,
+      headers: new Headers(event.request.headers),
+      mode: event.request.mode,
+      credentials: event.request.credentials,
+      cache: 'no-store'
+    });
+    
+    event.respondWith(fetch(noCacheRequest));
+    return;
+  }
+  
+  // Для остальных запросов всегда обращаемся в сеть
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Если сетевой запрос успешен, обновляем кеш
-        if (response && response.status === 200 && response.type === 'basic') {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-        }
-        return response;
-      })
+    fetch(event.request, { cache: 'no-store' })
       .catch(() => {
-        // При падении сети пробуем достать из кеша
-        return caches.match(event.request)
-          .then((cachedResponse) => {
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            
-            // Если в кеше нет, показываем резервную страницу для HTML
-            if (event.request.url.indexOf('.html') > -1) {
-              return caches.match('/offline.html');
-            }
-            
-            // Или создаем пустой ответ
-            return new Response('Нет соединения с сетью');
-          });
+        // Только при отсутствии сети показываем сообщение
+        return new Response('Нет соединения с сетью. Обновите страницу.');
       })
   );
 });

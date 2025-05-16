@@ -6,12 +6,23 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Отключение кеширования для всех ответов
+// Отключение кеширования для всех ответов - усиленная версия
 app.use((req, res, next) => {
-  res.header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  // Полное отключение кэширования для всех ответов
+  res.header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
   res.header('Pragma', 'no-cache');
-  res.header('Expires', '0');
+  res.header('Expires', '-1');
   res.header('Surrogate-Control', 'no-store');
+  res.header('Vary', '*');
+  
+  // Добавляем случайный заголовок для обхода промежуточных кэшей
+  res.header('X-No-Cache', Date.now().toString());
+  
+  // Если это API запрос, дополнительно убедимся в отсутствии кэширования
+  if (req.path.startsWith('/api/')) {
+    res.header('X-API-Time', new Date().toISOString());
+  }
+  
   next();
 });
 
