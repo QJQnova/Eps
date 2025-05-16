@@ -48,45 +48,29 @@ export default function ContactsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Информация о контактах */}
           <div>
-            <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
-              <div className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-eps-red">Волгоград</h2>
-                
-                <div className="space-y-4">
-                  <div className="flex">
-                    <MapPin className="h-5 w-5 text-eps-red mr-3 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-gray-700">г. Волгоград, улица им Маршала Еременко, дом 44</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex">
-                    <Phone className="h-5 w-5 text-eps-red mr-3 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-gray-700">8 800 101 38 35</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex">
-                    <Mail className="h-5 w-5 text-eps-red mr-3 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-gray-700">info@eps.su</p>
-                    </div>
-                  </div>
-                  
-                  <div className="border-t pt-4 mt-4">
-                    <p className="font-medium text-gray-700 mb-2">Режим работы:</p>
-                    <p className="text-gray-600">Пн. - Пт.: 8:00 - 18:00</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
             <div className="bg-white rounded-xl shadow-md overflow-hidden">
               <div className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-eps-red"></h2>
-                
                 <div className="space-y-5">
+                  <div className="border-b border-gray-100 pb-5">
+                    <div className="flex mb-4 items-center">
+                      <Phone className="h-5 w-5 text-eps-red mr-3 flex-shrink-0" />
+                      <p className="text-gray-700 font-medium">8 800 101 38 35</p>
+                    </div>
+                    <div className="flex mb-4 items-center">
+                      <Mail className="h-5 w-5 text-eps-red mr-3 flex-shrink-0" />
+                      <p className="text-gray-700">info@eps.su</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-700 mb-2">Режим работы:</p>
+                      <p className="text-gray-600">Пн. - Пт.: 8:00 - 18:00</p>
+                    </div>
+                  </div>
+                  
+                  <div className="pb-3 border-b border-gray-100">
+                    <p className="font-medium text-gray-800">г. Волгоград</p>
+                    <p className="text-gray-600 mb-1">улица им Маршала Еременко, дом 44</p>
+                  </div>
+
                   <div className="pb-3 border-b border-gray-100">
                     <p className="font-medium text-gray-800">г. Ростов-на-Дону</p>
                     <p className="text-gray-600 mb-1">проспект Королёва, 1Э</p>
