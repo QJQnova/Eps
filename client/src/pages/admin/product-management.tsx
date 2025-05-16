@@ -28,7 +28,7 @@ export default function ProductManagement() {
     setIsDeleting(true);
     
     try {
-      // Используем axios напрямую через нативный fetch
+      // Используем обычный fetch для DELETE запроса
       const response = await fetch("/api/admin/products/delete-all", {
         method: 'DELETE',
         credentials: 'include',
@@ -40,15 +40,20 @@ export default function ProductManagement() {
       
       // Проверяем статус
       if (response.ok) {
-        // Не пытаемся обработать ответ как JSON, вместо этого используем проверку статуса
         toast({
           title: "Все товары удалены",
           description: "Операция выполнена успешно"
         });
         
-        // Обновляем данные в таблице
-        queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+        // Полностью сбрасываем кеш и принудительно обновляем страницу для отображения актуальных данных
+        queryClient.invalidateQueries();
+        queryClient.resetQueries();
+        
+        // Добавляем небольшую задержку, чтобы запросы успели отработать
+        setTimeout(() => {
+          // Принудительно переходим на первую страницу для гарантированной перезагрузки данных
+          window.location.href = '/admin/products';
+        }, 1000);
       } else {
         throw new Error("Не удалось удалить все товары. Статус: " + response.status);
       }

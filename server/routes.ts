@@ -758,13 +758,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Запрос на удаление всех товаров");
       
+      // Сначала проверяем, успешно ли удалились товары
+      const allProducts = await db.select().from(products);
+      console.log(`Количество товаров перед удалением: ${allProducts.length}`);
+      
       // Используем прямой SQL запрос для удаления всех товаров из корзины
       await db.execute(sql`DELETE FROM cart_items`);
       console.log("Все элементы корзины удалены");
       
       // Удаляем все товары с использованием прямого SQL запроса
-      await db.execute(sql`DELETE FROM products`);
-      console.log("Все товары удалены");
+      await db.execute(sql`TRUNCATE TABLE products CASCADE`);
+      console.log("Все товары удалены через TRUNCATE");
+      
+      // Проверяем результат удаления
+      const remainingProducts = await db.select().from(products);
+      console.log(`Количество товаров после удаления: ${remainingProducts.length}`);
+      
+      if (remainingProducts.length > 0) {
+        console.log("ВНИМАНИЕ: Товары не были полностью удалены. Пробуем другой метод.");
+        
+        // Попробуем удалить ещё раз через DELETE
+        await db.execute(sql`DELETE FROM products`);
+        
+        const finalCheck = await db.select().from(products);
+        console.log(`Финальная проверка, количество товаров: ${finalCheck.length}`);
+      }
+      
+      // Очищаем кеш запросов на сервере - метод не нужен
       
       // Отправляем только строго правильный JSON
       return res.status(200).json({ 
