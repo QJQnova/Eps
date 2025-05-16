@@ -7,7 +7,7 @@ import {
   insertCartItemSchema, productSearchSchema, bulkImportSchema,
   orderInputSchema, orderSearchSchema, userSearchSchema,
   shopSettingsSchema, seoSettingsSchema, passwordResetRequestSchema,
-  passwordResetSchema, products
+  passwordResetSchema, products, cartItems
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
@@ -758,26 +758,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Запрос на удаление всех товаров");
       
-      // Сначала удаляем все элементы корзины
-      await db.delete(cartItems);
+      // Используем прямой SQL запрос для удаления всех товаров из корзины
+      await db.execute(sql`DELETE FROM cart_items`);
+      console.log("Все элементы корзины удалены");
       
-      // Затем удаляем все товары
-      const result = await db.delete(products).returning();
+      // Удаляем все товары с использованием прямого SQL запроса
+      await db.execute(sql`DELETE FROM products`);
+      console.log("Все товары удалены");
       
-      const count = result.length;
-      console.log(`Все товары удалены успешно. Количество: ${count}`);
-      
-      res.json({ 
+      // Отправляем только строго правильный JSON
+      return res.status(200).json({ 
         success: true, 
-        message: `Успешно удалено ${count} товаров`, 
-        count 
+        message: "Все товары успешно удалены"
       });
     } catch (error) {
       console.error("Ошибка при удалении всех товаров:", error);
-      res.status(500).json({ 
+      
+      // Гарантируем, что отправляем только корректный JSON
+      return res.status(500).json({ 
         success: false, 
-        message: "Ошибка при удалении всех товаров", 
-        error: String(error) 
+        message: "Ошибка при удалении всех товаров" 
       });
     }
   });
