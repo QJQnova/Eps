@@ -1,5 +1,4 @@
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
+// Удалены импорты Header и Footer, так как они подключаются в App.tsx
 import { Helmet } from 'react-helmet';
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";

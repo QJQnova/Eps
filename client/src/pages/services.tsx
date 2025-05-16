@@ -1,5 +1,4 @@
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
+// Удалены импорты Header и Footer, так как они подключаются в App.tsx
 import { Helmet } from 'react-helmet';
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
@@ -18,7 +17,7 @@ export default function ServicesPage() {
         <meta name="description" content="Профессиональные услуги от компании ЭПС: ремонт, обслуживание, доставка и аренда инструмента" />
       </Helmet>
 
-      <Header />
+      {/* Хедер удален, так как он добавляется в App.tsx */}
       
       <main className="min-h-screen pt-8 pb-16">
         <div className="container px-4 mx-auto">
