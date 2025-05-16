@@ -69,6 +69,7 @@ export default function ContactsPage() {
                   <div className="pb-3 border-b border-gray-100">
                     <p className="font-medium text-gray-800">г. Волгоград</p>
                     <p className="text-gray-600 mb-1">улица им Маршала Еременко, дом 44</p>
+                    <p className="text-gray-600">Тел.: +7 929 780-48-46</p>
                   </div>
 
                   <div className="pb-3 border-b border-gray-100">
