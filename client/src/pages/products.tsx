@@ -107,14 +107,14 @@ export default function Products() {
               Категория
             </label>
             <Select 
-              value={categoryId?.toString() || ""} 
-              onValueChange={(value) => setCategoryId(value ? parseInt(value) : undefined)}
+              value={categoryId?.toString() || "0"} 
+              onValueChange={(value) => setCategoryId(value !== "0" ? parseInt(value) : undefined)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Все категории" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Все категории</SelectItem>
+                <SelectItem value="0">Все категории</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id.toString()}>
                     {category.name}
