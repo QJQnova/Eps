@@ -34,7 +34,6 @@ export default function Footer() {
               <div className="mb-2">
                 <p className="text-gray-300 text-sm font-medium">Телефоны:</p>
                 <p className="text-gray-300 text-sm"><a href="tel:88001013835" className="text-eps-orange">8 800 101 38 35</a></p>
-                <p className="text-gray-300 text-sm"><a href="tel:+79297804846" className="text-eps-orange">+7 929 780-48-46</a> (Волгоград)</p>
               </div>
               
               <div className="mb-2">
@@ -50,20 +49,7 @@ export default function Footer() {
               <p className="text-gray-400 text-xs">пн. - пт.: 8:00 - 18:00</p>
             </div>
             
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-eps-orange transition duration-200">
-                <Facebook size={20} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-eps-red transition duration-200">
-                <Twitter size={20} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-eps-yellow transition duration-200">
-                <Instagram size={20} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-eps-orange transition duration-200">
-                <Youtube size={20} />
-              </a>
-            </div>
+
           </div>
           
           <div>
