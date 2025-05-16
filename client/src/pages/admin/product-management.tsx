@@ -28,24 +28,29 @@ export default function ProductManagement() {
     setIsDeleting(true);
     
     try {
+      // Используем axios напрямую через нативный fetch
       const response = await fetch("/api/admin/products/delete-all", {
         method: 'DELETE',
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
       });
       
-      const result = await response.json();
-      
-      if (result.success) {
+      // Проверяем статус
+      if (response.ok) {
+        // Не пытаемся обработать ответ как JSON, вместо этого используем проверку статуса
         toast({
           title: "Все товары удалены",
-          description: `Удалено ${result.count} товаров.`
+          description: "Операция выполнена успешно"
         });
         
         // Обновляем данные в таблице
         queryClient.invalidateQueries({ queryKey: ["/api/products"] });
         queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
       } else {
-        throw new Error(result.message || "Не удалось удалить товары");
+        throw new Error("Не удалось удалить все товары. Статус: " + response.status);
       }
     } catch (error) {
       toast({
