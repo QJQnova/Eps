@@ -28,36 +28,43 @@ export default function ProductManagement() {
     setIsDeleting(true);
     
     try {
-      // Используем обычный fetch для DELETE запроса
-      const response = await fetch("/api/admin/products/delete-all", {
+      // Используем обычный fetch с уникальным параметром для предотвращения кэширования
+      const noCacheParam = new Date().getTime();
+      const response = await fetch(`/api/admin/products/delete-all?nocache=${noCacheParam}`, {
         method: 'DELETE',
         credentials: 'include',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       });
       
-      // Проверяем статус
+      // Проверяем ответ
       if (response.ok) {
+        const data = await response.json();
+        console.log('Результат удаления товаров:', data);
+        
         toast({
           title: "Все товары удалены",
-          description: "Операция выполнена успешно"
+          description: `Операция выполнена успешно. Удалено товаров: ${data.count || 'все'}`
         });
         
-        // Полностью сбрасываем кеш и принудительно обновляем страницу для отображения актуальных данных
-        queryClient.invalidateQueries();
-        queryClient.resetQueries();
+        // Очищаем кэш запросов полностью
+        queryClient.clear();
         
-        // Добавляем небольшую задержку, чтобы запросы успели отработать
+        // Принудительная перезагрузка страницы с флагом отключения кэша
         setTimeout(() => {
-          // Принудительно переходим на первую страницу для гарантированной перезагрузки данных
-          window.location.href = '/admin/products';
-        }, 1000);
+          window.location.href = `/admin/products?refresh=${new Date().getTime()}`;
+        }, 500);
       } else {
         throw new Error("Не удалось удалить все товары. Статус: " + response.status);
       }
     } catch (error) {
+      console.error('Ошибка при удалении товаров:', error);
+      
       toast({
         title: "Ошибка",
         description: error instanceof Error ? error.message : "Не удалось удалить все товары",

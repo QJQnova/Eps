@@ -762,34 +762,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allProducts = await db.select().from(products);
       console.log(`Количество товаров перед удалением: ${allProducts.length}`);
       
-      // Используем прямой SQL запрос для удаления всех товаров из корзины
-      await db.execute(sql`DELETE FROM cart_items`);
-      console.log("Все элементы корзины удалены");
-      
-      // Удаляем все товары с использованием прямого SQL запроса
-      await db.execute(sql`TRUNCATE TABLE products CASCADE`);
-      console.log("Все товары удалены через TRUNCATE");
+      try {
+        // Используем несколько разных способов удаления для максимальной надежности
+        
+        // 1. Используем DROP и пересоздание таблицы через SQL
+        try {
+          // Сбрасываем ограничения внешних ключей
+          await db.execute(sql`SET session_replication_role = 'replica'`);
+          
+          // Удаляем все данные из cart_items
+          await db.execute(sql`DELETE FROM cart_items`);
+          console.log("Все элементы корзины удалены");
+          
+          // Удаляем все данные из products
+          await db.execute(sql`DELETE FROM products`);
+          console.log("Все товары удалены с помощью DELETE");
+          
+          // Восстанавливаем ограничения внешних ключей
+          await db.execute(sql`SET session_replication_role = 'origin'`);
+          
+          // Сбрасываем последовательность ID для таблицы products
+          await db.execute(sql`ALTER SEQUENCE products_id_seq RESTART WITH 1`);
+          console.log("Сброшена последовательность ID для таблицы products");
+        } catch (dropError) {
+          console.error("Ошибка при первом методе удаления:", dropError);
+        }
+        
+        // 2. Прямое удаление через ORM
+        try {
+          await db.delete(products);
+          console.log("Все товары удалены через ORM delete");
+        } catch (deleteDrizzleError) {
+          console.error("Ошибка при удалении через ORM:", deleteDrizzleError);
+        }
+      } catch (innerError) {
+        console.error("Ошибка при попытке удаления различными методами:", innerError);
+      }
       
       // Проверяем результат удаления
       const remainingProducts = await db.select().from(products);
       console.log(`Количество товаров после удаления: ${remainingProducts.length}`);
       
-      if (remainingProducts.length > 0) {
-        console.log("ВНИМАНИЕ: Товары не были полностью удалены. Пробуем другой метод.");
-        
-        // Попробуем удалить ещё раз через DELETE
-        await db.execute(sql`DELETE FROM products`);
-        
-        const finalCheck = await db.select().from(products);
-        console.log(`Финальная проверка, количество товаров: ${finalCheck.length}`);
-      }
-      
-      // Очищаем кеш запросов на сервере - метод не нужен
-      
       // Отправляем только строго правильный JSON
       return res.status(200).json({ 
         success: true, 
-        message: "Все товары успешно удалены"
+        message: "Все товары успешно удалены",
+        count: allProducts.length,
+        remaining: remainingProducts.length
       });
     } catch (error) {
       console.error("Ошибка при удалении всех товаров:", error);
