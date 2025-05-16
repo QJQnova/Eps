@@ -64,11 +64,7 @@ export default function AdminSidebar() {
       label: "Импорт товаров",
       href: "/admin/import",
     },
-    {
-      icon: Trash2,
-      label: "SQL Удаление товаров",
-      href: "/admin/sql-delete",
-    },
+
     {
       icon: Tag,
       label: "Категории",
