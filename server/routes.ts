@@ -753,6 +753,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Маршрут для удаления всех товаров
+  app.delete("/api/admin/products/delete-all", isAdmin, async (req, res) => {
+    try {
+      console.log("Запрос на удаление всех товаров");
+      
+      // Сначала удаляем все элементы корзины
+      await db.delete(cartItems);
+      
+      // Затем удаляем все товары
+      const result = await db.delete(products).returning();
+      
+      const count = result.length;
+      console.log(`Все товары удалены успешно. Количество: ${count}`);
+      
+      res.json({ 
+        success: true, 
+        message: `Успешно удалено ${count} товаров`, 
+        count 
+      });
+    } catch (error) {
+      console.error("Ошибка при удалении всех товаров:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Ошибка при удалении всех товаров", 
+        error: String(error) 
+      });
+    }
+  });
+  
   // Маршрут для SQL-удаления товара с обновлением категорий
   app.delete("/api/admin/hard-delete-product/:id", isAdmin, async (req, res) => {
     try {
