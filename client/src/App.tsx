@@ -50,7 +50,6 @@ function Router() {
   
   return (
     <>
-      {!isAdminRoute && <TopBanner />}
       {!isAdminRoute && <Header />}
       
       <main className={isAdminRoute ? "bg-gray-50 min-h-screen" : ""}>

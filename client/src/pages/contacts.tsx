@@ -63,8 +63,7 @@ export default function ContactsPage() {
                   <div className="flex">
                     <Phone className="h-5 w-5 text-eps-red mr-3 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-gray-700">+7 929 780-48-46</p>
-                      <p className="text-gray-500 text-sm">Бесплатная линия: 8 800 101 38 35</p>
+                      <p className="text-gray-700">8 800 101 38 35</p>
                     </div>
                   </div>
                   
@@ -85,7 +84,7 @@ export default function ContactsPage() {
             
             <div className="bg-white rounded-xl shadow-md overflow-hidden">
               <div className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-eps-red">Филиалы</h2>
+                <h2 className="text-xl font-semibold mb-4 text-eps-red"></h2>
                 
                 <div className="space-y-5">
                   <div className="pb-3 border-b border-gray-100">
