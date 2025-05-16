@@ -145,7 +145,7 @@ export default function PublicationsPage() {
         <meta name="description" content="Обзоры, советы, новости и полезная информация об инструментах и оборудовании от компании ЭПС" />
       </Helmet>
 
-      <Header />
+      {/* Хедер удален, так как он добавляется в App.tsx */}
       
       <main className="min-h-screen pt-8 pb-16">
         <div className="container px-4 mx-auto">

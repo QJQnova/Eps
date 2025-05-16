@@ -17,7 +17,7 @@ export default function PromotionsPage() {
         <meta name="description" content="Выгодные акции и специальные предложения на инструменты и оборудование от компании ЭПС" />
       </Helmet>
 
-      <Header />
+      {/* Хедер удален, так как он добавляется в App.tsx */}
       
       <main className="min-h-screen pt-8 pb-16">
         <div className="container px-4 mx-auto">
@@ -296,7 +296,7 @@ export default function PromotionsPage() {
         </div>
       </main>
       
-      <Footer />
+      {/* Footer удален, так как он добавляется в App.tsx */}
     </>
   );
 }

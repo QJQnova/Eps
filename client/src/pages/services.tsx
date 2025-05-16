@@ -328,7 +328,7 @@ export default function ServicesPage() {
         </div>
       </main>
       
-      <Footer />
+      {/* Footer удален, так как он добавляется в App.tsx */}
     </>
   );
 }
