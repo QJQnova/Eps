@@ -753,70 +753,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Маршрут для удаления всех товаров
+  // Маршрут для удаления всех товаров с использованием прямого SQL-запроса
   app.delete("/api/admin/products/delete-all", isAdmin, async (req, res) => {
     try {
-      console.log("Запрос на удаление всех товаров");
+      console.log("Запрос на удаление всех товаров (новый метод)");
       
-      // Сначала проверяем, успешно ли удалились товары
-      const allProducts = await db.select().from(products);
-      console.log(`Количество товаров перед удалением: ${allProducts.length}`);
+      // Подсчитываем количество товаров перед удалением
+      const countProductsBeforeQuery = await db.select({ count: sql`count(*)` }).from(products);
+      const countProductsBefore = parseInt(countProductsBeforeQuery[0].count.toString());
       
-      try {
-        // Используем несколько разных способов удаления для максимальной надежности
+      console.log(`Количество товаров перед удалением: ${countProductsBefore}`);
+      
+      // Выполняем последовательно все SQL-команды для надежного удаления
+      
+      // 1. Отключаем проверку ограничений внешних ключей
+      console.log("Шаг 1: Отключение ограничений внешних ключей");
+      await db.execute(sql`SET session_replication_role = 'replica'`);
+      
+      // 2. Удаляем все товары из корзины сначала
+      console.log("Шаг 2: Удаление всех элементов корзины");
+      await db.execute(sql`DELETE FROM cart_items`);
+      
+      // 3. Затем удаляем все товары
+      console.log("Шаг 3: Удаление всех товаров");
+      await db.execute(sql`DELETE FROM products`);
+      
+      // 4. Сбрасываем последовательность ID для таблицы товаров
+      console.log("Шаг 4: Сброс последовательности ID");
+      await db.execute(sql`ALTER SEQUENCE products_id_seq RESTART WITH 1`);
+      
+      // 5. Восстанавливаем проверку ограничений внешних ключей
+      console.log("Шаг 5: Восстановление ограничений внешних ключей");
+      await db.execute(sql`SET session_replication_role = 'origin'`);
+      
+      // Проверяем, что товары действительно удалены
+      const countProductsAfterQuery = await db.select({ count: sql`count(*)` }).from(products);
+      const countProductsAfter = parseInt(countProductsAfterQuery[0].count.toString());
+      
+      console.log(`Количество товаров после удаления: ${countProductsAfter}`);
+      
+      // Если остались товары, пробуем еще один способ - через удаление по одному
+      if (countProductsAfter > 0) {
+        console.log("ВНИМАНИЕ: Товары не были полностью удалены. Выполняем удаление по одному.");
         
-        // 1. Используем DROP и пересоздание таблицы через SQL
-        try {
-          // Сбрасываем ограничения внешних ключей
-          await db.execute(sql`SET session_replication_role = 'replica'`);
-          
-          // Удаляем все данные из cart_items
-          await db.execute(sql`DELETE FROM cart_items`);
-          console.log("Все элементы корзины удалены");
-          
-          // Удаляем все данные из products
-          await db.execute(sql`DELETE FROM products`);
-          console.log("Все товары удалены с помощью DELETE");
-          
-          // Восстанавливаем ограничения внешних ключей
-          await db.execute(sql`SET session_replication_role = 'origin'`);
-          
-          // Сбрасываем последовательность ID для таблицы products
-          await db.execute(sql`ALTER SEQUENCE products_id_seq RESTART WITH 1`);
-          console.log("Сброшена последовательность ID для таблицы products");
-        } catch (dropError) {
-          console.error("Ошибка при первом методе удаления:", dropError);
+        // Получаем оставшиеся товары
+        const remainingProductIds = await db.select({ id: products.id }).from(products);
+        
+        // Удаляем каждый товар по отдельности
+        for (const product of remainingProductIds) {
+          console.log(`Удаление товара с ID: ${product.id}`);
+          await db.delete(products).where(eq(products.id, product.id));
         }
         
-        // 2. Прямое удаление через ORM
-        try {
-          await db.delete(products);
-          console.log("Все товары удалены через ORM delete");
-        } catch (deleteDrizzleError) {
-          console.error("Ошибка при удалении через ORM:", deleteDrizzleError);
-        }
-      } catch (innerError) {
-        console.error("Ошибка при попытке удаления различными методами:", innerError);
+        // Проверяем результат
+        const finalCountQuery = await db.select({ count: sql`count(*)` }).from(products);
+        console.log(`Финальное количество товаров: ${parseInt(finalCountQuery[0].count.toString())}`);
       }
       
-      // Проверяем результат удаления
-      const remainingProducts = await db.select().from(products);
-      console.log(`Количество товаров после удаления: ${remainingProducts.length}`);
+      // Очистка кэша на клиенте через HTTP-заголовки
+      res.header("Clear-Site-Data", "\"cache\", \"cookies\", \"storage\"");
       
-      // Отправляем только строго правильный JSON
+      // Отправляем строго правильный JSON ответ
       return res.status(200).json({ 
         success: true, 
         message: "Все товары успешно удалены",
-        count: allProducts.length,
-        remaining: remainingProducts.length
+        before: countProductsBefore,
+        after: countProductsAfter
       });
     } catch (error) {
-      console.error("Ошибка при удалении всех товаров:", error);
+      console.error("Критическая ошибка при удалении всех товаров:", error);
       
-      // Гарантируем, что отправляем только корректный JSON
+      try {
+        // Пытаемся восстановить нормальное состояние БД
+        await db.execute(sql`SET session_replication_role = 'origin'`);
+      } catch (recoveryError) {
+        console.error("Не удалось восстановить состояние БД:", recoveryError);
+      }
+      
+      // Гарантируем правильный формат ответа
       return res.status(500).json({ 
         success: false, 
-        message: "Ошибка при удалении всех товаров" 
+        message: "Произошла ошибка при удалении всех товаров" 
       });
     }
   });
