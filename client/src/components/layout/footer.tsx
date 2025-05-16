@@ -31,9 +31,22 @@ export default function Footer() {
             <p className="text-gray-400 mb-4">Надежный поставщик профессиональных инструментов и оборудования.</p>
             
             <div className="mb-4">
-              <p className="text-gray-300 text-sm">Телефон: <a href="tel:88001013835" className="text-eps-orange">8 800 101 38 35</a></p>
-              <p className="text-gray-300 text-sm">Адрес: г. Волгоград, ул. им. Маршала Еременко 44</p>
-              <p className="text-gray-300 text-sm">Режим работы:</p>
+              <div className="mb-2">
+                <p className="text-gray-300 text-sm font-medium">Телефоны:</p>
+                <p className="text-gray-300 text-sm"><a href="tel:88001013835" className="text-eps-orange">8 800 101 38 35</a></p>
+                <p className="text-gray-300 text-sm"><a href="tel:+79297804846" className="text-eps-orange">+7 929 780-48-46</a> (Волгоград)</p>
+              </div>
+              
+              <div className="mb-2">
+                <p className="text-gray-300 text-sm font-medium">Адреса:</p>
+                <p className="text-gray-300 text-xs">г. Волгоград, ул. им. Маршала Еременко 44</p>
+                <p className="text-gray-300 text-xs">г. Ростов-на-Дону, проспект Королёва, 1Э</p>
+                <p className="text-gray-300 text-xs">г. Санкт-Петербург, ул. Химиков, 18</p>
+                <p className="text-gray-300 text-xs">г. Новороссийск, с. Цемдолина, ул. Промышленная 3</p>
+                <p className="text-gray-300 text-xs">г. Мариуполь, ул. Морских Десантников 1</p>
+              </div>
+              
+              <p className="text-gray-300 text-sm font-medium">Режим работы:</p>
               <p className="text-gray-400 text-xs">пн. - пт.: 8:00 - 18:00</p>
             </div>
             
