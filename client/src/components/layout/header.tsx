@@ -70,7 +70,7 @@ export default function Header() {
               <span className="hover:text-eps-yellow transition-colors">пн. - пт.: 8:00 - 18:00</span>
             </div>
             <div className="md:hidden">
-              <span className="hover:text-eps-yellow transition-colors">г. Волгоград</span>
+              <span className="hover:text-eps-yellow transition-colors">пн. - пт.: 8:00 - 18:00</span>
             </div>
           </div>
         </div>
