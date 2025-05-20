@@ -744,35 +744,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         });
         
-        // Обработаем категории для каждого товара перед валидацией
-        const productsWithProcessedCategories = await Promise.all(
-          productsWithDefaults.map(async (product) => {
-            // Если у продукта есть имя категории, создаем или находим категорию
-            if (product.categoryName) {
-              try {
-                // Используем метод, который мы определили выше
-                const categoryId = await processCategory(product.categoryId, product.categoryName);
-                return { ...product, categoryId };
-              } catch (error) {
-                console.error(`Ошибка при обработке категории для товара ${product.name}:`, error);
-                // Убедимся, что categoryId всегда установлен
-                return { ...product, categoryId: product.categoryId || 1 };
-              }
+        // Обрабатываем категории для каждого товара перед валидацией
+        // Но упрощаем логику, чтобы избежать проблем с типами
+        const productsWithCorrectCategories = productsWithDefaults.map(product => {
+          // Обеспечиваем, что categoryId всегда является числом и правильно установлен
+          let categoryId = 1; // Значение по умолчанию
+          
+          if (typeof product.categoryId === 'number') {
+            categoryId = product.categoryId;
+          } else if (typeof product.categoryId === 'string') {
+            const parsed = parseInt(product.categoryId, 10);
+            if (!isNaN(parsed)) {
+              categoryId = parsed;
             }
-            
-            // Убедимся, что categoryId всегда установлен и является числом
-            return { 
-              ...product, 
-              categoryId: typeof product.categoryId === 'number' ? 
-                product.categoryId : 
-                (typeof product.categoryId === 'string' ? 
-                  (parseInt(product.categoryId, 10) || 1) : 1) 
-            };
-          })
-        );
+          }
+          
+          // Возвращаем обновленный объект с гарантированным числовым categoryId
+          return {
+            ...product,
+            categoryId
+          };
+        });
         
         // Validate all products
-        const validatedProducts = validateData(bulkImportSchema, productsWithProcessedCategories);
+        const validatedProducts = validateData(bulkImportSchema, productsWithCorrectCategories);
         
         console.log(`Validated ${validatedProducts.length} products`);
         
