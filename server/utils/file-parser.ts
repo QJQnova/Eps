@@ -134,11 +134,15 @@ function parseCsvFile(content: string): ImportProduct[] {
 async function parseXmlFile(content: string): Promise<ImportProduct[]> {
   try {
     // Проверяем, не содержит ли файл DOCTYPE или другие декларации, которые могут вызвать проблемы
-    // Удаляем XML-декларацию и DOCTYPE, если они есть
+    // Но не удаляем их, так как это может нарушить структуру XML
     let cleanContent = content;
-    if (content.startsWith('<?xml')) {
-      cleanContent = content.substring(content.indexOf('?>') + 2).trim();
-    }
+    
+    // Для отладки только просматриваем наличие XML-деклараций
+    const hasXmlDeclaration = content.startsWith('<?xml');
+    const hasDoctypeDeclaration = content.includes('<!DOCTYPE');
+    
+    console.log("XML файл содержит декларацию XML:", hasXmlDeclaration);
+    console.log("XML файл содержит декларацию DOCTYPE:", hasDoctypeDeclaration);
     
     // Преобразуем функцию parseString в Promise
     // Создаем типизированную промисифицированную функцию
@@ -369,9 +373,92 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
         
         return product;
       }).filter(Boolean) as Partial<InsertProduct>[];
+    } else if (result.PROSVAR || result.prosvar) {
+      // Обработка файла в формате ПРОСВАР.xml
+      console.log("Обнаружен ПРОСВАР формат XML. Применяю специальную обработку...");
+      
+      const prosvarRoot = result.PROSVAR || result.prosvar;
+      console.log("Структура корневого элемента ПРОСВАР:", Object.keys(prosvarRoot));
+      
+      let productList: any[] = [];
+      // Проверка на различные варианты структуры данных
+      if (prosvarRoot.products && prosvarRoot.products.product) {
+        productList = Array.isArray(prosvarRoot.products.product) 
+          ? prosvarRoot.products.product 
+          : [prosvarRoot.products.product];
+        console.log(`Найдено ${productList.length} товаров в формате ПРОСВАР.products.product`);
+      } else if (prosvarRoot.product) {
+        productList = Array.isArray(prosvarRoot.product) 
+          ? prosvarRoot.product 
+          : [prosvarRoot.product];
+        console.log(`Найдено ${productList.length} товаров в формате ПРОСВАР.product`);
+      } else if (prosvarRoot.items && prosvarRoot.items.item) {
+        productList = Array.isArray(prosvarRoot.items.item) 
+          ? prosvarRoot.items.item 
+          : [prosvarRoot.items.item];
+        console.log(`Найдено ${productList.length} товаров в формате ПРОСВАР.items.item`);
+      } else if (prosvarRoot.item) {
+        productList = Array.isArray(prosvarRoot.item) 
+          ? prosvarRoot.item 
+          : [prosvarRoot.item];
+        console.log(`Найдено ${productList.length} товаров в формате ПРОСВАР.item`);
+      }
+      
+      // Обработка товаров в формате ПРОСВАР
+      return productList.map((item: any, index: number) => {
+        const product: ImportProduct = {};
+        
+        // Извлекаем название товара из разных возможных источников
+        product.name = item.name || item.title || item.наименование || item.артикул || `Товар ${index + 1}`;
+        
+        // Генерируем SKU из артикула или названия
+        product.sku = item.sku || item.artcode || item.articul || item.артикул || 
+          `SKU-${(product.name || "").substring(0, 10).replace(/\s+/g, '-')}-${index + 1}`;
+        
+        // Цена товара
+        product.price = item.price || item.цена || item.cost || "0";
+        // Убеждаемся, что цена всегда строка
+        if (typeof product.price !== 'string') {
+          product.price = String(product.price);
+        }
+        
+        // Описание товара
+        product.description = item.description || item.desc || item.описание || null;
+        
+        // Краткое описание
+        product.shortDescription = item.shortdesc || item.annotation || item.аннотация || null;
+        
+        // Изображение товара
+        product.imageUrl = item.image || item.picture || item.img || item.изображение || null;
+        
+        // Категория товара
+        const categoryName = item.category || item.категория || "Общая категория";
+        // Создаем идентификатор категории из ее имени
+        const categoryId = index + 1;
+        product.categoryId = categoryId;
+        product.categoryName = categoryName;
+        
+        // Активность товара
+        product.isActive = true;
+        
+        // Остаток на складе
+        product.stock = item.stock || item.количество || item.count || 100;
+        if (typeof product.stock !== 'number') {
+          product.stock = parseInt(String(product.stock), 10) || 100;
+        }
+        
+        // Генерация slug
+        product.slug = (product.name || "")
+          .toLowerCase()
+          .replace(/[^a-zA-Zа-яА-ЯёЁ0-9 ]/g, '')
+          .replace(/\s+/g, '-')
+          .substring(0, 40) + '-' + (index + 1);
+        
+        return product;
+      });
     } else {
-      // Файл может быть в другом формате (не в стандартном YML)
-      console.log("Файл ПРОСВАР.xml в нестандартном формате. Применяю специальную обработку...");
+      // Обработка других форматов XML
+      console.log("Файл XML в нестандартном формате. Применяю общую обработку...");
       
       try {
         // Проверяем, есть ли в корне документа элемент shop
