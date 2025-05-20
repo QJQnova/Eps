@@ -511,12 +511,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       const filePath = req.file.path;
+      // Определяем расширение файла правильно, с точкой впереди
       const fileExt = path.extname(req.file.originalname).toLowerCase();
       
       console.log("Processing file:", req.file.originalname, "with extension:", fileExt);
+      console.log("File mimetype:", req.file.mimetype);
       
-      // Parse the file based on its extension
-      const parsedProducts = await parseImportFile(filePath, fileExt);
+      // Дополнительно проверяем содержимое файла, чтобы определить его фактический тип
+      const fileContent = await fs.readFile(filePath, 'utf8');
+      const firstChars = fileContent.trim().substring(0, 100);
+      console.log("First 100 chars of file:", firstChars);
+      
+      // Определение типа файла на основе содержимого и расширения
+      let fileType = fileExt;
+      if (firstChars.startsWith('{') || firstChars.startsWith('[')) {
+        fileType = '.json';
+        console.log("Detected JSON content");
+      } else if (firstChars.startsWith('<?xml') || firstChars.startsWith('<')) {
+        fileType = '.xml';
+        console.log("Detected XML content");
+      } else if (firstChars.includes(',') && !firstChars.includes('<') && !firstChars.includes('{')) {
+        fileType = '.csv';
+        console.log("Detected CSV content");
+      }
+      
+      console.log("Using file type for parsing:", fileType);
+      
+      // Parse the file based on its determined type
+      const parsedProducts = await parseImportFile(filePath, fileType);
       
       console.log(`Parsed ${parsedProducts.length} products from file`);
       

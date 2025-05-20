@@ -154,7 +154,8 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
         explicitArray: false, // Не преобразовывать одиночные элементы в массивы
         normalizeTags: false, // Сохранять оригинальный регистр тегов
         trim: true, // Удалять лишние пробелы
-        strict: false // Отключаем строгую проверку XML
+        strict: false, // Отключаем строгую проверку XML
+        mergeAttrs: true // Объединяем атрибуты и элементы для упрощения доступа
       }, (err, result) => {
         if (err) {
           reject(err);
