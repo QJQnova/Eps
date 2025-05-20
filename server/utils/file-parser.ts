@@ -126,12 +126,32 @@ function parseCsvFile(content: string): ImportProduct[] {
  */
 async function parseXmlFile(content: string): Promise<ImportProduct[]> {
   try {
+    // Проверяем, не содержит ли файл DOCTYPE или другие декларации, которые могут вызвать проблемы
+    // Удаляем XML-декларацию и DOCTYPE, если они есть
+    let cleanContent = content;
+    if (content.startsWith('<?xml')) {
+      cleanContent = content.substring(content.indexOf('?>') + 2).trim();
+    }
+    
     // Преобразуем функцию parseString в Promise
     // Создаем типизированную промисифицированную функцию
-    const parseXmlAsync = promisify<string, object>(parseString);
+    // Мы будем использовать непосредственно саму функцию parseString с колбеком вместо промисификации
+    // с неправильными параметрами
     
-    // Парсим XML
-    const result = await parseXmlAsync(content);
+    // Создаем промис вручную
+    const result = await new Promise<any>((resolve, reject) => {
+      parseString(cleanContent, {
+        explicitArray: false, // Не преобразовывать одиночные элементы в массивы
+        normalizeTags: false, // Сохранять оригинальный регистр тегов
+        trim: true // Удалять лишние пробелы
+      }, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
     
     console.log("Результат парсинга XML:", JSON.stringify(result, null, 2).substring(0, 500) + "...");
     
@@ -140,36 +160,82 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
     }
     
     // Обработка YML-формата (Яндекс.Маркет)
-    if (result.yml_catalog) {
+    // Проверяем формат YML-каталога более универсально
+    const ymlCatalog = result.yml_catalog;
+
+    if (ymlCatalog) {
       console.log("Обнаружен формат YML-каталога");
       
-      if (!result.yml_catalog.shop || !result.yml_catalog.shop.offers || !result.yml_catalog.shop.offers.offer) {
-        throw new Error('XML файл не содержит необходимых данных о товарах (формат YML)');
+      // Убедимся, что shop существует
+      if (!ymlCatalog.shop) {
+        throw new Error('XML файл не содержит элемента shop в формате YML');
+      }
+      
+      const shop = ymlCatalog.shop;
+      
+      // Проверяем наличие offers в разных форматах XML
+      if (!shop.offers) {
+        throw new Error('XML файл не содержит элемента offers в формате YML');
+      }
+      
+      // Проверка на существование offer (может быть массивом или одиночным объектом)
+      if (!shop.offers.offer) {
+        throw new Error('XML файл не содержит элементов offer в формате YML');
       }
       
       // Обрабатываем категории, если они есть
       const categoriesMap: Record<string, {id: number, name: string}> = {};
       
-      if (result.yml_catalog.shop.categories && result.yml_catalog.shop.categories.category) {
-        // Если есть только одна категория, преобразуем в массив
-        const categories = Array.isArray(result.yml_catalog.shop.categories.category)
-          ? result.yml_catalog.shop.categories.category
-          : [result.yml_catalog.shop.categories.category];
+      if (shop.categories && shop.categories.category) {
+        // Получаем список категорий, убедитесь, что это массив
+        const categoryItems = Array.isArray(shop.categories.category) 
+          ? shop.categories.category 
+          : [shop.categories.category];
         
-        categories.forEach((cat: any) => {
-          if (cat.id && cat._) {
-            categoriesMap[cat.id] = {
-              id: Number(cat.id),
-              name: cat._.toString()
+        // Проходим по всем категориям
+        categoryItems.forEach((cat: any) => {
+          // Категория может иметь несколько форматов, обрабатываем все
+          // Возможные форматы: 
+          // 1. {id: "1", _: "Название"} 
+          // 2. {id: "1", _value: "Название"} 
+          // 3. {id: "1", $: {id: "1"}, _: "Название"}
+          // 4. {id: "1", name: "Название"}
+          
+          let categoryId: string | undefined;
+          let categoryName: string | undefined;
+          
+          // Получаем ID категории
+          if (cat.id) {
+            categoryId = cat.id.toString();
+          } else if (cat.$ && cat.$.id) {
+            categoryId = cat.$.id.toString();
+          }
+          
+          // Получаем название категории
+          if (cat._) {
+            categoryName = cat._.toString();
+          } else if (cat._value) {
+            categoryName = cat._value.toString();
+          } else if (cat.name) {
+            categoryName = cat.name.toString();
+          } else if (typeof cat === 'string') {
+            categoryName = cat;
+          }
+          
+          // Если нашли и ID, и название - добавляем в карту
+          if (categoryId && categoryName) {
+            categoriesMap[categoryId] = {
+              id: Number(categoryId),
+              name: categoryName
             };
           }
         });
       }
       
       // Получаем список товаров
-      const offers = Array.isArray(result.yml_catalog.shop.offers.offer)
-        ? result.yml_catalog.shop.offers.offer
-        : [result.yml_catalog.shop.offers.offer];
+      const offers = Array.isArray(shop.offers.offer)
+        ? shop.offers.offer
+        : [shop.offers.offer];
       
       // Преобразуем каждый товар
       return offers.map((offer: any, index: number) => {
@@ -209,18 +275,33 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
         if (offer.price) product.price = parseFloat(offer.price).toString();
         if (offer.oldprice) product.originalPrice = parseFloat(offer.oldprice).toString();
         if (offer.picture) product.imageUrl = offer.picture;
-        if (offer.categoryId && categoriesMap[offer.categoryId]) {
-          product.categoryId = categoriesMap[offer.categoryId].id;
+        // Обрабатываем ID категории, который может быть в разных местах
+        let categoryId: string | undefined;
+        
+        if (offer.categoryId) {
+          categoryId = offer.categoryId.toString();
+        } else if (offer.categoryid) {
+          categoryId = offer.categoryid.toString();
+        } else if (offer.categoryID) {
+          categoryId = offer.categoryID.toString();
+        } else if (offer.category_id) {
+          categoryId = offer.category_id.toString();
+        }
+        
+        // Если у нас есть ID категории и она существует в нашей карте
+        if (categoryId && categoriesMap[categoryId]) {
+          product.categoryId = categoriesMap[categoryId].id;
           // Сохраняем название категории для автоматического создания
-          product.categoryName = categoriesMap[offer.categoryId].name;
-        } else if (offer.categoryid && categoriesMap[offer.categoryid]) {
-          // Альтернативное название атрибута (с маленькой буквы)
-          product.categoryId = categoriesMap[offer.categoryid].id;
-          // Сохраняем название категории для автоматического создания
-          product.categoryName = categoriesMap[offer.categoryid].name;
+          product.categoryName = categoriesMap[categoryId].name;
         } else {
-          // Используем категорию по умолчанию, если не указана
-          product.categoryId = 1;
+          // Если категория не найдена, но ID есть - сохраняем его для автоматического создания
+          if (categoryId) {
+            product.categoryId = Number(categoryId);
+            product.categoryName = `Категория ${categoryId}`;
+          } else {
+            // Используем категорию по умолчанию, если не указана
+            product.categoryId = 1;
+          }
         }
         
         // Статус доступности
