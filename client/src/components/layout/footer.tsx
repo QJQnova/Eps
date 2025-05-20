@@ -38,11 +38,11 @@ export default function Footer() {
               
               <div className="mb-2">
                 <p className="text-gray-300 text-sm font-medium">Адреса:</p>
-                <p className="text-gray-300 text-xs">г. Волгоград, ул. им. Маршала Еременко 44</p>
-                <p className="text-gray-300 text-xs">г. Ростов-на-Дону, проспект Королёва, 1Э</p>
-                <p className="text-gray-300 text-xs">г. Санкт-Петербург, ул. Химиков, 18</p>
-                <p className="text-gray-300 text-xs">г. Новороссийск, с. Цемдолина, ул. Промышленная 3</p>
-                <p className="text-gray-300 text-xs">г. Мариуполь, ул. Морских Десантников 1</p>
+                <p className="text-gray-300 text-xs">г. Волгоград, у. и. Маршала Еременко, д. 44</p>
+                <p className="text-gray-300 text-xs">г. Ростов-на-Дону, проспект Королёва, д. 1Э</p>
+                <p className="text-gray-300 text-xs">г. Санкт-Петербург, проспект Железнодорожный, д. 14 к7</p>
+                <p className="text-gray-300 text-xs">г. Новороссийск, с. Гайдук, у. Строительная д. 14</p>
+                <p className="text-gray-300 text-xs">г. Мариуполь, ул. Соборная, д. 10</p>
               </div>
               
               <p className="text-gray-300 text-sm font-medium">Режим работы:</p>

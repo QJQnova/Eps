@@ -68,31 +68,31 @@ export default function ContactsPage() {
                   
                   <div className="pb-3 border-b border-gray-100">
                     <p className="font-medium text-gray-800">г. Волгоград</p>
-                    <p className="text-gray-600 mb-1">улица им Маршала Еременко, дом 44</p>
+                    <p className="text-gray-600 mb-1">Адрес: у. и. Маршала Еременко, д. 44</p>
                     <p className="text-gray-600">Тел.: +7 929 780-48-46</p>
                   </div>
 
                   <div className="pb-3 border-b border-gray-100">
                     <p className="font-medium text-gray-800">г. Ростов-на-Дону</p>
-                    <p className="text-gray-600 mb-1">проспект Королёва, 1Э</p>
+                    <p className="text-gray-600 mb-1">Адрес: проспект Королёва, д. 1Э</p>
                     <p className="text-gray-600">Тел.: +7 960 444-75-95</p>
                   </div>
                   
                   <div className="pb-3 border-b border-gray-100">
                     <p className="font-medium text-gray-800">г. Санкт-Петербург</p>
-                    <p className="text-gray-600 mb-1">проспект Железнодорожный 14 к7</p>
+                    <p className="text-gray-600 mb-1">Адрес: проспект Железнодорожный, д. 14 к7</p>
                     <p className="text-gray-600">Тел.: +7 981 858-21-43</p>
                   </div>
                   
                   <div className="pb-3 border-b border-gray-100">
                     <p className="font-medium text-gray-800">г. Новороссийск</p>
-                    <p className="text-gray-600 mb-1">село Гайдук улица Строительная дом 14</p>
+                    <p className="text-gray-600 mb-1">Адрес: с. Гайдук, у. Строительная д. 14</p>
                     <p className="text-gray-600">Тел.: +7 918 120-85-55</p>
                   </div>
                   
                   <div>
                     <p className="font-medium text-gray-800">г. Мариуполь</p>
-                    <p className="text-gray-600 mb-1">ул. Соборная, д. 10</p>
+                    <p className="text-gray-600 mb-1">Адрес: ул. Соборная, д. 10</p>
                     <p className="text-gray-600">Тел.: +7 949 023-20-77</p>
                   </div>
                 </div>
