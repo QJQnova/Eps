@@ -143,7 +143,7 @@ async function parseXmlFile(content: string): Promise<Partial<InsertProduct>[]> 
       }
       
       // Обрабатываем категории, если они есть
-      const categoriesMap: Record<string, number> = {};
+      const categoriesMap: Record<string, {id: number, name: string}> = {};
       
       if (result.yml_catalog.shop.categories && result.yml_catalog.shop.categories.category) {
         // Если есть только одна категория, преобразуем в массив
@@ -153,7 +153,10 @@ async function parseXmlFile(content: string): Promise<Partial<InsertProduct>[]> 
         
         categories.forEach((cat: any) => {
           if (cat.id && cat._) {
-            categoriesMap[cat.id] = Number(cat.id);
+            categoriesMap[cat.id] = {
+              id: Number(cat.id),
+              name: cat._.toString()
+            };
           }
         });
       }

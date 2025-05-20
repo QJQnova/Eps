@@ -521,6 +521,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Parsed ${parsedProducts.length} products from file`);
       
       try {
+        // Получаем список существующих категорий
+        const existingCategories = await storage.getAllCategories();
+        const existingCategoryIds = existingCategories.map(cat => cat.id);
+        const existingCategoryNames = existingCategories.map(cat => cat.name.toLowerCase());
+        
+        // Собираем все уникальные категории из импортируемых товаров
+        const categoryIds = new Set<number>();
+        const categoryNames = new Map<number, string>();
+        
+        // Сначала проходимся по товарам, чтобы выделить все уникальные категории
+        parsedProducts.forEach(product => {
+          if (product.categoryId) {
+            let catId: number;
+            if (typeof product.categoryId === 'string') {
+              catId = parseInt(product.categoryId, 10);
+            } else if (typeof product.categoryId === 'number') {
+              catId = product.categoryId;
+            } else {
+              catId = 1; // Значение по умолчанию
+            }
+            
+            if (!isNaN(catId) && catId > 0) {
+              categoryIds.add(catId);
+              
+              // Если у товара есть название категории (например, из XML-файла YML)
+              if (product.categoryName && typeof product.categoryName === 'string') {
+                categoryNames.set(catId, product.categoryName);
+              }
+            }
+          }
+        });
+        
+        // Создаем недостающие категории
+        const newCategoryPromises: Promise<any>[] = [];
+        
+        for (const catId of categoryIds) {
+          // Проверяем, существует ли категория с таким ID
+          if (!existingCategoryIds.includes(catId)) {
+            // Определяем название новой категории
+            let categoryName = categoryNames.get(catId) || `Категория ${catId}`;
+            
+            // Проверяем, что такое имя категории еще не существует
+            let uniqueName = categoryName;
+            let counter = 1;
+            while (existingCategoryNames.includes(uniqueName.toLowerCase())) {
+              uniqueName = `${categoryName} ${counter}`;
+              counter++;
+            }
+            
+            // Создаем уникальный slug из названия
+            const cleanedName = uniqueName
+              .toLowerCase()
+              .replace(/[^a-zA-Zа-яА-ЯёЁ0-9 ]/g, '')
+              .replace(/\s+/g, '-')
+              .substring(0, 40);
+            
+            const slug = `${cleanedName}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+            
+            console.log(`Создаем новую категорию: ID=${catId}, Name=${uniqueName}, Slug=${slug}`);
+            
+            // Создаем новую категорию
+            const newCategory = {
+              id: catId, // Пытаемся использовать указанный ID
+              name: uniqueName,
+              slug: slug,
+              description: `Автоматически созданная категория при импорте товаров`
+            };
+            
+            newCategoryPromises.push(
+              storage.createCategory(newCategory)
+                .then(created => {
+                  console.log(`Успешно создана категория: ${created.name} (ID: ${created.id})`);
+                  existingCategoryIds.push(created.id);
+                  existingCategoryNames.push(created.name.toLowerCase());
+                  return created;
+                })
+                .catch(error => {
+                  console.error(`Ошибка при создании категории ${uniqueName}:`, error);
+                  return null;
+                })
+            );
+          }
+        }
+        
+        // Ждем завершения создания всех категорий
+        await Promise.all(newCategoryPromises);
+        
         // Автодополняем недостающие поля для товаров и преобразуем типы
         const productsWithDefaults = parsedProducts.map(product => {
           // Если нет slug, генерируем его из названия
