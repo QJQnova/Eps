@@ -33,9 +33,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
-      const userData = await res.json();
-      return userData;
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(credentials),
+          credentials: "include",
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || "Неверное имя пользователя или пароль");
+        }
+        
+        const userData = await response.json();
+        return userData;
+      } catch (error: any) {
+        throw new Error(error.message || "Произошла ошибка при входе");
+      }
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
@@ -55,9 +72,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation({
     mutationFn: async (credentials: InsertUser) => {
-      const res = await apiRequest("POST", "/api/register", credentials);
-      const userData = await res.json();
-      return userData;
+      try {
+        const response = await fetch("/api/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(credentials),
+          credentials: "include",
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || "Ошибка при регистрации пользователя");
+        }
+        
+        const userData = await response.json();
+        return userData;
+      } catch (error: any) {
+        throw new Error(error.message || "Произошла ошибка при регистрации");
+      }
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
@@ -77,7 +111,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
+      try {
+        const response = await fetch("/api/logout", {
+          method: "POST",
+          credentials: "include",
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || "Ошибка при выходе из системы");
+        }
+        
+        return true;
+      } catch (error: any) {
+        throw new Error(error.message || "Произошла ошибка при выходе из системы");
+      }
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
