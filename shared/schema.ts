@@ -119,6 +119,8 @@ export type Category = typeof categories.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema> & {
   // Дополнительные поля для импорта
   categoryName?: string;
+  // Разрешаем categoryId быть строкой, числом или undefined для большей гибкости при импорте
+  categoryId?: string | number;
 };
 export type Product = typeof products.$inferSelect;
 

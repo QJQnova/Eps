@@ -766,8 +766,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         });
         
+        // Создаем вспомогательную функцию для создания категорий
+        const createCategoryIfNotExists = async (name: string): Promise<number> => {
+          try {
+            // Проверяем, существует ли категория с таким именем
+            const slug = name
+              .toLowerCase()
+              .replace(/[^a-zA-Zа-яА-ЯёЁ0-9 ]/g, '')
+              .replace(/\s+/g, '-');
+              
+            // Сначала ищем по slug
+            let category = await storage.getCategoryBySlug(slug);
+            if (category) {
+              return category.id;
+            }
+            
+            // Если не нашли, создаем новую категорию
+            category = await storage.createCategory({
+              name,
+              slug,
+              description: null
+            });
+            
+            console.log(`Создана новая категория "${name}" с ID ${category.id}`);
+            return category.id;
+          } catch (error) {
+            console.error(`Ошибка при создании категории "${name}":`, error);
+            return 1; // Возвращаем ID категории по умолчанию в случае ошибки
+          }
+        };
+        
+        // Сначала создаем все необходимые категории
+        const productsWithFixedCategories = await Promise.all(
+          productsWithCorrectCategories.map(async (product: any) => {
+            try {
+              // Если есть имя категории, создаем или находим категорию
+              if (product.categoryName) {
+                const categoryId = await createCategoryIfNotExists(product.categoryName);
+                return {
+                  ...product,
+                  categoryId // Устанавливаем ID категории
+                };
+              }
+              
+              // Если нет имени категории, но есть ID - используем его
+              if (product.categoryId) {
+                return {
+                  ...product,
+                  categoryId: typeof product.categoryId === 'number' ? 
+                    product.categoryId : 
+                    (typeof product.categoryId === 'string' ? 
+                      parseInt(product.categoryId, 10) || 1 : 1)
+                };
+              }
+              
+              // По умолчанию используем категорию с ID 1
+              return {
+                ...product,
+                categoryId: 1
+              };
+            } catch (error) {
+              console.error(`Ошибка при обработке категории для товара ${product.name}:`, error);
+              return {
+                ...product,
+                categoryId: 1 // Установка категории по умолчанию
+              };
+            }
+          })
+        );
+        
+        // Обязательно убеждаемся, что все поля правильно заполнены
+        const productsToImport = productsWithFixedCategories.map(product => ({
+          ...product,
+          categoryId: typeof product.categoryId === 'number' ? product.categoryId : 1,
+          price: product.price || "0",
+          sku: product.sku || `SKU-${Math.floor(Math.random() * 100000)}`,
+          slug: product.slug || `product-${Math.floor(Math.random() * 100000)}`,
+          name: product.name || `Товар ${Math.floor(Math.random() * 100000)}`
+        }));
+        
         // Validate all products
-        const validatedProducts = validateData(bulkImportSchema, productsWithCorrectCategories);
+        const validatedProducts = validateData(bulkImportSchema, productsToImport);
         
         console.log(`Validated ${validatedProducts.length} products`);
         

@@ -361,6 +361,49 @@ export class DatabaseStorage implements IStorage {
     
     for (const productData of productsToImport) {
       try {
+        // Убедимся, что categoryId всегда является числом
+        let categoryId = 1; // Значение по умолчанию
+        
+        // Проверяем, есть ли категория с таким названием (если предоставлено)
+        if (productData.categoryName) {
+          try {
+            // Создаем slug из названия
+            const slug = productData.categoryName
+              .toLowerCase()
+              .replace(/[^a-zA-Zа-яА-ЯёЁ0-9 ]/g, '')
+              .replace(/\s+/g, '-');
+              
+            // Проверяем существование категории
+            let category = await this.getCategoryBySlug(slug);
+            
+            if (!category) {
+              // Создаем новую категорию
+              category = await this.createCategory({
+                name: productData.categoryName,
+                slug: slug,
+                description: null
+              });
+              console.log(`Создана новая категория: ${productData.categoryName} (ID: ${category.id})`);
+            }
+            
+            categoryId = category.id;
+          } catch (error) {
+            console.error(`Ошибка при обработке категории ${productData.categoryName}:`, error);
+            // Используем categoryId если он доступен, иначе категорию по умолчанию
+            categoryId = productData.categoryId || 1;
+          }
+        } else if (productData.categoryId) {
+          // Если нет имени категории, но есть ID
+          categoryId = typeof productData.categoryId === 'number' ? 
+            productData.categoryId : 
+            parseInt(String(productData.categoryId), 10);
+            
+          // Убедимся, что ID - корректное число
+          if (isNaN(categoryId) || categoryId <= 0) {
+            categoryId = 1;
+          }
+        }
+        
         // Преобразовать в формат, подходящий для createProduct
         const productInput: ProductInput = {
           sku: productData.sku,
@@ -372,7 +415,7 @@ export class DatabaseStorage implements IStorage {
           originalPrice: productData.originalPrice || null,
           imageUrl: productData.imageUrl || null,
           stock: productData.stock || null,
-          categoryId: productData.categoryId,
+          categoryId: categoryId, // Используем проверенный categoryId
           isActive: productData.isActive ?? true,
           isFeatured: productData.isFeatured ?? false,
           tag: productData.tag || null,
