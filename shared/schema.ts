@@ -171,7 +171,13 @@ export const bulkImportSchema = z.array(
       z.string().transform(val => val === "" ? null : parseInt(val, 10)),
       z.null()
     ]).optional().nullable(),
-    categoryId: z.number().default(1),
+    // Разрешаем categoryId быть undefined во время импорта, 
+    // но устанавливаем значение по умолчанию = 1 при обработке
+    categoryId: z.union([
+      z.number(),
+      z.string().transform(val => parseInt(val, 10) || 1),
+      z.undefined().transform(() => 1)
+    ]).default(1),
     // Добавляем поле с названием категории для автоматического создания
     categoryName: z.string().optional(),
     isActive: z.boolean().default(true),

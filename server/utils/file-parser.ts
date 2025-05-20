@@ -410,7 +410,7 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
               
               // Генерируем SKU из ID или названия
               product.sku = offer.id || offer.sku || offer.vendorCode || 
-                `SKU-${product.name.substring(0, 10)}-${index + 1}`;
+                `SKU-${product.name ? product.name.substring(0, 10) : 'unknown'}-${index + 1}`;
               
               // Цена
               product.price = offer.price ? offer.price.toString() : "0";
@@ -432,12 +432,14 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
                 product.categoryId = 1;
               }
               
-              // Slug
-              product.slug = product.name
-                .toLowerCase()
-                .replace(/[^a-zA-Zа-яА-ЯёЁ0-9 ]/g, '')
-                .replace(/\s+/g, '-')
-                .substring(0, 40) + `-${index + 1}`;
+              // Slug - генерируем из названия или используем дефолтное значение
+              product.slug = (product.name ? 
+                product.name
+                  .toLowerCase()
+                  .replace(/[^a-zA-Zа-яА-ЯёЁ0-9 ]/g, '')
+                  .replace(/\s+/g, '-')
+                  .substring(0, 40) 
+                : `product-${index}`) + `-${index + 1}`;
               
               // Статус
               product.isActive = true;
@@ -498,12 +500,15 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
                   (obj.category.name || obj.category._ || "Импортированная категория");
               }
               
-              // Slug
-              product.slug = product.name
-                .toLowerCase()
-                .replace(/[^a-zA-Zа-яА-ЯёЁ0-9 ]/g, '')
-                .replace(/\s+/g, '-')
-                .substring(0, 40) + `-${Math.floor(Math.random() * 10000)}`;
+              // Slug с проверкой на undefined
+              product.slug = (product.name ? 
+                product.name
+                  .toLowerCase()
+                  .replace(/[^a-zA-Zа-яА-ЯёЁ0-9 ]/g, '')
+                  .replace(/\s+/g, '-')
+                  .substring(0, 40) 
+                : `product-${prefix.replace(/[^a-zA-Z0-9]/g, "-")}`) + 
+                `-${Math.floor(Math.random() * 10000)}`;
               
               // Товар активен по умолчанию
               product.isActive = true;
