@@ -47,21 +47,34 @@ export function setupAuth(app: Express) {
   app.use(passport.session());
 
   passport.use(
-    new LocalStrategy(async (username, password, done) => {
+    new LocalStrategy({
+      usernameField: 'username',
+      passwordField: 'password'
+    }, async (username, password, done) => {
       try {
+        console.log("LocalStrategy: Попытка входа пользователя:", username);
+        
+        if (!username || !password) {
+          console.log("LocalStrategy: Отсутствуют учетные данные");
+          return done(null, false, { message: "Необходимо указать имя пользователя и пароль" });
+        }
+        
         const user = await storage.getUserByUsername(username);
         if (!user) {
+          console.log("LocalStrategy: Пользователь не найден");
           return done(null, false, { message: "Неверное имя пользователя" });
         }
         
         // Проверяем сначала обычное сравнение для тестовых аккаунтов
         if (user.password === password) {
+          console.log("LocalStrategy: Успешный вход с простым паролем");
           return done(null, user);
         }
         
         // Проверяем хешированный пароль
         try {
           if (await comparePasswords(password, user.password)) {
+            console.log("LocalStrategy: Успешный вход с хешированным паролем");
             return done(null, user);
           }
         } catch (error) {
@@ -69,8 +82,10 @@ export function setupAuth(app: Express) {
           console.log("Ошибка сравнения паролей:", error);
         }
         
+        console.log("LocalStrategy: Неверный пароль");
         return done(null, false, { message: "Неверный пароль" });
       } catch (err) {
+        console.error("LocalStrategy: Ошибка:", err);
         return done(err);
       }
     })
@@ -126,37 +141,68 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    console.log("Попытка входа:", req.body);
+    console.log("Попытка входа, содержимое запроса:", req.body);
+    console.log("Заголовки запроса:", req.headers);
     
-    // Проверяем, что имя пользователя и пароль есть в запросе
-    if (!req.body.username || !req.body.password) {
-      return res.status(400).json({ message: "Необходимо указать имя пользователя и пароль" });
-    }
-    
-    passport.authenticate("local", (err: Error | null, user: Express.User | false, info: { message: string } | undefined) => {
-      if (err) {
-        console.error("Ошибка аутентификации:", err);
-        return next(err);
-      }
-      
-      if (!user) {
-        console.log("Пользователь не найден или неверные данные");
-        return res.status(401).json({ message: info?.message || "Неверное имя пользователя или пароль" });
-      }
-      
-      req.login(user, (err: Error | null) => {
-        if (err) {
-          console.error("Ошибка при входе в систему:", err);
-          return next(err);
+    // Создаем ручную обработку логина без использования passport.authenticate
+    (async () => {
+      try {
+        // Проверяем наличие имени пользователя и пароля
+        const { username, password } = req.body;
+        
+        if (!username || !password) {
+          console.log("Отсутствуют учетные данные в запросе");
+          return res.status(400).json({ message: "Необходимо указать имя пользователя и пароль" });
         }
         
-        console.log("Успешный вход пользователя:", user.username);
+        // Ищем пользователя в базе
+        const user = await storage.getUserByUsername(username);
         
-        // Не возвращаем пароль в ответе
-        const { password, ...userWithoutPassword } = user;
-        res.status(200).json(userWithoutPassword);
-      });
-    })(req, res, next);
+        if (!user) {
+          console.log("Пользователь не найден:", username);
+          return res.status(401).json({ message: "Неверное имя пользователя или пароль" });
+        }
+        
+        // Проверяем пароль (сначала простой, затем хешированный)
+        let passwordValid = false;
+        
+        if (user.password === password) {
+          console.log("Успешная аутентификация с простым паролем");
+          passwordValid = true;
+        } else {
+          try {
+            passwordValid = await comparePasswords(password, user.password);
+            if (passwordValid) {
+              console.log("Успешная аутентификация с хешированным паролем");
+            }
+          } catch (error) {
+            console.error("Ошибка при проверке пароля:", error);
+          }
+        }
+        
+        if (!passwordValid) {
+          console.log("Неверный пароль для пользователя:", username);
+          return res.status(401).json({ message: "Неверное имя пользователя или пароль" });
+        }
+        
+        // Если пароль верный, входим в систему
+        req.login(user, (err) => {
+          if (err) {
+            console.error("Ошибка при создании сессии:", err);
+            return next(err);
+          }
+          
+          console.log("Успешный вход пользователя:", username);
+          
+          // Не возвращаем пароль в ответе
+          const { password, ...userWithoutPassword } = user;
+          return res.status(200).json(userWithoutPassword);
+        });
+      } catch (error) {
+        console.error("Ошибка при обработке входа:", error);
+        return next(error);
+      }
+    })();
   });
 
   app.post("/api/logout", (req, res) => {

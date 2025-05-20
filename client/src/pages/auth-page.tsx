@@ -74,35 +74,90 @@ export default function AuthPage() {
   });
 
   // Обработчик отправки формы входа
-  const onLoginSubmit = (data: LoginFormValues) => {
-    loginMutation.mutate(data, {
-      onSuccess: () => {
-        setLocation("/");
+  const onLoginSubmit = async (data: LoginFormValues) => {
+    try {
+      // Выводим данные для отладки
+      console.log("Отправляем данные для входа:", data);
+      
+      // Отправляем запрос напрямую, минуя мутацию
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Ошибка входа");
       }
-    });
+      
+      const userData = await response.json();
+      
+      // Обновляем состояние вручную
+      queryClient.setQueryData(["/api/user"], userData);
+      
+      toast({
+        title: "Успешный вход",
+        description: `Добро пожаловать, ${userData.username}!`,
+      });
+      
+      setLocation("/");
+    } catch (error: any) {
+      console.error("Ошибка входа:", error);
+      toast({
+        title: "Ошибка входа",
+        description: error.message || "Неверное имя пользователя или пароль",
+        variant: "destructive",
+      });
+    }
   };
 
   // Обработчик отправки формы регистрации
-  const onRegisterSubmit = (data: RegisterFormValues) => {
-    // Удаляем поле confirmPassword перед отправкой
-    const { confirmPassword, ...registerData } = data;
-    
-    registerMutation.mutate(registerData, {
-      onSuccess: () => {
-        toast({
-          title: "Успешная регистрация",
-          description: `Аккаунт ${registerData.username} успешно создан!`,
-        });
-        setLocation("/");
-      },
-      onError: (error) => {
-        toast({
-          title: "Ошибка регистрации",
-          description: error.message || "Не удалось зарегистрировать пользователя",
-          variant: "destructive",
-        });
+  const onRegisterSubmit = async (data: RegisterFormValues) => {
+    try {
+      // Удаляем поле confirmPassword перед отправкой
+      const { confirmPassword, ...registerData } = data;
+      
+      // Выводим данные для отладки
+      console.log("Отправляем данные для регистрации:", registerData);
+      
+      // Отправляем запрос напрямую
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(registerData),
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Ошибка регистрации");
       }
-    });
+      
+      const userData = await response.json();
+      
+      // Обновляем состояние вручную
+      queryClient.setQueryData(["/api/user"], userData);
+      
+      toast({
+        title: "Успешная регистрация",
+        description: `Аккаунт ${userData.username} успешно создан!`,
+      });
+      
+      setLocation("/");
+    } catch (error: any) {
+      console.error("Ошибка регистрации:", error);
+      toast({
+        title: "Ошибка регистрации",
+        description: error.message || "Не удалось зарегистрировать пользователя",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
