@@ -271,28 +271,7 @@ export default function Header() {
               )}
             </div>
             
-            {/* Поиск для десктопной версии */}
-            <div className="flex items-center">
-              <form onSubmit={handleSearch} className="w-64">
-                <div className="relative">
-                  <Input 
-                    type="text"
-                    placeholder="Поиск товаров..."
-                    className="pr-8 h-8 bg-white/10 border-white/30 placeholder-white/70 text-white focus:bg-white/20 focus:border-white"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  <Button 
-                    type="submit" 
-                    variant="ghost" 
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 text-white h-6 w-6"
-                  >
-                    <Search className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </form>
-            </div>
+            {/* Поиск для десктопной версии удален по запросу */}
           </div>
         </div>
       </nav>
@@ -414,7 +393,7 @@ export default function Header() {
             <div className="space-y-2 text-sm text-gray-500">
               <p>Телефон: 8 800 101 38 35</p>
               <p>Адрес: г. Волгоград, ул. им. Маршала Еременко 44</p>
-              <p>Режим работы: пн. - пт.: 8:00 - 18:00</p>
+              <p>Режим работы: пн–пт 8:00–18:00, сб, вс — выходные</p>
             </div>
           </div>
         </div>
