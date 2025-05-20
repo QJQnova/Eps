@@ -4,10 +4,15 @@ import { InsertProduct } from "@shared/schema";
 import { parseString } from "xml2js";
 import { promisify } from "util";
 
+// Расширенный тип для работы с импортом
+interface ImportProduct extends Partial<InsertProduct> {
+  categoryName?: string;
+}
+
 /**
  * Парсит файл CSV, JSON или XML и возвращает массив данных товаров
  */
-export async function parseImportFile(filePath: string, fileExtension: string): Promise<Partial<InsertProduct>[]> {
+export async function parseImportFile(filePath: string, fileExtension: string): Promise<ImportProduct[]> {
   try {
     const fileContent = await fs.readFile(filePath, 'utf8');
     
@@ -34,7 +39,7 @@ export async function parseImportFile(filePath: string, fileExtension: string): 
 /**
  * Парсит содержимое JSON-файла в данные о товарах
  */
-function parseJsonFile(content: string): Partial<InsertProduct>[] {
+function parseJsonFile(content: string): ImportProduct[] {
   try {
     const data = JSON.parse(content);
     
@@ -67,7 +72,7 @@ function parseJsonFile(content: string): Partial<InsertProduct>[] {
 /**
  * Парсит содержимое CSV-файла в данные о товарах
  */
-function parseCsvFile(content: string): Partial<InsertProduct>[] {
+function parseCsvFile(content: string): ImportProduct[] {
   try {
     // Парсим CSV-файл с заголовками
     const records = parse(content, {
@@ -119,7 +124,7 @@ function parseCsvFile(content: string): Partial<InsertProduct>[] {
 /**
  * Парсит содержимое XML-файла в данные о товарах
  */
-async function parseXmlFile(content: string): Promise<Partial<InsertProduct>[]> {
+async function parseXmlFile(content: string): Promise<ImportProduct[]> {
   try {
     // Преобразуем функцию parseString в Promise
     // Создаем типизированную промисифицированную функцию
@@ -204,8 +209,15 @@ async function parseXmlFile(content: string): Promise<Partial<InsertProduct>[]> 
         if (offer.price) product.price = parseFloat(offer.price).toString();
         if (offer.oldprice) product.originalPrice = parseFloat(offer.oldprice).toString();
         if (offer.picture) product.imageUrl = offer.picture;
-        if (offer.categoryid && categoriesMap[offer.categoryid]) {
-          product.categoryId = categoriesMap[offer.categoryid];
+        if (offer.categoryId && categoriesMap[offer.categoryId]) {
+          product.categoryId = categoriesMap[offer.categoryId].id;
+          // Сохраняем название категории для автоматического создания
+          product.categoryName = categoriesMap[offer.categoryId].name;
+        } else if (offer.categoryid && categoriesMap[offer.categoryid]) {
+          // Альтернативное название атрибута (с маленькой буквы)
+          product.categoryId = categoriesMap[offer.categoryid].id;
+          // Сохраняем название категории для автоматического создания
+          product.categoryName = categoriesMap[offer.categoryid].name;
         } else {
           // Используем категорию по умолчанию, если не указана
           product.categoryId = 1;

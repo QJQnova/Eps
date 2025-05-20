@@ -115,7 +115,11 @@ export type User = typeof users.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Category = typeof categories.$inferSelect;
 
-export type InsertProduct = z.infer<typeof insertProductSchema>;
+// Базовый тип InsertProduct от схемы
+export type InsertProduct = z.infer<typeof insertProductSchema> & {
+  // Дополнительные поля для импорта
+  categoryName?: string;
+};
 export type Product = typeof products.$inferSelect;
 
 // Создаем типы с преобразованием для работы во фронтенде
@@ -168,6 +172,8 @@ export const bulkImportSchema = z.array(
       z.null()
     ]).optional().nullable(),
     categoryId: z.number().default(1),
+    // Добавляем поле с названием категории для автоматического создания
+    categoryName: z.string().optional(),
     isActive: z.boolean().default(true),
     isFeatured: z.boolean().default(false),
     tag: z.string().optional().nullable(),
