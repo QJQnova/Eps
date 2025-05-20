@@ -46,7 +46,7 @@ export default function Footer() {
               </div>
               
               <p className="text-gray-300 text-sm font-medium">Режим работы:</p>
-              <p className="text-gray-400 text-xs">пн. - пт.: 8:00 - 18:00</p>
+              <p className="text-gray-400 text-xs">пн–пт 8:00–18:00, сб, вс — выходные</p>
             </div>
             
 

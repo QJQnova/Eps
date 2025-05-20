@@ -62,7 +62,7 @@ export default function ContactsPage() {
                     </div>
                     <div>
                       <p className="font-medium text-gray-700 mb-2">Режим работы:</p>
-                      <p className="text-gray-600">Пн. - Пт.: 8:00 - 18:00</p>
+                      <p className="text-gray-600">пн–пт 8:00–18:00, сб, вс — выходные</p>
                     </div>
                   </div>
                   

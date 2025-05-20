@@ -67,10 +67,10 @@ export default function Header() {
               </span>
             </div>
             <div className="hidden md:flex items-center space-x-6">
-              <span className="hover:text-eps-yellow transition-colors">пн. - пт.: 8:00 - 18:00</span>
+              <span className="hover:text-eps-yellow transition-colors">пн–пт 8:00–18:00, сб, вс — выходные</span>
             </div>
             <div className="md:hidden">
-              <span className="hover:text-eps-yellow transition-colors">пн. - пт.: 8:00 - 18:00</span>
+              <span className="hover:text-eps-yellow transition-colors">пн–пт 8:00–18:00</span>
             </div>
           </div>
         </div>
