@@ -556,7 +556,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Создаем недостающие категории
         const newCategoryPromises: Promise<any>[] = [];
         
-        for (const catId of categoryIds) {
+        // Преобразуем Set в массив для итерации
+        const categoryIdsArray = Array.from(categoryIds);
+        for (const catId of categoryIdsArray) {
           // Проверяем, существует ли категория с таким ID
           if (!existingCategoryIds.includes(catId)) {
             // Определяем название новой категории

@@ -83,7 +83,7 @@ function parseCsvFile(content: string): ImportProduct[] {
     
     return records.map((record: any) => {
       // Конвертируем строковые значения в соответствующие типы
-      const product: Partial<InsertProduct> = {};
+      const product: ImportProduct = {};
       
       // Обязательные поля
       if (!record.name || !record.price) {
@@ -173,7 +173,7 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
       
       // Преобразуем каждый товар
       return offers.map((offer: any, index: number) => {
-        const product: Partial<InsertProduct> = {};
+        const product: ImportProduct = {};
         
         // Получаем название товара из разных возможных полей
         if (offer.name) product.name = offer.name;
