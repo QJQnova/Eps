@@ -2,7 +2,6 @@ import * as fs from "fs/promises";
 import { parse } from "csv-parse/sync";
 import { InsertProduct } from "@shared/schema";
 import { parseString } from "xml2js";
-import { promisify } from "util";
 
 // Расширенный тип для работы с импортом
 interface ImportProduct extends Partial<InsertProduct> {
@@ -133,9 +132,8 @@ function parseCsvFile(content: string): ImportProduct[] {
  */
 async function parseXmlFile(content: string): Promise<ImportProduct[]> {
   try {
-    // Проверяем, не содержит ли файл DOCTYPE или другие декларации, которые могут вызвать проблемы
-    // Но не удаляем их, так как это может нарушить структуру XML
-    let cleanContent = content;
+    // Очищаем текст от BOM
+    const cleanContent = content.replace(/^\uFEFF/, '');
     
     // Для отладки только просматриваем наличие XML-деклараций
     const hasXmlDeclaration = content.startsWith('<?xml');
@@ -144,22 +142,19 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
     console.log("XML файл содержит декларацию XML:", hasXmlDeclaration);
     console.log("XML файл содержит декларацию DOCTYPE:", hasDoctypeDeclaration);
     
-    // Преобразуем функцию parseString в Promise
-    // Создаем типизированную промисифицированную функцию
-    // Мы будем использовать непосредственно саму функцию parseString с колбеком вместо промисификации
-    // с неправильными параметрами
-    
     // Выводим начало XML для диагностики
-    console.log("Начало XML файла:", cleanContent.substring(0, 500));
+    console.log("Начало XML файла:", cleanContent.substring(0, 200));
     
     // Создаем промис вручную для парсинга XML
     const result = await new Promise<any>((resolve, reject) => {
       parseString(content, {
         explicitArray: false, // Не преобразовывать одиночные элементы в массивы
-        normalizeTags: false, // Сохранять оригинальный регистр тегов
+        normalizeTags: true, // Приводим теги к нижнему регистру для единообразия
         trim: true, // Удалять лишние пробелы
         strict: false, // Отключаем строгую проверку XML
-        mergeAttrs: true // Объединяем атрибуты и элементы для упрощения доступа
+        mergeAttrs: true, // Объединяем атрибуты и элементы для упрощения доступа
+        attrNameProcessors: [(name: string) => name.toLowerCase()], // Приводим имена атрибутов к нижнему регистру
+        tagNameProcessors: [(name: string) => name.toLowerCase()] // Приводим имена тегов к нижнему регистру
       }, (err, result) => {
         if (err) {
           reject(err);
@@ -168,9 +163,9 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
         }
       });
     });
-    
+  
     console.log("Результат парсинга XML:", JSON.stringify(result, null, 2).substring(0, 500) + "...");
-    
+  
     if (!result) {
       throw new Error('XML файл не может быть прочитан');
     }
@@ -372,7 +367,7 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
         }
         
         return product;
-      }).filter(Boolean) as Partial<InsertProduct>[];
+      }).filter(Boolean) as ImportProduct[];
     } else if (result.PROSVAR || result.prosvar) {
       // Обработка файла в формате ПРОСВАР.xml
       console.log("Обнаружен ПРОСВАР формат XML. Применяю специальную обработку...");
@@ -408,229 +403,280 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
       return productList.map((item: any, index: number) => {
         const product: ImportProduct = {};
         
-        // Извлекаем название товара из разных возможных источников
-        product.name = item.name || item.title || item.наименование || item.артикул || `Товар ${index + 1}`;
-        
-        // Генерируем SKU из артикула или названия
-        product.sku = item.sku || item.artcode || item.articul || item.артикул || 
-          `SKU-${(product.name || "").substring(0, 10).replace(/\s+/g, '-')}-${index + 1}`;
-        
-        // Цена товара
-        product.price = item.price || item.цена || item.cost || "0";
-        // Убеждаемся, что цена всегда строка
-        if (typeof product.price !== 'string') {
-          product.price = String(product.price);
+        try {
+          // Получаем ID товара
+          if (item.id) product.sku = item.id.toString();
+          else if (item.code) product.sku = item.code.toString();
+          else {
+            // Генерируем уникальный SKU
+            const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            product.sku = `SKU-${randomPart}`;
+          }
+          
+          // Получаем название товара
+          if (item.name) product.name = item.name.toString();
+          else if (item.title) product.name = item.title.toString();
+          else {
+            // Если нет имени, пропускаем
+            console.warn(`Товар ПРОСВАР #${index} пропущен - отсутствует название`);
+            return null;
+          }
+          
+          // Получаем цену
+          if (item.price) {
+            if (typeof item.price === 'string') {
+              // Заменяем запятую на точку и парсим
+              product.price = parseFloat(item.price.replace(/,/g, '.')).toString();
+            } else if (typeof item.price === 'number') {
+              product.price = item.price.toString();
+            }
+          } else if (item.cost) {
+            if (typeof item.cost === 'string') {
+              product.price = parseFloat(item.cost.replace(/,/g, '.')).toString();
+            } else if (typeof item.cost === 'number') {
+              product.price = item.cost.toString();
+            }
+          } else {
+            // Если нет цены, устанавливаем 0
+            product.price = "0";
+          }
+          
+          // Обрабатываем категории
+          let categoryName: string | undefined;
+          
+          if (item.categoryname) categoryName = item.categoryname;
+          else if (item.category) categoryName = item.category;
+          else if (item.group) categoryName = item.group;
+          
+          if (categoryName) {
+            product.categoryName = categoryName;
+          } else {
+            // Устанавливаем категорию по умолчанию
+            product.categoryId = 1;
+          }
+          
+          // Описание
+          if (item.description) product.description = item.description;
+          
+          // Краткое описание
+          if (item.shortdescription) product.shortDescription = item.shortdescription;
+          else if (item.brief) product.shortDescription = item.brief;
+          
+          // Создаем slug из названия
+          if (product.name) {
+            const cyrillicPattern = /[^a-zA-Zа-яА-ЯёЁ0-9 ]/g;
+            product.slug = product.name
+              .toLowerCase()
+              .replace(cyrillicPattern, '')
+              .replace(/\s+/g, '-')
+              .substring(0, 50); // Ограничиваем длину slug
+              
+            // Добавляем уникальный идентификатор к slug
+            const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            product.slug = `${product.slug}-${randomPart}`;
+          }
+          
+          // Картинка
+          if (item.picture) product.imageUrl = item.picture;
+          else if (item.image) product.imageUrl = item.image;
+          
+          // По умолчанию товар активен
+          product.isActive = true;
+          
+          return product;
+        } catch (err: any) {
+          console.error(`Ошибка при обработке товара ПРОСВАР #${index}:`, err);
+          return null;
         }
-        
-        // Описание товара
-        product.description = item.description || item.desc || item.описание || null;
-        
-        // Краткое описание
-        product.shortDescription = item.shortdesc || item.annotation || item.аннотация || null;
-        
-        // Изображение товара
-        product.imageUrl = item.image || item.picture || item.img || item.изображение || null;
-        
-        // Категория товара
-        const categoryName = item.category || item.категория || "Общая категория";
-        // Создаем идентификатор категории из ее имени
-        const categoryId = index + 1;
-        product.categoryId = categoryId;
-        product.categoryName = categoryName;
-        
-        // Активность товара
-        product.isActive = true;
-        
-        // Остаток на складе
-        product.stock = item.stock || item.количество || item.count || 100;
-        if (typeof product.stock !== 'number') {
-          product.stock = parseInt(String(product.stock), 10) || 100;
-        }
-        
-        // Генерация slug
-        product.slug = (product.name || "")
-          .toLowerCase()
-          .replace(/[^a-zA-Zа-яА-ЯёЁ0-9 ]/g, '')
-          .replace(/\s+/g, '-')
-          .substring(0, 40) + '-' + (index + 1);
-        
-        return product;
-      });
-    } else {
-      // Обработка других форматов XML
-      console.log("Файл XML в нестандартном формате. Применяю общую обработку...");
+      }).filter(Boolean) as ImportProduct[];
+    } else if (result.base && result.base.items && result.base.items.item) {
+      // Обработка специального формата для файла "ПРОСВАР.xml"
+      console.log("Обнаружен формат Base с элементами Items/Item");
       
-      try {
-        // Проверяем, есть ли в корне документа элемент shop
-        if (result && result.shop) {
-          console.log("Найден элемент shop в корне документа");
-          const shop = result.shop;
+      // Получаем товары
+      const items = Array.isArray(result.base.items.item) 
+        ? result.base.items.item 
+        : [result.base.items.item];
+      
+      console.log(`Найдено ${items.length} товаров в формате Base/Items/Item`);
+      
+      // Преобразуем товары
+      return items.map((item: any, index: number) => {
+        try {
+          const product: ImportProduct = {};
           
-          // Проверяем наличие товаров в структуре shop
-          if (shop.offers && shop.offers.offer) {
-            const offers = Array.isArray(shop.offers.offer) ? shop.offers.offer : [shop.offers.offer];
-            console.log(`Найдено ${offers.length} товаров в shop.offers.offer`);
-            
-            // Создаем список категорий если они есть
-            const categoriesMap: Record<string, {id: number, name: string}> = {};
-            if (shop.categories && shop.categories.category) {
-              const categories = Array.isArray(shop.categories.category) ? 
-                shop.categories.category : [shop.categories.category];
+          // ID товара
+          if (item.id) product.sku = item.id.toString();
+          else if (item.code) product.sku = item.code.toString();
+          else {
+            // Генерируем уникальный SKU
+            const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            product.sku = `SKU-${randomPart}`;
+          }
+          
+          // Название товара
+          if (item.name) product.name = item.name.toString();
+          else if (item.title) product.name = item.title.toString();
+          else {
+            // Если нет имени, пропускаем
+            console.warn(`Товар Base/Items/Item #${index} пропущен - отсутствует название`);
+            return null;
+          }
+          
+          // Цена товара
+          if (item.price) {
+            if (typeof item.price === 'string') {
+              // Заменяем запятую на точку и парсим
+              product.price = parseFloat(item.price.replace(/,/g, '.')).toString();
+            } else if (typeof item.price === 'number') {
+              product.price = item.price.toString();
+            }
+          } else {
+            // Если нет цены, устанавливаем 0
+            product.price = "0";
+          }
+          
+          // Описание
+          if (item.description) product.description = item.description;
+          
+          // Категория
+          if (item.group) product.categoryName = item.group;
+          else if (item.category) product.categoryName = item.category;
+          
+          // Создаем slug из названия
+          if (product.name) {
+            const cyrillicPattern = /[^a-zA-Zа-яА-ЯёЁ0-9 ]/g;
+            product.slug = product.name
+              .toLowerCase()
+              .replace(cyrillicPattern, '')
+              .replace(/\s+/g, '-')
+              .substring(0, 50); // Ограничиваем длину slug
               
-              categories.forEach((cat: any, index: number) => {
-                const catId = cat.id || cat.$ && cat.$.id || (index + 1).toString();
-                const catName = cat._ || cat._value || cat.name || `Категория ${catId}`;
-                categoriesMap[catId.toString()] = {
-                  id: Number(catId),
-                  name: catName.toString()
-                };
+            // Добавляем уникальный идентификатор к slug
+            const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            product.slug = `${product.slug}-${randomPart}`;
+          }
+          
+          return product;
+        } catch (err) {
+          console.error(`Ошибка при обработке товара Base/Items/Item #${index}:`, err);
+          return null;
+        }
+      }).filter(Boolean) as ImportProduct[];
+    } else {
+      // Если ни один известный формат не обнаружен, пытаемся найти товары в корневом элементе
+      console.log("Неизвестный формат XML, пытаемся извлечь товары из корневого элемента...");
+      
+      const products: ImportProduct[] = [];
+      
+      // Функция для поиска элементов, которые могут быть товарами
+      const findProducts = (obj: any, path: string = "") => {
+        if (!obj || typeof obj !== 'object') return;
+        
+        // Проверяем, есть ли массивы товаров с типичными названиями
+        const possibleProductArrays = [
+          "items", "товары", "products", "offers", "goods", "product", "item", "offer",
+          "элементы", "прайс", "price", "catalogue", "каталог"
+        ];
+        
+        for (const key of Object.keys(obj)) {
+          const value = obj[key];
+          
+          // Если нашли массив, проверяем, содержит ли он товары
+          if (Array.isArray(value)) {
+            // Проверяем первый элемент массива
+            if (value.length > 0 && typeof value[0] === 'object' && (
+                value[0].name || value[0].title || value[0].id || value[0].price || value[0].code)) {
+              console.log(`Найден массив товаров в пути ${path}/${key}`);
+              
+              // Преобразуем каждый элемент массива в товар
+              value.forEach((item, index) => {
+                try {
+                  const product: ImportProduct = {};
+                  
+                  // ID товара
+                  if (item.id) product.sku = item.id.toString();
+                  else if (item.code) product.sku = item.code.toString();
+                  else {
+                    // Генерируем уникальный SKU
+                    const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                    product.sku = `SKU-${randomPart}`;
+                  }
+                  
+                  // Название товара
+                  if (item.name) product.name = item.name.toString();
+                  else if (item.title) product.name = item.title.toString();
+                  else {
+                    // Если нет имени, пропускаем
+                    return;
+                  }
+                  
+                  // Цена товара
+                  if (item.price) {
+                    if (typeof item.price === 'string') {
+                      // Заменяем запятую на точку и парсим
+                      product.price = parseFloat(item.price.replace(/,/g, '.')).toString();
+                    } else if (typeof item.price === 'number') {
+                      product.price = item.price.toString();
+                    }
+                  } else {
+                    // Если нет цены, устанавливаем 0
+                    product.price = "0";
+                  }
+                  
+                  // Описание
+                  if (item.description) product.description = item.description;
+                  
+                  // Категория
+                  if (item.group) product.categoryName = item.group;
+                  else if (item.category) product.categoryName = item.category;
+                  else {
+                    // Используем родительский элемент как категорию
+                    product.categoryName = key;
+                  }
+                  
+                  // Создаем slug из названия
+                  if (product.name) {
+                    const cyrillicPattern = /[^a-zA-Zа-яА-ЯёЁ0-9 ]/g;
+                    product.slug = product.name
+                      .toLowerCase()
+                      .replace(cyrillicPattern, '')
+                      .replace(/\s+/g, '-')
+                      .substring(0, 50); // Ограничиваем длину slug
+                      
+                    // Добавляем уникальный идентификатор к slug
+                    const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                    product.slug = `${product.slug}-${randomPart}`;
+                  }
+                  
+                  products.push(product);
+                } catch (err) {
+                  console.error(`Ошибка при обработке товара в ${path}/${key}[${index}]:`, err);
+                }
               });
-              
-              console.log(`Обработано ${Object.keys(categoriesMap).length} категорий`);
             }
-            
-            // Обрабатываем товары
-            return offers.map((offer: any, index: number) => {
-              const product: ImportProduct = {};
-              
-              // Название товара
-              product.name = offer.name || offer.model || offer.title || offer._ || `Товар ${index + 1}`;
-              
-              // Генерируем SKU из ID или названия
-              product.sku = offer.id || offer.sku || offer.vendorCode || 
-                `SKU-${product.name ? product.name.substring(0, 10) : 'unknown'}-${index + 1}`;
-              
-              // Цена
-              product.price = offer.price ? offer.price.toString() : "0";
-              
-              // Описание
-              product.description = offer.description || null;
-              
-              // Изображение
-              product.imageUrl = offer.picture || offer.image || null;
-              
-              // Обработка категории
-              if (offer.categoryId && categoriesMap[offer.categoryId]) {
-                product.categoryId = categoriesMap[offer.categoryId].id;
-                product.categoryName = categoriesMap[offer.categoryId].name;
-              } else if (offer.categoryId) {
-                product.categoryId = parseInt(offer.categoryId, 10);
-                product.categoryName = `Категория ${offer.categoryId}`;
-              } else {
-                product.categoryId = 1;
-              }
-              
-              // Slug - генерируем из названия или используем дефолтное значение
-              product.slug = (product.name ? 
-                product.name
-                  .toLowerCase()
-                  .replace(/[^a-zA-Zа-яА-ЯёЁ0-9 ]/g, '')
-                  .replace(/\s+/g, '-')
-                  .substring(0, 40) 
-                : `product-${index}`) + `-${index + 1}`;
-              
-              // Статус
-              product.isActive = true;
-              product.stock = 100;
-              
-              return product;
-            });
+          }
+          // Рекурсивно обрабатываем вложенные объекты
+          else if (typeof value === 'object' && value !== null) {
+            findProducts(value, `${path}/${key}`);
           }
         }
-        
-        // Если предыдущие проверки не сработали, используем более универсальный подход
-        console.log("Применяю глубокий поиск товаров в XML структуре...");
-        
-        // Функция для рекурсивного поиска товаров в любой структуре XML
-        const findProducts = (obj: any, prefix: string = ""): ImportProduct[] => {
-          const products: ImportProduct[] = [];
-          
-          if (!obj) return products;
-          
-          // Если это массив, обрабатываем каждый элемент
-          if (Array.isArray(obj)) {
-            let index = 0;
-            for (const item of obj) {
-              products.push(...findProducts(item, `${prefix}[${index}]`));
-              index++;
-            }
-            return products;
-          }
-          
-          // Если это объект, проверяем его свойства
-          if (typeof obj === 'object') {
-            // Проверяем, похож ли этот объект на товар
-            if ((obj.price || obj.cost) && (obj.name || obj.title || obj.model)) {
-              // Этот объект похож на товар, преобразуем его
-              const product: ImportProduct = {};
-              
-              // Получаем название
-              product.name = obj.name || obj.title || obj.model || obj.article || `Товар из ${prefix}`;
-              
-              // Генерируем SKU
-              product.sku = obj.id || obj.sku || obj.code || obj.articul || obj.article || 
-                `SKU-${Math.floor(Math.random() * 10000)}`;
-              
-              // Цена
-              product.price = (obj.price || obj.cost || "0").toString();
-              
-              // Описание
-              product.description = obj.description || obj.desc || null;
-              
-              // Изображение
-              product.imageUrl = obj.picture || obj.image || obj.photo || obj.img || null;
-              
-              // Категория (используем категорию по умолчанию)
-              product.categoryId = 1;
-              if (obj.category) {
-                product.categoryName = typeof obj.category === 'string' ? 
-                  obj.category : 
-                  (obj.category.name || obj.category._ || "Импортированная категория");
-              }
-              
-              // Slug с проверкой на undefined
-              product.slug = (product.name ? 
-                product.name
-                  .toLowerCase()
-                  .replace(/[^a-zA-Zа-яА-ЯёЁ0-9 ]/g, '')
-                  .replace(/\s+/g, '-')
-                  .substring(0, 40) 
-                : `product-${prefix.replace(/[^a-zA-Z0-9]/g, "-")}`) + 
-                `-${Math.floor(Math.random() * 10000)}`;
-              
-              // Товар активен по умолчанию
-              product.isActive = true;
-              product.stock = 100;
-              
-              products.push(product);
-            }
-            
-            // Рекурсивно ищем в каждом свойстве
-            for (const key in obj) {
-              if (typeof obj[key] === 'object') {
-                products.push(...findProducts(obj[key], `${prefix}.${key}`));
-              }
-            }
-          }
-          
-          return products;
-        };
-        
-        // Применяем универсальный поиск
-        const foundProducts = findProducts(result);
-        
-        if (foundProducts.length > 0) {
-          console.log(`Найдено ${foundProducts.length} товаров в структуре XML с помощью универсального поиска`);
-          return foundProducts;
-        }
-        
-        // Если ничего не найдено, выбрасываем ошибку
-        throw new Error('Не удалось найти товары в структуре XML');
-      } catch (err: any) {
-        console.error("Ошибка при обработке альтернативного формата XML:", err);
-        throw new Error(`Не удалось обработать XML-файл: ${err.message}`);
+      };
+      
+      // Начинаем поиск товаров с корневого элемента
+      findProducts(result, "");
+      
+      if (products.length === 0) {
+        throw new Error('Не удалось найти товары в XML файле');
       }
+      
+      console.log(`Найдено ${products.length} товаров в неизвестном формате XML`);
+      return products;
     }
+    
+    // Если не удалось обработать ни один формат, возвращаем ошибку
+    throw new Error('Не удалось определить формат XML или найти товары');
+    
   } catch (error: any) {
     console.error("Ошибка парсинга XML:", error);
     throw new Error(`Ошибка формата XML: ${error.message}`);
