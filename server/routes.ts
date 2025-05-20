@@ -11,7 +11,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
-import { hashPassword } from "./auth";
+import { hashPassword, comparePasswords } from "./auth";
 import { parseImportFile } from "./utils/file-parser";
 import { setupAuth } from "./auth";
 import multer from "multer";
@@ -74,7 +74,94 @@ const validateData = <T>(schema: z.ZodType<T>, data: any): T => {
 export async function registerRoutes(app: Express): Promise<Server> {
   await ensureTempDir();
   
-  // Настройка авторизации
+  // Добавляем альтернативные маршруты аутентификации (будут работать параллельно с passport)
+  app.post("/api/simple-login", async (req, res) => {
+    try {
+      console.log("Попытка входа через простой маршрут:", req.body);
+      
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        console.log("Не указаны имя пользователя или пароль");
+        return res.status(400).json({ message: "Необходимо указать имя пользователя и пароль" });
+      }
+      
+      const user = await storage.getUserByUsername(username);
+      
+      if (!user) {
+        console.log("Пользователь не найден:", username);
+        return res.status(401).json({ message: "Неверное имя пользователя или пароль" });
+      }
+      
+      let passwordMatch = false;
+      
+      // Проверяем простой пароль (для тестовых аккаунтов)
+      if (user.password === password) {
+        console.log("Вход с совпадением простого пароля");
+        passwordMatch = true;
+      } else {
+        // Проверяем хешированный пароль
+        try {
+          passwordMatch = await comparePasswords(password, user.password);
+          console.log("Результат проверки хешированного пароля:", passwordMatch);
+        } catch (error) {
+          console.error("Ошибка при проверке пароля:", error);
+        }
+      }
+      
+      if (!passwordMatch) {
+        console.log("Неверный пароль");
+        return res.status(401).json({ message: "Неверное имя пользователя или пароль" });
+      }
+      
+      // Удаляем пароль из ответа
+      const { password: _, ...userWithoutPassword } = user;
+      res.status(200).json(userWithoutPassword);
+      
+    } catch (error: any) {
+      console.error("Ошибка при входе:", error);
+      res.status(500).json({ message: "Внутренняя ошибка сервера" });
+    }
+  });
+  
+  app.post("/api/simple-register", async (req, res) => {
+    try {
+      console.log("Попытка регистрации через простой маршрут:", req.body);
+      
+      const { username, email, password } = req.body;
+      
+      if (!username || !email || !password) {
+        return res.status(400).json({ message: "Все поля обязательны для заполнения" });
+      }
+      
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Пользователь с таким именем уже существует" });
+      }
+      
+      // Создаем хеш пароля
+      const hashedPassword = await hashPassword(password);
+      
+      // Создаем пользователя
+      const user = await storage.createUser({
+        username,
+        email,
+        password: hashedPassword,
+        role: "user",
+        isActive: true
+      });
+      
+      // Удаляем пароль из ответа
+      const { password: _, ...userWithoutPassword } = user;
+      res.status(201).json(userWithoutPassword);
+      
+    } catch (error: any) {
+      console.error("Ошибка при регистрации:", error);
+      res.status(500).json({ message: "Внутренняя ошибка сервера" });
+    }
+  });
+  
+  // Стандартная настройка авторизации через passport
   setupAuth(app);
 
   // User Routes для администрирования

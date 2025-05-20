@@ -79,8 +79,8 @@ export default function AuthPage() {
       // Выводим данные для отладки
       console.log("Отправляем данные для входа:", data);
       
-      // Отправляем запрос напрямую, минуя мутацию
-      const response = await fetch("/api/login", {
+      // Отправляем запрос через упрощенный маршрут
+      const response = await fetch("/api/simple-login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -124,8 +124,8 @@ export default function AuthPage() {
       // Выводим данные для отладки
       console.log("Отправляем данные для регистрации:", registerData);
       
-      // Отправляем запрос напрямую
-      const response = await fetch("/api/register", {
+      // Отправляем запрос через упрощенный маршрут
+      const response = await fetch("/api/simple-register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
