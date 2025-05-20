@@ -126,14 +126,32 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
+    console.log("Попытка входа:", req.body);
+    
+    // Проверяем, что имя пользователя и пароль есть в запросе
+    if (!req.body.username || !req.body.password) {
+      return res.status(400).json({ message: "Необходимо указать имя пользователя и пароль" });
+    }
+    
     passport.authenticate("local", (err: Error | null, user: Express.User | false, info: { message: string } | undefined) => {
-      if (err) return next(err);
+      if (err) {
+        console.error("Ошибка аутентификации:", err);
+        return next(err);
+      }
+      
       if (!user) {
-        return res.status(401).json({ message: info?.message || "Ошибка авторизации" });
+        console.log("Пользователь не найден или неверные данные");
+        return res.status(401).json({ message: info?.message || "Неверное имя пользователя или пароль" });
       }
       
       req.login(user, (err: Error | null) => {
-        if (err) return next(err);
+        if (err) {
+          console.error("Ошибка при входе в систему:", err);
+          return next(err);
+        }
+        
+        console.log("Успешный вход пользователя:", user.username);
+        
         // Не возвращаем пароль в ответе
         const { password, ...userWithoutPassword } = user;
         res.status(200).json(userWithoutPassword);
