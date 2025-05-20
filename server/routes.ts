@@ -635,19 +635,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Преобразуем данные и устанавливаем корректные типы
-          const categoryId = (() => {
-            // Обязательное числовое поле categoryId
-            if (product.categoryId) {
-              if (typeof product.categoryId === 'string') {
-                const parsed = parseInt(product.categoryId, 10);
-                return isNaN(parsed) ? 1 : parsed;
-              }
-              if (typeof product.categoryId === 'number') {
-                return product.categoryId;
+          // Если у нас есть имя категории, нам нужно её создать
+          const processCategory = async (catId: number | string | undefined, catName: string | undefined): Promise<number> => {
+            // Если есть имя категории, попробуем найти её по имени или создать новую
+            if (catName) {
+              // Попытка найти категорию по названию
+              try {
+                const formattedName = catName.trim();
+                const slug = formattedName
+                  .toLowerCase()
+                  .replace(/[^a-zA-Zа-яА-ЯёЁ0-9 ]/g, '')
+                  .replace(/\s+/g, '-');
+                
+                // Проверяем, существует ли категория с таким slug
+                const existingCategory = await storage.getCategoryBySlug(slug);
+                if (existingCategory) {
+                  return existingCategory.id;
+                }
+                
+                // Если категория не найдена, создаем новую
+                const newCategory = await storage.createCategory({
+                  name: formattedName,
+                  slug: slug,
+                  description: null
+                });
+                return newCategory.id;
+              } catch (error) {
+                console.error(`Ошибка при создании категории ${catName}:`, error);
               }
             }
-            return 1; // Значение по умолчанию
-          })();
+            
+            // Если есть числовой ID категории, используем его
+            if (catId !== undefined) {
+              if (typeof catId === 'string') {
+                const parsed = parseInt(catId, 10);
+                return isNaN(parsed) ? 1 : parsed;
+              }
+              if (typeof catId === 'number') {
+                return catId;
+              }
+            }
+            
+            return 1; // Значение по умолчанию, если не удалось определить категорию
+          };
+          
+          // Используем значение по умолчанию для компиляции, фактическое значение будет заменено позже
+          const categoryId = product.categoryId ? 
+            (typeof product.categoryId === 'number' ? product.categoryId : 
+            (typeof product.categoryId === 'string' ? 
+              (parseInt(product.categoryId, 10) || 1) : 1)) : 1;
           
           // Цена всегда как строка
           const price = (() => {
@@ -708,8 +744,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         });
         
+        // Обработаем категории для каждого товара перед валидацией
+        const productsWithProcessedCategories = await Promise.all(
+          productsWithDefaults.map(async (product) => {
+            // Если у продукта есть имя категории, создаем или находим категорию
+            if (product.categoryName) {
+              try {
+                // Используем метод, который мы определили выше
+                const categoryId = await processCategory(product.categoryId, product.categoryName);
+                return { ...product, categoryId };
+              } catch (error) {
+                console.error(`Ошибка при обработке категории для товара ${product.name}:`, error);
+                // Убедимся, что categoryId всегда установлен
+                return { ...product, categoryId: product.categoryId || 1 };
+              }
+            }
+            
+            // Убедимся, что categoryId всегда установлен и является числом
+            return { 
+              ...product, 
+              categoryId: typeof product.categoryId === 'number' ? 
+                product.categoryId : 
+                (typeof product.categoryId === 'string' ? 
+                  (parseInt(product.categoryId, 10) || 1) : 1) 
+            };
+          })
+        );
+        
         // Validate all products
-        const validatedProducts = validateData(bulkImportSchema, productsWithDefaults);
+        const validatedProducts = validateData(bulkImportSchema, productsWithProcessedCategories);
         
         console.log(`Validated ${validatedProducts.length} products`);
         

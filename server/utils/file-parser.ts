@@ -14,7 +14,13 @@ interface ImportProduct extends Partial<InsertProduct> {
  */
 export async function parseImportFile(filePath: string, fileExtension: string): Promise<ImportProduct[]> {
   try {
+    // Выводим тип файла для диагностики
+    console.log(`Обработка файла с расширением: ${fileExtension}`);
+    
     const fileContent = await fs.readFile(filePath, 'utf8');
+    
+    // Выводим небольшой фрагмент содержимого для диагностики
+    console.log(`Первые 200 символов файла: ${fileContent.substring(0, 200)}`);
     
     if (fileExtension === '.json') {
       return parseJsonFile(fileContent);
@@ -22,6 +28,7 @@ export async function parseImportFile(filePath: string, fileExtension: string): 
       return parseCsvFile(fileContent);
     } else if (fileExtension === '.xml') {
       try {
+        console.log("Начинаем разбор XML файла...");
         return await parseXmlFile(fileContent);
       } catch (xmlError: any) {
         console.error("XML parsing error:", xmlError);
