@@ -72,4 +72,4 @@ app.listen(port, '0.0.0.0', () => {
   console.log(`Test auth at: http://localhost:${port}/clean-auth`);
 });
 
-module.exports = app;
+export default app;
