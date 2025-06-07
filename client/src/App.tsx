@@ -61,6 +61,7 @@ function Router() {
           <Route path="/category/:slug" component={Category} />
           <Route path="/cart" component={Cart} />
           <Route path="/auth" component={SimpleAuthPage} />
+          <Route path="/login" component={SimpleAuthPage} />
           <Route path="/password-reset" component={PasswordResetPage} />
           <Route path="/password-reset/reset" component={PasswordResetPage} />
           <Route path="/services" component={ServicesPage} />
