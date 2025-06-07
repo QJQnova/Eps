@@ -146,11 +146,17 @@ app.get('/api/settings/shop', (req, res) => {
   });
 });
 
-const port = process.env.PORT || 5000;
+// Serve demo page at root
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'eps-demo.html'));
+});
+
+const port = process.env.PORT || 5001;
 app.listen(port, '0.0.0.0', () => {
-  console.log(`ЭПС сервер запущен на порту ${port}`);
+  console.log(`ЭПС демо-сервер запущен на порту ${port}`);
   console.log('Функции готовы:');
   console.log('✓ Удален дублирующийся поиск из хедера');
   console.log('✓ Обновлен формат рабочего времени');
   console.log('✓ Автоматическое создание категорий при импорте');
+  console.log(`Демо доступно: http://localhost:${port}`);
 });
