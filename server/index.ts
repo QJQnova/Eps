@@ -4,30 +4,20 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
-// Добавляем отладку для входящих запросов
+// Middleware для парсинга JSON
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false }));
+
+// Отладка для POST запросов (после парсинга)
 app.use((req, res, next) => {
   if (req.method === 'POST') {
     console.log(`POST запрос на ${req.path}`);
-    console.log('Headers:', req.headers);
-    
-    let body = '';
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
-    
-    req.on('end', () => {
-      console.log('Raw body:', body);
-      // Восстанавливаем body для дальнейшей обработки
-      req.body = body ? JSON.parse(body) : {};
-      next();
-    });
-  } else {
-    next();
+    console.log('Headers Content-Type:', req.headers['content-type']);
+    console.log('Headers Content-Length:', req.headers['content-length']);
+    console.log('Parsed body:', req.body);
   }
+  next();
 });
-
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: false }));
 
 // Отключение кеширования для всех ответов - усиленная версия
 app.use((req, res, next) => {
