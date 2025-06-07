@@ -73,6 +73,15 @@ const validateData = <T>(schema: z.ZodType<T>, data: any): T => {
 export async function registerRoutes(app: Express): Promise<Server> {
   await ensureTempDir();
 
+  // Тестовый эндпоинт для проверки работы сервера
+  app.get("/api/test", (req, res) => {
+    res.json({ 
+      message: "Сервер работает!", 
+      time: new Date().toISOString(),
+      status: "OK" 
+    });
+  });
+
   // Добавляем альтернативные маршруты аутентификации (будут работать параллельно с passport)
   app.post("/api/simple-login", async (req, res) => {
     try {
