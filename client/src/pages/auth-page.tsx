@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation, Link } from "wouter";
+import { queryClient } from "@/lib/queryClient";
 
 // Схема для валидации данных формы логина
 const loginSchema = z.object({
@@ -76,34 +77,11 @@ export default function AuthPage() {
   // Обработчик отправки формы входа
   const onLoginSubmit = async (data: LoginFormValues) => {
     try {
-      // Выводим данные для отладки
-      console.log("Отправляем данные для входа:", data);
-      
-      // Отправляем запрос через упрощенный маршрут
-      const response = await fetch("/api/simple-login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-        credentials: "include",
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Ошибка входа");
-      }
-      
-      const userData = await response.json();
-      
-      // Обновляем состояние вручную
-      queryClient.setQueryData(["/api/user"], userData);
-      
+      await loginMutation.mutateAsync(data);
       toast({
         title: "Успешный вход",
-        description: `Добро пожаловать, ${userData.username}!`,
+        description: "Добро пожаловать!",
       });
-      
       setLocation("/");
     } catch (error: any) {
       console.error("Ошибка входа:", error);
@@ -121,34 +99,11 @@ export default function AuthPage() {
       // Удаляем поле confirmPassword перед отправкой
       const { confirmPassword, ...registerData } = data;
       
-      // Выводим данные для отладки
-      console.log("Отправляем данные для регистрации:", registerData);
-      
-      // Отправляем запрос через упрощенный маршрут
-      const response = await fetch("/api/simple-register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(registerData),
-        credentials: "include",
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Ошибка регистрации");
-      }
-      
-      const userData = await response.json();
-      
-      // Обновляем состояние вручную
-      queryClient.setQueryData(["/api/user"], userData);
-      
+      await registerMutation.mutateAsync(registerData);
       toast({
         title: "Успешная регистрация",
-        description: `Аккаунт ${userData.username} успешно создан!`,
+        description: "Аккаунт успешно создан!",
       });
-      
       setLocation("/");
     } catch (error: any) {
       console.error("Ошибка регистрации:", error);
