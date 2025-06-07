@@ -77,6 +77,7 @@ export default function AuthPage() {
   // Обработчик отправки формы входа
   const onLoginSubmit = async (data: LoginFormValues) => {
     try {
+      console.log("Отправка формы входа с данными:", data);
       await loginMutation.mutateAsync(data);
       toast({
         title: "Успешный вход",
@@ -98,6 +99,7 @@ export default function AuthPage() {
     try {
       // Удаляем поле confirmPassword перед отправкой
       const { confirmPassword, ...registerData } = data;
+      console.log("Отправка формы регистрации с данными:", registerData);
       
       await registerMutation.mutateAsync(registerData);
       toast({

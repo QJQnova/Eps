@@ -142,7 +142,14 @@ export function setupAuth(app: Express) {
 
   app.post("/api/login", (req, res, next) => {
     console.log("Попытка входа, содержимое запроса:", req.body);
-    console.log("Заголовки запроса:", req.headers);
+    console.log("Content-Type:", req.headers['content-type']);
+    console.log("Content-Length:", req.headers['content-length']);
+    
+    // Проверяем, что данные корректно переданы
+    if (!req.body || Object.keys(req.body).length === 0) {
+      console.log("Пустое тело запроса");
+      return res.status(400).json({ message: "Данные не переданы в запросе" });
+    }
     
     // Создаем ручную обработку логина без использования passport.authenticate
     (async () => {

@@ -34,6 +34,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
       try {
+        console.log("Отправка данных входа:", credentials);
+        
         const response = await fetch("/api/login", {
           method: "POST",
           headers: {
@@ -43,14 +45,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           credentials: "include",
         });
         
+        console.log("Ответ сервера на login:", response.status);
+        
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
+          console.error("Ошибка входа:", errorData);
           throw new Error(errorData.message || "Неверное имя пользователя или пароль");
         }
         
         const userData = await response.json();
+        console.log("Успешный вход:", userData);
         return userData;
       } catch (error: any) {
+        console.error("Ошибка при входе:", error);
         throw new Error(error.message || "Произошла ошибка при входе");
       }
     },
@@ -73,6 +80,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const registerMutation = useMutation({
     mutationFn: async (credentials: InsertUser) => {
       try {
+        console.log("Отправка данных регистрации:", credentials);
+        
         const response = await fetch("/api/register", {
           method: "POST",
           headers: {
@@ -82,14 +91,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           credentials: "include",
         });
         
+        console.log("Ответ сервера на register:", response.status);
+        
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
+          console.error("Ошибка регистрации:", errorData);
           throw new Error(errorData.message || "Ошибка при регистрации пользователя");
         }
         
         const userData = await response.json();
+        console.log("Успешная регистрация:", userData);
         return userData;
       } catch (error: any) {
+        console.error("Ошибка при регистрации:", error);
         throw new Error(error.message || "Произошла ошибка при регистрации");
       }
     },
