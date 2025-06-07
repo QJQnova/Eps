@@ -99,9 +99,27 @@ export default function AuthPage() {
     try {
       // Удаляем поле confirmPassword перед отправкой
       const { confirmPassword, ...registerData } = data;
-      console.log("Отправка формы регистрации с данными:", registerData);
       
-      await registerMutation.mutateAsync(registerData);
+      // Выводим данные для отладки
+      console.log("Отправляем данные для регистрации:", registerData);
+      
+      // Отправляем запрос через упрощенный маршрут
+      const response = await fetch("/api/simple-register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(registerData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Ошибка регистрации");
+      }
+
+      const userData = await response.json();
+      console.log("Успешная регистрация:", userData);
+
       toast({
         title: "Успешная регистрация",
         description: "Аккаунт успешно создан!",

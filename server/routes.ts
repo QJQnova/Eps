@@ -126,12 +126,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/simple-register", async (req, res) => {
     try {
-      console.log("Попытка регистрации через простой маршрут:", req.body);
+      console.log("Попытка регистрации через простой маршрут:");
+      console.log("req.body:", req.body);
+      console.log("Content-Type:", req.headers['content-type']);
       
-      const { username, email, password } = req.body;
+      const { username, email, password } = req.body || {};
+      
+      console.log("Извлеченные поля:");
+      console.log("- username:", username);
+      console.log("- email:", email);
+      console.log("- password:", password ? "[скрыт]" : "отсутствует");
       
       if (!username || !email || !password) {
-        return res.status(400).json({ message: "Все поля обязательны для заполнения" });
+        console.log("Не хватает обязательных полей");
+        return res.status(400).json({ 
+          message: "Все поля обязательны для заполнения",
+          received: { username: !!username, email: !!email, password: !!password }
+        });
       }
       
       const existingUser = await storage.getUserByUsername(username);
