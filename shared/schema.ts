@@ -119,8 +119,6 @@ export type Category = typeof categories.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema> & {
   // Дополнительные поля для импорта
   categoryName?: string;
-  // Разрешаем categoryId быть строкой, числом или undefined для большей гибкости при импорте
-  categoryId?: string | number;
 };
 export type Product = typeof products.$inferSelect;
 
@@ -173,13 +171,7 @@ export const bulkImportSchema = z.array(
       z.string().transform(val => val === "" ? null : parseInt(val, 10)),
       z.null()
     ]).optional().nullable(),
-    // Разрешаем categoryId быть undefined во время импорта, 
-    // но устанавливаем значение по умолчанию = 1 при обработке
-    categoryId: z.union([
-      z.number(),
-      z.string().transform(val => parseInt(val, 10) || 1),
-      z.undefined().transform(() => 1)
-    ]).default(1),
+    categoryId: z.number().default(1),
     // Добавляем поле с названием категории для автоматического создания
     categoryName: z.string().optional(),
     isActive: z.boolean().default(true),

@@ -52,11 +52,10 @@ const JSON_TEMPLATE = `[
   }
 ]`;
 
-// Стандартный шаблон XML для формата YML_catalog
 const XML_TEMPLATE = `<?xml version="1.0" encoding="UTF-8"?>
 <yml_catalog date="2025-05-05MSK16:29:50+03:00">
 <shop>
-  <n>ЭПС</n>
+  <name>ЭПС</name>
   <company>ООО "ЭПС"</company>
   <url>https://eps-tools.ru</url>
   <currencies>
@@ -70,7 +69,7 @@ const XML_TEMPLATE = `<?xml version="1.0" encoding="UTF-8"?>
   </categories>
   <offers>
     <offer id="TP001" available="true">
-      <n>Профессиональная Беспроводная Дрель</n>
+      <name>Профессиональная Беспроводная Дрель</name>
       <url>https://eps-tools.ru/product/professional-cordless-drill</url>
       <price>12999</price>
       <oldprice>15999</oldprice>
@@ -84,7 +83,7 @@ const XML_TEMPLATE = `<?xml version="1.0" encoding="UTF-8"?>
       <param name="Скорости">2</param>
     </offer>
     <offer id="TP002" available="true">
-      <n>Цифровой Лазерный Дальномер</n>
+      <name>Цифровой Лазерный Дальномер</name>
       <url>https://eps-tools.ru/product/digital-laser-measure</url>
       <price>7999</price>
       <oldprice>8999</oldprice>
@@ -100,48 +99,6 @@ const XML_TEMPLATE = `<?xml version="1.0" encoding="UTF-8"?>
   </offers>
 </shop>
 </yml_catalog>`;
-
-// Альтернативный шаблон XML для формата ПРОСВАР.xml
-const PROSVAR_XML_TEMPLATE = `<?xml version="1.0" encoding="UTF-8"?>
-<PROSVAR>
-  <Классификатор>
-    <Группы>
-      <Группа Код="1" Название="Электроинструменты"/>
-      <Группа Код="2" Название="Сварочное оборудование"/>
-      <Группа Код="3" Название="Измерительные приборы"/>
-    </Группы>
-  </Классификатор>
-  <Каталог>
-    <Товары>
-      <Товар Код="SV001">
-        <Наименование>Инверторный сварочный аппарат ЭПС-200</Наименование>
-        <Описание>Профессиональный инверторный сварочный аппарат для ручной дуговой сварки</Описание>
-        <Группа>2</Группа>
-        <БазоваяЕдиница>шт</БазоваяЕдиница>
-        <Цена>15990</Цена>
-        <Картинка>https://example.com/sv001.jpg</Картинка>
-        <Атрибуты>
-          <Атрибут Название="Диапазон тока">10-200А</Атрибут>
-          <Атрибут Название="Максимальный диаметр электрода">5мм</Атрибут>
-          <Атрибут Название="Вес">4.5кг</Атрибут>
-        </Атрибуты>
-      </Товар>
-      <Товар Код="SV002">
-        <Наименование>Маска сварщика ЭПС-Хамелеон</Наименование>
-        <Описание>Автоматическая сварочная маска с регулируемым светофильтром</Описание>
-        <Группа>2</Группа>
-        <БазоваяЕдиница>шт</БазоваяЕдиница>
-        <Цена>4990</Цена>
-        <Картинка>https://example.com/sv002.jpg</Картинка>
-        <Атрибуты>
-          <Атрибут Название="Затемнение">DIN 9-13</Атрибут>
-          <Атрибут Название="Время срабатывания">0.0001с</Атрибут>
-          <Атрибут Название="Вес">0.5кг</Атрибут>
-        </Атрибуты>
-      </Товар>
-    </Товары>
-  </Каталог>
-</PROSVAR>`;
 
 export default function ImportForm() {
   const [file, setFile] = useState<File | null>(null);
@@ -244,7 +201,7 @@ export default function ImportForm() {
     }
   };
   
-  const downloadTemplate = (type: "csv" | "json" | "xml" | "prosvar-xml") => {
+  const downloadTemplate = (type: "csv" | "json" | "xml") => {
     let template, fileName, mimeType;
     
     if (type === "csv") {
@@ -255,10 +212,6 @@ export default function ImportForm() {
       template = JSON_TEMPLATE;
       fileName = "product-template.json";
       mimeType = "application/json";
-    } else if (type === "prosvar-xml") {
-      template = PROSVAR_XML_TEMPLATE;
-      fileName = "prosvar-template.xml";
-      mimeType = "application/xml";
     } else {
       template = XML_TEMPLATE;
       fileName = "product-template.xml";
@@ -331,7 +284,7 @@ export default function ImportForm() {
           <p className="text-sm text-gray-500 mb-2">
             Нужен шаблон? Скачайте наши примеры:
           </p>
-          <div className="flex flex-wrap justify-center gap-2">
+          <div className="flex justify-center space-x-4">
             <Button 
               variant="link" 
               className="text-primary"
@@ -352,13 +305,6 @@ export default function ImportForm() {
               onClick={() => downloadTemplate("xml")}
             >
               Шаблон XML
-            </Button>
-            <Button 
-              variant="link" 
-              className="text-primary"
-              onClick={() => downloadTemplate("prosvar-xml")}
-            >
-              Шаблон ПРОСВАР
             </Button>
           </div>
         </div>

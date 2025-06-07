@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext } from "react";
 import {
   useQuery,
   useMutation,
@@ -12,7 +12,7 @@ type AuthContextType = {
   user: SelectUser | null;
   isLoading: boolean;
   error: Error | null;
-  login: (username: string, password: string) => Promise<{ success: boolean; message?: string; }>;
+  loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
   logoutMutation: UseMutationResult<void, Error, void>;
   registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
 };
@@ -20,119 +20,49 @@ type AuthContextType = {
 type LoginData = Pick<InsertUser, "username" | "password">;
 
 export const AuthContext = createContext<AuthContextType | null>(null);
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
-  const [user, setUser] = useState<SelectUser | null>(null);
-  const [isLoading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
   const {
-    data: initialUser,
-    error: initialError,
-    isLoading: initialLoading,
+    data: user,
+    error,
+    isLoading,
   } = useQuery<SelectUser | null, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
-  // Initialize user state from the query
-  React.useEffect(() => {
-    setUser(initialUser ?? null);
-    setError(initialError ?? null);
-    setLoading(initialLoading);
-  }, [initialUser, initialError, initialLoading]);
-
-  const login = async (username: string, password: string) => {
-    try {
-      setLoading(true);
-
-      // Проверяем, что данные переданы
-      if (!username || !password) {
-        return { success: false, message: "Необходимо указать имя пользователя и пароль" };
+  const loginMutation = useMutation({
+    mutationFn: async (credentials: LoginData) => {
+      try {
+        const res = await apiRequest("POST", "/api/login", credentials);
+        return res;
+      } catch (error) {
+        throw error;
       }
-
-      console.log("Отправляем данные:", { username, password });
-
-      const response = await fetch("/api/simple-login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
+    },
+    onSuccess: (user: SelectUser) => {
+      queryClient.setQueryData(["/api/user"], user);
+      toast({
+        title: "Успешный вход",
+        description: `Добро пожаловать, ${user.username}!`,
       });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        setUser(result.user);
-        return { success: true };
-      } else {
-        return { success: false, message: result.message || "Ошибка входа" };
-      }
-    } catch (error: any) {
-      console.error("Ошибка входа:", error);
-      return { success: false, message: "Произошла ошибка при входе" };
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Ошибка входа",
+        description: error.message || "Неверное имя пользователя или пароль",
+        variant: "destructive",
+      });
+    },
+  });
 
   const registerMutation = useMutation({
     mutationFn: async (credentials: InsertUser) => {
       try {
-        console.log("Отправка данных регистрации:", credentials);
-
-        // Убедимся, что все обязательные поля присутствуют
-        if (!credentials.username || !credentials.password || !credentials.email) {
-          throw new Error("Все поля обязательны для заполнения");
-        }
-
-        const requestBody = {
-          username: credentials.username.trim(),
-          password: credentials.password,
-          email: credentials.email.trim(),
-        };
-
-        console.log("Тело запроса для регистрации:", requestBody);
-
-        // Сначала пробуем основной маршрут регистрации
-        let response = await fetch("/api/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-          credentials: "include",
-        });
-
-        // Если основной маршрут не работает, пробуем альтернативный
-        if (!response.ok) {
-          console.log("Основной маршрут регистрации не сработал, пробуем альтернативный");
-          response = await fetch("/api/simple-register", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(requestBody),
-            credentials: "include",
-          });
-        }
-
-        console.log("Ответ сервера на register:", response.status);
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error("Ошибка регистрации:", errorData);
-          throw new Error(errorData.message || "Ошибка при регистрации пользователя");
-        }
-
-        const userData = await response.json();
-        console.log("Успешная регистрация:", userData);
-        return userData;
-      } catch (error: any) {
-        console.error("Ошибка при регистрации:", error);
-        throw new Error(error.message || "Произошла ошибка при регистрации");
+        const res = await apiRequest("POST", "/api/register", credentials);
+        return res;
+      } catch (error) {
+        throw error;
       }
     },
     onSuccess: (user: SelectUser) => {
@@ -153,21 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      try {
-        const response = await fetch("/api/logout", {
-          method: "POST",
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || "Ошибка при выходе из системы");
-        }
-
-        return true;
-      } catch (error: any) {
-        throw new Error(error.message || "Произошла ошибка при выходе из системы");
-      }
+      await apiRequest("POST", "/api/logout");
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
@@ -191,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user: user ?? null,
         isLoading,
         error,
-        login,
+        loginMutation,
         logoutMutation,
         registerMutation,
       }}

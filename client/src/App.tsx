@@ -22,8 +22,6 @@ import OrderComplete from "@/pages/order-complete";
 import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
-import SimpleAuthPage from "@/pages/simple-auth";
-import CleanAuth from "@/pages/clean-auth";
 import PasswordResetPage from "@/pages/password-reset-page";
 import ServicesPage from "@/pages/services";
 import PromotionsPage from "@/pages/promotions";
@@ -61,9 +59,7 @@ function Router() {
           <Route path="/product/:slug" component={ProductDetails} />
           <Route path="/category/:slug" component={Category} />
           <Route path="/cart" component={Cart} />
-          <Route path="/auth" component={SimpleAuthPage} />
-          <Route path="/login" component={SimpleAuthPage} />
-          <Route path="/test-auth" component={CleanAuth} />
+          <Route path="/auth" component={AuthPage} />
           <Route path="/password-reset" component={PasswordResetPage} />
           <Route path="/password-reset/reset" component={PasswordResetPage} />
           <Route path="/services" component={ServicesPage} />

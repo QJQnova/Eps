@@ -1,52 +1,26 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import fs from "fs";
-import path from "path";
 
 const app = express();
-
-// Middleware для парсинга JSON
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Отладка для POST запросов (после парсинга)
+// Отключение кеширования для всех ответов - усиленная версия
 app.use((req, res, next) => {
-  if (req.method === 'POST') {
-    console.log(`POST запрос на ${req.path}`);
-    console.log('Headers Content-Type:', req.headers['content-type']);
-    console.log('Headers Content-Length:', req.headers['content-length']);
-    console.log('Parsed body:', req.body);
-  }
-  next();
-});
-
-// АГРЕССИВНОЕ отключение кэширования для всех ответов
-app.use((req, res, next) => {
-  // Максимальный набор заголовков против кэширования
-  res.header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0, private');
+  // Полное отключение кэширования для всех ответов
+  res.header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
   res.header('Pragma', 'no-cache');
-  res.header('Expires', '0');
-  res.header('Last-Modified', new Date(0).toUTCString());
-  res.header('ETag', '');
+  res.header('Expires', '-1');
   res.header('Surrogate-Control', 'no-store');
   res.header('Vary', '*');
-  res.header('X-Accel-Expires', '0');
-  res.header('X-Cache', 'MISS');
+  
+  // Добавляем случайный заголовок для обхода промежуточных кэшей
   res.header('X-No-Cache', Date.now().toString());
-  res.header('X-Timestamp', new Date().toISOString());
-  res.header('X-Random', Math.random().toString(36));
   
-  // Дополнительные заголовки для API
+  // Если это API запрос, дополнительно убедимся в отсутствии кэширования
   if (req.path.startsWith('/api/')) {
-    res.header('X-API-Time', Date.now().toString());
-    res.header('X-API-Version', 'no-cache-v2');
-    res.header('X-Content-Type-Options', 'nosniff');
-  }
-  
-  // Заголовки для статических файлов
-  if (req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg)$/)) {
-    res.header('X-Static-No-Cache', 'true');
+    res.header('X-API-Time', new Date().toISOString());
   }
   
   next();
@@ -83,12 +57,6 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Serve clean auth page directly to bypass Vite caching issues
-  app.get("/auth-clean", (req: Request, res: Response) => {
-    const htmlPath = path.join(process.cwd(), "client/clean.html");
-    res.sendFile(htmlPath);
-  });
-
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -99,9 +67,10 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Temporarily disable Vite to bypass caching issues
-  // TODO: Re-enable after resolving browser cache problems
-  if (false && app.get("env") === "development") {
+  // importantly only setup vite in development and after
+  // setting up all the other routes so the catch-all route
+  // doesn't interfere with the other routes
+  if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);

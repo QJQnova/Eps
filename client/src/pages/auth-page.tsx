@@ -10,7 +10,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation, Link } from "wouter";
-import { queryClient } from "@/lib/queryClient";
 
 // Схема для валидации данных формы логина
 const loginSchema = z.object({
@@ -75,81 +74,35 @@ export default function AuthPage() {
   });
 
   // Обработчик отправки формы входа
-  const onLoginSubmit = async (data: LoginFormValues) => {
-    try {
-      console.log("Отправляем данные для входа:", data);
-      
-      // Отправляем запрос через упрощенный маршрут
-      const response = await fetch("/api/simple-login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Ошибка входа");
+  const onLoginSubmit = (data: LoginFormValues) => {
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        setLocation("/");
       }
-
-      const userData = await response.json();
-      console.log("Успешный вход:", userData);
-
-      toast({
-        title: "Успешный вход",
-        description: "Добро пожаловать!",
-      });
-      setLocation("/");
-    } catch (error: any) {
-      console.error("Ошибка входа:", error);
-      toast({
-        title: "Ошибка входа",
-        description: error.message || "Неверное имя пользователя или пароль",
-        variant: "destructive",
-      });
-    }
+    });
   };
 
   // Обработчик отправки формы регистрации
-  const onRegisterSubmit = async (data: RegisterFormValues) => {
-    try {
-      // Удаляем поле confirmPassword перед отправкой
-      const { confirmPassword, ...registerData } = data;
-      
-      // Выводим данные для отладки
-      console.log("Отправляем данные для регистрации:", registerData);
-      
-      // Отправляем запрос через упрощенный маршрут
-      const response = await fetch("/api/simple-register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(registerData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Ошибка регистрации");
+  const onRegisterSubmit = (data: RegisterFormValues) => {
+    // Удаляем поле confirmPassword перед отправкой
+    const { confirmPassword, ...registerData } = data;
+    
+    registerMutation.mutate(registerData, {
+      onSuccess: () => {
+        toast({
+          title: "Успешная регистрация",
+          description: `Аккаунт ${registerData.username} успешно создан!`,
+        });
+        setLocation("/");
+      },
+      onError: (error) => {
+        toast({
+          title: "Ошибка регистрации",
+          description: error.message || "Не удалось зарегистрировать пользователя",
+          variant: "destructive",
+        });
       }
-
-      const userData = await response.json();
-      console.log("Успешная регистрация:", userData);
-
-      toast({
-        title: "Успешная регистрация",
-        description: "Аккаунт успешно создан!",
-      });
-      setLocation("/");
-    } catch (error: any) {
-      console.error("Ошибка регистрации:", error);
-      toast({
-        title: "Ошибка регистрации",
-        description: error.message || "Не удалось зарегистрировать пользователя",
-        variant: "destructive",
-      });
-    }
+    });
   };
 
   return (

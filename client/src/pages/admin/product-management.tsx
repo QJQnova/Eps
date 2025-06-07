@@ -35,7 +35,9 @@ export default function ProductManagement() {
         description: "Пожалуйста, подождите и не закрывайте страницу",
       });
       
-      const deleteUrl = `/api/admin/products/delete-all`;
+      // Используем параметр запроса для предотвращения кэширования
+      const noCacheToken = `nocache=${new Date().getTime()}-${Math.random().toString(36).substring(2, 15)}`;
+      const deleteUrl = `/api/admin/products/delete-all?${noCacheToken}`;
       
       console.log(`Отправка запроса на удаление всех товаров: ${deleteUrl}`);
       
