@@ -77,8 +77,25 @@ export default function AuthPage() {
   // Обработчик отправки формы входа
   const onLoginSubmit = async (data: LoginFormValues) => {
     try {
-      console.log("Отправка формы входа с данными:", data);
-      await loginMutation.mutateAsync(data);
+      console.log("Отправляем данные для входа:", data);
+      
+      // Отправляем запрос через упрощенный маршрут
+      const response = await fetch("/api/simple-login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Ошибка входа");
+      }
+
+      const userData = await response.json();
+      console.log("Успешный вход:", userData);
+
       toast({
         title: "Успешный вход",
         description: "Добро пожаловать!",
