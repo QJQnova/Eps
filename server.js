@@ -9,8 +9,27 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static files
-app.use(express.static(path.join(__dirname, 'server/public')));
+// Fix MIME types for static files
+express.static.mime.define({
+  'application/javascript': ['js'],
+  'text/css': ['css'],
+  'text/html': ['html']
+});
+
+// Static files with proper headers
+app.use(express.static(path.join(__dirname, 'server/public'), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    }
+    if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+    if (path.endsWith('.html')) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    }
+  }
+}));
 
 // Categories data
 const categories = [
