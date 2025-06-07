@@ -1,37 +1,30 @@
-import passport from "passport";
-import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
-import session from "express-session";
-import { scrypt, randomBytes, timingSafeEqual } from "crypto";
-import { promisify } from "util";
-import { storage } from "./storage";
-import { User as SelectUser } from "@shared/schema";
 
-declare global {
-  namespace Express {
-    interface User extends SelectUser {}
-  }
-}
+const passport = require("passport");
+const { Strategy: LocalStrategy } = require("passport-local");
+const session = require("express-session");
+const { scrypt, randomBytes, timingSafeEqual } = require("crypto");
+const { promisify } = require("util");
+const { storage } = require("./storage");
 
 const scryptAsync = promisify(scrypt);
 
 // Функция для хеширования пароля
-export async function hashPassword(password: string) {
+async function hashPassword(password) {
   const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  const buf = await scryptAsync(password, salt, 64);
   return `${buf.toString("hex")}.${salt}`;
 }
 
 // Функция для сравнения паролей
-export async function comparePasswords(supplied: string, stored: string) {
+async function comparePasswords(supplied, stored) {
   const [hashed, salt] = stored.split(".");
   const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+  const suppliedBuf = await scryptAsync(supplied, salt, 64);
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
-export function setupAuth(app: Express) {
-  const sessionSettings: session.SessionOptions = {
+function setupAuth(app) {
+  const sessionSettings = {
     secret: "ЭПС-secret-key", // В реальном приложении должно быть в переменных окружения
     resave: false,
     saveUninitialized: false,
@@ -91,15 +84,15 @@ export function setupAuth(app: Express) {
     })
   );
 
-  passport.serializeUser((user: Express.User, done: (err: Error | null, id: number) => void) => {
+  passport.serializeUser((user, done) => {
     done(null, user.id);
   });
 
-  passport.deserializeUser(async (id: number, done: (err: Error | null, user?: Express.User) => void) => {
+  passport.deserializeUser(async (id, done) => {
     try {
       const user = await storage.getUser(id);
       done(null, user);
-    } catch (err: any) {
+    } catch (err) {
       done(err);
     }
   });
@@ -107,6 +100,7 @@ export function setupAuth(app: Express) {
   // Маршруты аутентификации
   app.post("/api/register", async (req, res, next) => {
     try {
+      console.log("Регистрация - тело запроса:", req.body);
       const { username, email, password } = req.body;
       
       if (!username || !email || !password) {
@@ -129,44 +123,77 @@ export function setupAuth(app: Express) {
         isActive: true
       });
       
-      req.login(user, (err: Error | null) => {
+      req.login(user, (err) => {
         if (err) return next(err);
         // Не возвращаем пароль в ответе
         const { password, ...userWithoutPassword } = user;
         res.status(201).json(userWithoutPassword);
       });
-    } catch (error: any) {
+    } catch (error) {
+      console.error("Ошибка регистрации:", error);
       res.status(500).json({ message: error.message });
     }
   });
 
-  app.post("/api/login", (req, res, next) => {
-    console.log("Попытка входа через passport, содержимое запроса:", req.body);
-    
-    passport.authenticate('local', (err: any, user: any, info: any) => {
-      if (err) {
-        console.error("Ошибка аутентификации:", err);
-        return next(err);
+  app.post("/api/login", async (req, res, next) => {
+    try {
+      console.log("Вход - тело запроса:", req.body);
+      console.log("Content-Type:", req.headers['content-type']);
+      
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        console.log("Отсутствуют учетные данные в запросе");
+        return res.status(400).json({ message: "Необходимо указать имя пользователя и пароль" });
       }
+      
+      // Ищем пользователя в базе
+      const user = await storage.getUserByUsername(username);
       
       if (!user) {
-        console.log("Аутентификация не прошла:", info?.message);
-        return res.status(401).json({ message: info?.message || "Неверное имя пользователя или пароль" });
+        console.log("Пользователь не найден:", username);
+        return res.status(401).json({ message: "Неверное имя пользователя или пароль" });
       }
       
+      // Проверяем пароль (сначала простой, затем хешированный)
+      let passwordValid = false;
+      
+      if (user.password === password) {
+        console.log("Успешная аутентификация с простым паролем");
+        passwordValid = true;
+      } else {
+        try {
+          passwordValid = await comparePasswords(password, user.password);
+          if (passwordValid) {
+            console.log("Успешная аутентификация с хешированным паролем");
+          }
+        } catch (error) {
+          console.error("Ошибка при проверке пароля:", error);
+        }
+      }
+      
+      if (!passwordValid) {
+        console.log("Неверный пароль для пользователя:", username);
+        return res.status(401).json({ message: "Неверное имя пользователя или пароль" });
+      }
+      
+      // Если пароль верный, входим в систему
       req.login(user, (err) => {
         if (err) {
           console.error("Ошибка при создании сессии:", err);
           return next(err);
         }
         
-        console.log("Успешный вход пользователя через passport:", user.username);
+        console.log("Успешный вход пользователя:", username);
         
         // Не возвращаем пароль в ответе
         const { password, ...userWithoutPassword } = user;
         return res.status(200).json(userWithoutPassword);
       });
-    })(req, res, next);
+    } catch (error) {
+      console.error("Ошибка при обработке входа:", error);
+      return next(error);
+    }
   });
 
   app.post("/api/logout", (req, res) => {
@@ -188,3 +215,9 @@ export function setupAuth(app: Express) {
     res.json(userWithoutPassword);
   });
 }
+
+module.exports = {
+  setupAuth,
+  hashPassword,
+  comparePasswords
+};
