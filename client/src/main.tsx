@@ -116,9 +116,6 @@ const addNoCacheMetaTags = () => {
 };
 
 addNoCacheMetaTags();
-    });
-  });
-}
 
 createRoot(document.getElementById("root")!).render(
   <CartProvider>

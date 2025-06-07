@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 import {
   useQuery,
   useMutation,
@@ -12,7 +12,7 @@ type AuthContextType = {
   user: SelectUser | null;
   isLoading: boolean;
   error: Error | null;
-  loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
+  login: (username: string, password: string) => Promise<{ success: boolean; message?: string; }>;
   logoutMutation: UseMutationResult<void, Error, void>;
   registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
 };
@@ -23,86 +23,60 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const [user, setUser] = useState<SelectUser | null>(null);
+  const [isLoading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
   const {
-    data: user,
-    error,
-    isLoading,
+    data: initialUser,
+    error: initialError,
+    isLoading: initialLoading,
   } = useQuery<SelectUser | null, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
-  const loginMutation = useMutation({
-    mutationFn: async (credentials: { username: string; password: string }) => {
-      try {
-        console.log("Отправка данных входа:", credentials);
+  // Initialize user state from the query
+  useState(() => {
+    setUser(initialUser ?? null);
+    setError(initialError ?? null);
+    setLoading(initialLoading);
+  }, [initialUser, initialError, initialLoading]);
 
-        // Убедимся, что все обязательные поля присутствуют
-        if (!credentials.username || !credentials.password) {
-          throw new Error("Необходимо указать имя пользователя и пароль");
-        }
+  const login = async (username: string, password: string) => {
+    try {
+      setLoading(true);
 
-        const requestBody = {
-          username: credentials.username.trim(),
-          password: credentials.password,
-        };
-
-        console.log("Тело запроса для входа:", requestBody);
-
-        // Сначала пробуем основной маршрут входа
-        let response = await fetch("/api/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-          credentials: "include",
-        });
-
-        // Если основной маршрут не работает, пробуем альтернативный
-        if (!response.ok) {
-          console.log("Основной маршрут не сработал, пробуем альтернативный");
-          response = await fetch("/api/simple-login", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(requestBody),
-            credentials: "include",
-          });
-        }
-
-        console.log("Ответ сервера на login:", response.status);
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error("Ошибка входа:", errorData);
-          throw new Error(errorData.message || "Неверное имя пользователя или пароль");
-        }
-
-        const userData = await response.json();
-        console.log("Успешный вход:", userData);
-        return userData;
-      } catch (error: any) {
-        console.error("Ошибка при входе:", error);
-        throw new Error(error.message || "Произошла ошибка при входе");
+      // Проверяем, что данные переданы
+      if (!username || !password) {
+        return { success: false, message: "Необходимо указать имя пользователя и пароль" };
       }
-    },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(["/api/user"], user);
-      toast({
-        title: "Успешный вход",
-        description: `Добро пожаловать, ${user.username}!`,
+
+      console.log("Отправляем данные:", { username, password });
+
+      const response = await fetch("/api/simple-login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
       });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Ошибка входа",
-        description: error.message || "Неверное имя пользователя или пароль",
-        variant: "destructive",
-      });
-    },
-  });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setUser(result.user);
+        return { success: true };
+      } else {
+        return { success: false, message: result.message || "Ошибка входа" };
+      }
+    } catch (error: any) {
+      console.error("Ошибка входа:", error);
+      return { success: false, message: "Произошла ошибка при входе" };
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const registerMutation = useMutation({
     mutationFn: async (credentials: InsertUser) => {
@@ -217,7 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user: user ?? null,
         isLoading,
         error,
-        loginMutation,
+        login,
         logoutMutation,
         registerMutation,
       }}
