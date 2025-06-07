@@ -82,6 +82,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Служим чистую HTML страницу авторизации в обход Vite
+  app.get("/clean-auth", (req, res) => {
+    res.sendFile(path.join(process.cwd(), "client/clean.html"));
+  });
+
   // Добавляем альтернативные маршруты аутентификации (будут работать параллельно с passport)
   app.post("/api/simple-login", async (req, res) => {
     try {
