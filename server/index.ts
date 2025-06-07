@@ -19,21 +19,32 @@ app.use((req, res, next) => {
   next();
 });
 
-// Отключение кеширования для всех ответов - усиленная версия
+// АГРЕССИВНОЕ отключение кэширования для всех ответов
 app.use((req, res, next) => {
-  // Полное отключение кэширования для всех ответов
-  res.header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  // Максимальный набор заголовков против кэширования
+  res.header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0, private');
   res.header('Pragma', 'no-cache');
-  res.header('Expires', '-1');
+  res.header('Expires', '0');
+  res.header('Last-Modified', new Date(0).toUTCString());
+  res.header('ETag', '');
   res.header('Surrogate-Control', 'no-store');
   res.header('Vary', '*');
-  
-  // Добавляем случайный заголовок для обхода промежуточных кэшей
+  res.header('X-Accel-Expires', '0');
+  res.header('X-Cache', 'MISS');
   res.header('X-No-Cache', Date.now().toString());
+  res.header('X-Timestamp', new Date().toISOString());
+  res.header('X-Random', Math.random().toString(36));
   
-  // Если это API запрос, дополнительно убедимся в отсутствии кэширования
+  // Дополнительные заголовки для API
   if (req.path.startsWith('/api/')) {
-    res.header('X-API-Time', new Date().toISOString());
+    res.header('X-API-Time', Date.now().toString());
+    res.header('X-API-Version', 'no-cache-v2');
+    res.header('X-Content-Type-Options', 'nosniff');
+  }
+  
+  // Заголовки для статических файлов
+  if (req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg)$/)) {
+    res.header('X-Static-No-Cache', 'true');
   }
   
   next();
