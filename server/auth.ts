@@ -1,10 +1,10 @@
 
-const passport = require("passport");
-const { Strategy: LocalStrategy } = require("passport-local");
-const session = require("express-session");
-const { scrypt, randomBytes, timingSafeEqual } = require("crypto");
-const { promisify } = require("util");
-const { storage } = require("./storage");
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
+import session from "express-session";
+import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+import { promisify } from "util";
+import { storage } from "./storage.js";
 
 const scryptAsync = promisify(scrypt);
 
@@ -216,7 +216,7 @@ function setupAuth(app) {
   });
 }
 
-module.exports = {
+export {
   setupAuth,
   hashPassword,
   comparePasswords

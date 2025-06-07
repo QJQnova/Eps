@@ -11,7 +11,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
-const { hashPassword, comparePasswords, setupAuth } = require("./auth");
+import { hashPassword, comparePasswords, setupAuth } from "./auth.js";
 import { parseImportFile } from "./utils/file-parser";
 import multer from "multer";
 import fs from "fs/promises";
