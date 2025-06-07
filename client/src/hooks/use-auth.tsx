@@ -49,7 +49,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         console.log("Тело запроса для входа:", requestBody);
 
-        const response = await fetch("/api/login", {
+        // Сначала пробуем основной маршрут входа
+        let response = await fetch("/api/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -57,6 +58,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           body: JSON.stringify(requestBody),
           credentials: "include",
         });
+
+        // Если основной маршрут не работает, пробуем альтернативный
+        if (!response.ok) {
+          console.log("Основной маршрут не сработал, пробуем альтернативный");
+          response = await fetch("/api/simple-login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
+            credentials: "include",
+          });
+        }
 
         console.log("Ответ сервера на login:", response.status);
 
@@ -108,7 +122,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         console.log("Тело запроса для регистрации:", requestBody);
 
-        const response = await fetch("/api/register", {
+        // Сначала пробуем основной маршрут регистрации
+        let response = await fetch("/api/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -116,6 +131,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           body: JSON.stringify(requestBody),
           credentials: "include",
         });
+
+        // Если основной маршрут не работает, пробуем альтернативный
+        if (!response.ok) {
+          console.log("Основной маршрут регистрации не сработал, пробуем альтернативный");
+          response = await fetch("/api/simple-register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
+            credentials: "include",
+          });
+        }
 
         console.log("Ответ сервера на register:", response.status);
 

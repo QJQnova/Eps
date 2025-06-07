@@ -141,75 +141,32 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    console.log("Попытка входа, содержимое запроса:", req.body);
-    console.log("Content-Type:", req.headers['content-type']);
-    console.log("Content-Length:", req.headers['content-length']);
+    console.log("Попытка входа через passport, содержимое запроса:", req.body);
     
-    // Проверяем, что данные корректно переданы
-    if (!req.body || Object.keys(req.body).length === 0) {
-      console.log("Пустое тело запроса");
-      return res.status(400).json({ message: "Данные не переданы в запросе" });
-    }
-    
-    // Создаем ручную обработку логина без использования passport.authenticate
-    (async () => {
-      try {
-        // Проверяем наличие имени пользователя и пароля
-        const { username, password } = req.body;
-        
-        if (!username || !password) {
-          console.log("Отсутствуют учетные данные в запросе");
-          return res.status(400).json({ message: "Необходимо указать имя пользователя и пароль" });
-        }
-        
-        // Ищем пользователя в базе
-        const user = await storage.getUserByUsername(username);
-        
-        if (!user) {
-          console.log("Пользователь не найден:", username);
-          return res.status(401).json({ message: "Неверное имя пользователя или пароль" });
-        }
-        
-        // Проверяем пароль (сначала простой, затем хешированный)
-        let passwordValid = false;
-        
-        if (user.password === password) {
-          console.log("Успешная аутентификация с простым паролем");
-          passwordValid = true;
-        } else {
-          try {
-            passwordValid = await comparePasswords(password, user.password);
-            if (passwordValid) {
-              console.log("Успешная аутентификация с хешированным паролем");
-            }
-          } catch (error) {
-            console.error("Ошибка при проверке пароля:", error);
-          }
-        }
-        
-        if (!passwordValid) {
-          console.log("Неверный пароль для пользователя:", username);
-          return res.status(401).json({ message: "Неверное имя пользователя или пароль" });
-        }
-        
-        // Если пароль верный, входим в систему
-        req.login(user, (err) => {
-          if (err) {
-            console.error("Ошибка при создании сессии:", err);
-            return next(err);
-          }
-          
-          console.log("Успешный вход пользователя:", username);
-          
-          // Не возвращаем пароль в ответе
-          const { password, ...userWithoutPassword } = user;
-          return res.status(200).json(userWithoutPassword);
-        });
-      } catch (error) {
-        console.error("Ошибка при обработке входа:", error);
-        return next(error);
+    passport.authenticate('local', (err: any, user: any, info: any) => {
+      if (err) {
+        console.error("Ошибка аутентификации:", err);
+        return next(err);
       }
-    })();
+      
+      if (!user) {
+        console.log("Аутентификация не прошла:", info?.message);
+        return res.status(401).json({ message: info?.message || "Неверное имя пользователя или пароль" });
+      }
+      
+      req.login(user, (err) => {
+        if (err) {
+          console.error("Ошибка при создании сессии:", err);
+          return next(err);
+        }
+        
+        console.log("Успешный вход пользователя через passport:", user.username);
+        
+        // Не возвращаем пароль в ответе
+        const { password, ...userWithoutPassword } = user;
+        return res.status(200).json(userWithoutPassword);
+      });
+    })(req, res, next);
   });
 
   app.post("/api/logout", (req, res) => {
