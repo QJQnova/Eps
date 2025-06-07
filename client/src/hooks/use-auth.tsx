@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import React, { createContext, ReactNode, useContext, useState } from "react";
 import {
   useQuery,
   useMutation,
@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   // Initialize user state from the query
-  useState(() => {
+  React.useEffect(() => {
     setUser(initialUser ?? null);
     setError(initialError ?? null);
     setLoading(initialLoading);

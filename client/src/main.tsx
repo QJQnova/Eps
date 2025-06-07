@@ -86,12 +86,11 @@ window.fetch = function(...args) {
     }
   };
   
-  // Добавляем случайный параметр к URL
+  // Добавляем timestamp к URL только для API запросов
   let url = resource;
-  if (typeof resource === 'string') {
+  if (typeof resource === 'string' && resource.startsWith('/api/')) {
     const urlObj = new URL(resource, window.location.origin);
-    urlObj.searchParams.set('_nocache', Date.now().toString());
-    urlObj.searchParams.set('_bust', Math.random().toString(36));
+    urlObj.searchParams.set('_t', Date.now().toString());
     url = urlObj.toString();
   }
   
