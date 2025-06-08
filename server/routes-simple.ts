@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { setupAuth, requireAuth, requireAdmin } from "./auth";
+import { setupAuth, requireAuth } from "./auth";
 import { storage } from "./storage";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -40,6 +40,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin routes
   app.get("/api/admin/test", requireAdmin, async (req, res) => {
     res.json({ message: "Admin access confirmed", user: req.user });
+  });
+
+  // Bulk import route
+  app.post("/api/products/bulk-import", requireAdmin, async (req, res) => {
+    try {
+      res.status(200).json({
+        message: "Импорт функция временно отключена",
+        success: 0,
+        failed: 0
+      });
+    } catch (error: any) {
+      console.error('Import error:', error);
+      res.status(500).json({ message: "Ошибка импорта: " + error.message });
+    }
   });
 
   const httpServer = createServer(app);
