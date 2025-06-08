@@ -63,6 +63,7 @@ export default function AuthPage() {
   };
 
   const onRegister = (data: RegisterForm) => {
+    console.log('Register form data:', data);
     registerMutation.mutate(data, {
       onSuccess: () => {
         setLocation("/");

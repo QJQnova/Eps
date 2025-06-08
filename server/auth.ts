@@ -34,9 +34,15 @@ export function setupAuth(app: Express) {
   // Register endpoint
   app.post("/api/register", async (req: Request, res: Response) => {
     try {
+      console.log('Register request body:', req.body);
+      console.log('Register headers:', req.headers);
+      
       const { username, email, password } = req.body;
       
+      console.log('Extracted fields:', { username, email, password: password ? '***' : undefined });
+      
       if (!username || !email || !password) {
+        console.log('Missing fields - username:', !!username, 'email:', !!email, 'password:', !!password);
         return res.status(400).json({ message: "Все поля обязательны" });
       }
 
