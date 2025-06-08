@@ -403,23 +403,44 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    // Batch-вставка валидных продуктов
-    if (validProducts.length > 0) {
+    // Обработка продуктов по одному с проверкой дубликатов
+    for (const productData of validProducts) {
       try {
-        const result = await db.insert(products).values(validProducts).returning();
-        success = result.length;
-      } catch (error) {
-        console.error("Ошибка batch-вставки:", error);
-        // Fallback: вставляем по одному
-        for (const productData of validProducts) {
-          try {
-            await db.insert(products).values(productData);
-            success++;
-          } catch (error) {
-            console.error("Ошибка при импорте товара:", error);
-            failed++;
-          }
+        // Проверяем существование товара по SKU или slug
+        const existingProduct = await db
+          .select()
+          .from(products)
+          .where(or(eq(products.sku, productData.sku), eq(products.slug, productData.slug)))
+          .limit(1);
+
+        if (existingProduct.length > 0) {
+          // Обновляем существующий товар
+          await db
+            .update(products)
+            .set({
+              name: productData.name,
+              description: productData.description,
+              shortDescription: productData.shortDescription,
+              price: productData.price,
+              originalPrice: productData.originalPrice,
+              categoryId: productData.categoryId,
+              stock: productData.stock,
+              imageUrl: productData.imageUrl,
+              isActive: productData.isActive,
+              isFeatured: productData.isFeatured,
+              tag: productData.tag,
+              updatedAt: new Date()
+            })
+            .where(eq(products.id, existingProduct[0].id));
+          success++;
+        } else {
+          // Создаем новый товар
+          await db.insert(products).values(productData);
+          success++;
         }
+      } catch (error) {
+        console.error("Ошибка при импорте товара:", error);
+        failed++;
       }
     }
 
