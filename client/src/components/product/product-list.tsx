@@ -60,8 +60,8 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
           </h2>
           <p className="text-gray-500">
             {isLoading ? "Загрузка товаров..." : 
-             `Найдено ${data?.pagination.total || 0} ${data?.pagination.total === 1 ? 'товар' : 
-               (data?.pagination.total && data.pagination.total >= 2 && data.pagination.total <= 4) ? 'товара' : 'товаров'}`}
+             `Найдено ${data?.total || 0} ${data?.total === 1 ? 'товар' : 
+               (data?.total && data.total >= 2 && data.total <= 4) ? 'товара' : 'товаров'}`}
           </p>
         </div>
         
@@ -134,15 +134,7 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
             ))}
           </div>
           
-          {data.pagination.totalPages > 1 && (
-            <div className="mt-10 flex justify-center">
-              <Pagination 
-                currentPage={data.pagination.page} 
-                totalPages={data.pagination.totalPages}
-                onPageChange={handlePageChange}
-              />
-            </div>
-          )}
+          {/* Remove pagination for now since API returns simple array */}
         </>
       ) : (
         <div className="flex flex-col items-center justify-center py-12 text-center">
