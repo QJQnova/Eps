@@ -17,7 +17,7 @@ const PostgresSessionStore = connectPg(session);
 export interface IStorage {
   // Session Store
   sessionStore: session.Store;
-  
+
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -32,7 +32,8 @@ export interface IStorage {
     page: number;
     limit: number;
   }): Promise<{ users: User[], total: number }>;
-  
+  updateUserRole(id: number, role: string): Promise<User | undefined>;
+
   // Category operations
   getAllCategories(): Promise<Category[]>;
   getCategoryById(id: number): Promise<Category | undefined>;
@@ -40,7 +41,7 @@ export interface IStorage {
   createCategory(category: InsertCategory): Promise<Category>;
   updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category | undefined>;
   deleteCategory(id: number): Promise<boolean>;
-  
+
   // Product operations
   getAllProducts(): Promise<Product[]>;
   getProductById(id: number): Promise<Product | undefined>;
@@ -52,7 +53,7 @@ export interface IStorage {
   updateProduct(id: number, product: Partial<ProductInput>): Promise<Product | undefined>;
   deleteProduct(id: number): Promise<boolean>;
   bulkImportProducts(products: InsertProduct[]): Promise<{ success: number, failed: number }>;
-  
+
   // Cart operations
   getCartItems(cartId: string): Promise<CartItem[]>;
   getCartItemWithProduct(cartId: string): Promise<(CartItem & { product: Product })[]>;
@@ -60,7 +61,7 @@ export interface IStorage {
   updateCartItemQuantity(id: number, quantity: number): Promise<CartItem | undefined>;
   removeFromCart(id: number): Promise<boolean>;
   clearCart(cartId: string): Promise<boolean>;
-  
+
   // Order operations
   createOrder(orderInput: OrderInput, cartItems: (CartItem & { product: Product })[]): Promise<Order>;
   getOrderById(id: number): Promise<(Order & { items: (OrderItem & { product?: Product })[] }) | undefined>;
@@ -69,13 +70,13 @@ export interface IStorage {
   updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
   getOrderItems(orderId: number): Promise<OrderItem[]>;
   getOrderItemsWithProducts(orderId: number): Promise<(OrderItem & { product?: Product })[]>;
-  
+
   // Settings operations
   getShopSettings(): Promise<Record<string, any>>;
   updateShopSettings(settings: z.infer<typeof shopSettingsSchema>): Promise<boolean>;
   getSeoSettings(): Promise<Record<string, any>>;
   updateSeoSettings(settings: z.infer<typeof seoSettingsSchema>): Promise<boolean>;
-  
+
   // Password reset operations
   createPasswordResetToken(userId: number): Promise<PasswordResetToken>;
   getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
@@ -85,7 +86,7 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
-  
+
   constructor() {
     this.sessionStore = new PostgresSessionStore({
       pool,
@@ -93,28 +94,28 @@ export class DatabaseStorage implements IStorage {
       tableName: 'sessions',
     });
   }
-  
+
   // User operations
   async getUser(id: number): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.id, id));
     return result.length > 0 ? result[0] : undefined;
   }
-  
+
   async getUserByUsername(username: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.username, username));
     return result.length > 0 ? result[0] : undefined;
   }
-  
+
   async getUserByEmail(email: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.email, email));
     return result.length > 0 ? result[0] : undefined;
   }
-  
+
   async createUser(user: InsertUser): Promise<User> {
     const result = await db.insert(users).values(user).returning();
     return result[0];
   }
-  
+
   async updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined> {
     const result = await db.update(users)
       .set({
@@ -125,12 +126,20 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return result.length > 0 ? result[0] : undefined;
   }
-  
+
+  async updateUserRole(id: number, role: string): Promise<User | undefined> {
+    const result = await db.update(users)
+      .set({ role, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return result.length > 0 ? result[0] : undefined;
+  }
+
   async deleteUser(id: number): Promise<boolean> {
     const result = await db.delete(users).where(eq(users.id, id)).returning();
     return result.length > 0;
   }
-  
+
   async searchUsers(params: {
     query?: string;
     role?: string;
@@ -139,62 +148,62 @@ export class DatabaseStorage implements IStorage {
     limit: number;
   }): Promise<{ users: User[], total: number }> {
     let query = db.select().from(users);
-    
+
     // Фильтрация по поисковому запросу
     if (params.query) {
       query = query.where(
         sql`(${users.username} ILIKE ${'%' + params.query + '%'} OR ${users.email} ILIKE ${'%' + params.query + '%'} OR ${users.fullName} ILIKE ${'%' + params.query + '%'})`
       );
     }
-    
+
     // Фильтрация по роли
     if (params.role) {
       query = query.where(eq(users.role, params.role));
     }
-    
+
     // Фильтрация по статусу активности
     if (params.isActive !== undefined) {
       query = query.where(eq(users.isActive, params.isActive));
     }
-    
+
     // Подсчет общего количества пользователей для пагинации
     const countQuery = sql`SELECT COUNT(*) FROM (${query}) AS count_query`;
     const countResult = await db.execute(countQuery);
     const total = parseInt(countResult.rows[0]?.count || '0');
-    
+
     // Пагинация
     const offset = (params.page - 1) * params.limit;
     query = query.limit(params.limit).offset(offset);
     query = query.orderBy(desc(users.id));
-    
+
     const usersResult = await query;
-    
+
     return {
       users: usersResult,
       total
     };
   }
-  
+
   // Category operations
   async getAllCategories(): Promise<Category[]> {
     return await db.select().from(categories).orderBy(categories.name);
   }
-  
+
   async getCategoryById(id: number): Promise<Category | undefined> {
     const result = await db.select().from(categories).where(eq(categories.id, id));
     return result.length > 0 ? result[0] : undefined;
   }
-  
+
   async getCategoryBySlug(slug: string): Promise<Category | undefined> {
     const result = await db.select().from(categories).where(eq(categories.slug, slug));
     return result.length > 0 ? result[0] : undefined;
   }
-  
+
   async createCategory(category: InsertCategory): Promise<Category> {
     const result = await db.insert(categories).values(category).returning();
     return result[0];
   }
-  
+
   async updateCategory(id: number, updateData: Partial<InsertCategory>): Promise<Category | undefined> {
     const result = await db.update(categories)
       .set(updateData)
@@ -202,72 +211,72 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return result.length > 0 ? result[0] : undefined;
   }
-  
+
   async deleteCategory(id: number): Promise<boolean> {
     // Проверяем, есть ли товары в этой категории
     const productsCount = await db.select({ count: sql<number>`count(*)` })
       .from(products)
       .where(eq(products.categoryId, id));
-    
+
     if (productsCount[0].count > 0) {
       return false;
     }
-    
+
     const result = await db.delete(categories).where(eq(categories.id, id)).returning();
     return result.length > 0;
   }
-  
+
   // Product operations
   async getAllProducts(): Promise<Product[]> {
     return await db.select().from(products);
   }
-  
+
   async getProductById(id: number): Promise<Product | undefined> {
     const result = await db.select().from(products).where(eq(products.id, id));
     return result.length > 0 ? result[0] : undefined;
   }
-  
+
   async getProductBySlug(slug: string): Promise<Product | undefined> {
     const result = await db.select().from(products).where(eq(products.slug, slug));
     return result.length > 0 ? result[0] : undefined;
   }
-  
+
   async getProductsByCategoryId(categoryId: number): Promise<Product[]> {
     return await db.select().from(products).where(eq(products.categoryId, categoryId));
   }
-  
+
   async searchProducts(params: ProductSearchParams): Promise<{ products: Product[], total: number }> {
     const conditions: any[] = [];
 
     // Базовый запрос для поиска товаров
     let query = db.select().from(products);
-    
+
     // Фильтрация по поисковому запросу
     if (params.query) {
       query = query.where(
         sql`(${products.name} ILIKE ${'%' + params.query + '%'} OR ${products.description} ILIKE ${'%' + params.query + '%'})`
       );
     }
-    
+
     // Фильтрация по категории
     if (params.categoryId) {
       query = query.where(eq(products.categoryId, params.categoryId));
     }
-    
+
     // Фильтрация по цене
     if (params.minPrice !== undefined) {
       query = query.where(sql`${products.price} >= ${params.minPrice.toString()}`);
     }
-    
+
     if (params.maxPrice !== undefined) {
       query = query.where(sql`${products.price} <= ${params.maxPrice.toString()}`);
     }
-    
+
     // Подсчет общего количества товаров для пагинации
     const countQuery = sql`SELECT COUNT(*) FROM (${query}) AS count_query`;
     const countResult = await db.execute(countQuery);
     const total = parseInt(countResult.rows[0]?.count || '0');
-    
+
     // Сортировка
     if (params.sort) {
       switch (params.sort) {
@@ -291,23 +300,23 @@ export class DatabaseStorage implements IStorage {
           break;
       }
     }
-    
+
     // Пагинация
     const offset = (params.page - 1) * params.limit;
     query = query.limit(params.limit).offset(offset);
-    
+
     const productsResult = await query;
-    
+
     return {
       products: productsResult,
       total
     };
   }
-  
+
   async getFeaturedProducts(): Promise<Product[]> {
     return await db.select().from(products).where(eq(products.isFeatured, true));
   }
-  
+
   async createProduct(productInput: ProductInput): Promise<Product> {
     // Оптимизация: преобразуем ProductInput в InsertProduct
     const insertProduct: InsertProduct = {
@@ -325,11 +334,11 @@ export class DatabaseStorage implements IStorage {
       isFeatured: productInput.isFeatured ?? false,
       tag: productInput.tag || null,
     };
-    
+
     const result = await db.insert(products).values(insertProduct).returning();
     return result[0];
   }
-  
+
   async updateProduct(id: number, updateData: Partial<ProductInput>): Promise<Product | undefined> {
     // Преобразовать ProductInput в структуру для БД
     const updateValues: Partial<InsertProduct> = { 
@@ -341,27 +350,27 @@ export class DatabaseStorage implements IStorage {
       stock: updateData.stock ?? undefined,
       tag: updateData.tag ?? undefined
     };
-    
+
     const result = await db.update(products)
       .set(updateValues)
       .where(eq(products.id, id))
       .returning();
-    
+
     return result.length > 0 ? result[0] : undefined;
   }
-  
+
   async deleteProduct(id: number): Promise<boolean> {
     const result = await db.delete(products).where(eq(products.id, id)).returning();
     return result.length > 0;
   }
-  
+
   async bulkImportProducts(productsToImport: InsertProduct[]): Promise<{ success: number, failed: number }> {
     let success = 0;
     let failed = 0;
-    
+
     // Валидируем и преобразуем продукты
     const validProducts: InsertProduct[] = [];
-    
+
     for (const productData of productsToImport) {
       try {
         // Проверяем обязательные поля
@@ -386,7 +395,7 @@ export class DatabaseStorage implements IStorage {
           isFeatured: Boolean(productData.isFeatured),
           tag: productData.tag || null,
         };
-        
+
         validProducts.push(validProduct);
       } catch (error) {
         console.error("Ошибка валидации продукта:", error);
@@ -413,15 +422,15 @@ export class DatabaseStorage implements IStorage {
         }
       }
     }
-    
+
     return { success, failed };
   }
-  
+
   // Cart operations
   async getCartItems(cartId: string): Promise<CartItem[]> {
     return await db.select().from(cartItems).where(eq(cartItems.cartId, cartId));
   }
-  
+
   async getCartItemWithProduct(cartId: string): Promise<(CartItem & { product: Product })[]> {
     const result = await db.select({
       id: cartItems.id,
@@ -434,10 +443,10 @@ export class DatabaseStorage implements IStorage {
     .from(cartItems)
     .where(eq(cartItems.cartId, cartId))
     .innerJoin(products, eq(cartItems.productId, products.id));
-    
+
     return result;
   }
-  
+
   async addToCart(insertCartItem: InsertCartItem): Promise<CartItem> {
     // Проверяем, существует ли уже такой товар в корзине
     const existingItem = await db.select()
@@ -448,7 +457,7 @@ export class DatabaseStorage implements IStorage {
           eq(cartItems.productId, insertCartItem.productId)
         )
       );
-    
+
     if (existingItem.length > 0) {
       // Если товар уже в корзине, обновим его количество
       const newQuantity = existingItem[0].quantity + (insertCartItem.quantity || 1);
@@ -456,46 +465,46 @@ export class DatabaseStorage implements IStorage {
         .set({ quantity: newQuantity })
         .where(eq(cartItems.id, existingItem[0].id))
         .returning();
-      
+
       return result[0];
     }
-    
+
     // Иначе добавим новый товар в корзину
     const validatedItem = {
       ...insertCartItem,
       quantity: insertCartItem.quantity || 1, // Если количество не указано, установим 1
       addedAt: new Date()
     };
-    
+
     const result = await db.insert(cartItems).values(validatedItem).returning();
     return result[0];
   }
-  
+
   async updateCartItemQuantity(id: number, quantity: number): Promise<CartItem | undefined> {
     const result = await db.update(cartItems)
       .set({ quantity })
       .where(eq(cartItems.id, id))
       .returning();
-    
+
     return result.length > 0 ? result[0] : undefined;
   }
-  
+
   async removeFromCart(id: number): Promise<boolean> {
     const result = await db.delete(cartItems)
       .where(eq(cartItems.id, id))
       .returning();
-    
+
     return result.length > 0;
   }
-  
+
   async clearCart(cartId: string): Promise<boolean> {
     const result = await db.delete(cartItems)
       .where(eq(cartItems.cartId, cartId))
       .returning();
-    
+
     return true; // Даже если корзина пуста, считаем операцию успешной
   }
-  
+
   // Order operations
   async createOrder(orderInput: OrderInput, cartItems: (CartItem & { product: Product })[]): Promise<Order> {
     // Рассчитаем общую сумму заказа
@@ -503,7 +512,7 @@ export class DatabaseStorage implements IStorage {
       (sum, item) => sum + item.quantity * Number(item.product.price),
       0
     );
-    
+
     // Создаем заказ в транзакции
     // Note: для PostgreSQL используем транзакции
     const orderResult = await db.transaction(async (tx) => {
@@ -523,9 +532,9 @@ export class DatabaseStorage implements IStorage {
         notes: orderInput.notes || null,
         createdAt: new Date()
       };
-      
+
       const [order] = await tx.insert(orders).values(orderData).returning();
-      
+
       // 2. Добавляем элементы заказа
       for (const item of cartItems) {
         const orderItemData = {
@@ -536,28 +545,28 @@ export class DatabaseStorage implements IStorage {
           quantity: item.quantity,
           totalPrice: item.quantity * parseFloat(item.product.price.toString())
         };
-        
+
         await tx.insert(orderItems).values(orderItemData);
       }
-      
+
       return order;
     });
-    
+
     // 3. Очищаем корзину после создания заказа
     await this.clearCart(orderInput.cartId);
-    
+
     return orderResult;
   }
-  
+
   async getOrderById(id: number): Promise<(Order & { items: (OrderItem & { product?: Product })[] }) | undefined> {
     const orderResult = await db.select().from(orders).where(eq(orders.id, id));
-    
+
     if (orderResult.length === 0) {
       return undefined;
     }
-    
+
     const order = orderResult[0];
-    
+
     // Получаем элементы заказа с информацией о товарах
     const orderItemsWithProduct = await db.select({
       orderItem: orderItems,
@@ -566,26 +575,26 @@ export class DatabaseStorage implements IStorage {
     .from(orderItems)
     .where(eq(orderItems.orderId, id))
     .leftJoin(products, eq(orderItems.productId, products.id));
-    
+
     const items = orderItemsWithProduct.map(row => ({
       ...row.orderItem,
       product: row.product
     }));
-    
+
     return {
       ...order,
       items
     };
   }
-  
+
   async getAllOrders(): Promise<Order[]> {
     return await db.select().from(orders).orderBy(desc(orders.createdAt));
   }
-  
+
   async searchOrders(params: OrderSearchParams): Promise<{ orders: Order[], total: number }> {
     // Базовый запрос для поиска заказов
     let query = db.select().from(orders);
-    
+
     // Фильтрация по поисковому запросу
     if (params.query) {
       query = query.where(
@@ -594,54 +603,54 @@ export class DatabaseStorage implements IStorage {
              ${orders.customerPhone} ILIKE ${'%' + params.query + '%'})`
       );
     }
-    
+
     // Фильтрация по статусу
     if (params.status && params.status !== 'all') {
       query = query.where(eq(orders.status, params.status));
     }
-    
+
     // Фильтрация по датам
     if (params.startDate) {
       query = query.where(sql`${orders.createdAt} >= ${new Date(params.startDate)}`);
     }
-    
+
     if (params.endDate) {
       query = query.where(sql`${orders.createdAt} <= ${new Date(params.endDate)}`);
     }
-    
+
     // Подсчет общего количества заказов для пагинации
     const countQuery = sql`SELECT COUNT(*) FROM (${query}) AS count_query`;
     const countResult = await db.execute(countQuery);
     const total = parseInt(countResult.rows[0]?.count || '0');
-    
+
     // Сортировка по дате создания (новые в начале)
     query = query.orderBy(desc(orders.createdAt));
-    
+
     // Пагинация
     const offset = (params.page - 1) * params.limit;
     query = query.limit(params.limit).offset(offset);
-    
+
     const ordersResult = await query;
-    
+
     return {
       orders: ordersResult,
       total
     };
   }
-  
+
   async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
     const result = await db.update(orders)
       .set({ status })
       .where(eq(orders.id, id))
       .returning();
-    
+
     return result.length > 0 ? result[0] : undefined;
   }
-  
+
   async getOrderItems(orderId: number): Promise<OrderItem[]> {
     return await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
   }
-  
+
   async getOrderItemsWithProducts(orderId: number): Promise<(OrderItem & { product?: Product })[]> {
     const result = await db.select({
       orderItem: orderItems,
@@ -650,19 +659,19 @@ export class DatabaseStorage implements IStorage {
     .from(orderItems)
     .where(eq(orderItems.orderId, orderId))
     .leftJoin(products, eq(orderItems.productId, products.id));
-    
+
     return result.map(row => ({
       ...row.orderItem,
       product: row.product
     }));
   }
-  
+
   // Settings operations
   async getShopSettings(): Promise<Record<string, any>> {
     const result = await db.select()
       .from(shopSettings)
       .where(eq(shopSettings.key, 'shop_settings'));
-      
+
     if (result.length === 0) {
       // Возвращаем настройки по умолчанию, если их еще нет
       return {
@@ -677,10 +686,10 @@ export class DatabaseStorage implements IStorage {
         maintenanceMode: false,
       };
     }
-    
+
     return result[0].value as Record<string, any>;
   }
-  
+
   async updateShopSettings(settings: z.infer<typeof shopSettingsSchema>): Promise<boolean> {
     try {
       // Проверяем наличие обязательных полей
@@ -690,9 +699,9 @@ export class DatabaseStorage implements IStorage {
         enableCheckout: settings.enableCheckout ?? true,
         maintenanceMode: settings.maintenanceMode ?? false
       };
-      
+
       const result = await db.select().from(shopSettings).where(eq(shopSettings.key, 'shop_settings'));
-      
+
       if (result.length === 0) {
         // Если настроек еще нет, создаем их
         await db.insert(shopSettings).values({
@@ -709,19 +718,19 @@ export class DatabaseStorage implements IStorage {
           })
           .where(eq(shopSettings.key, 'shop_settings'));
       }
-      
+
       return true;
     } catch (error) {
       console.error('Ошибка при обновлении настроек магазина:', error);
       return false;
     }
   }
-  
+
   async getSeoSettings(): Promise<Record<string, any>> {
     const result = await db.select()
       .from(shopSettings)
       .where(eq(shopSettings.key, 'seo_settings'));
-      
+
     if (result.length === 0) {
       // Возвращаем настройки по умолчанию, если их еще нет
       return {
@@ -733,14 +742,14 @@ export class DatabaseStorage implements IStorage {
         yandexMetrikaId: "",
       };
     }
-    
+
     return result[0].value as Record<string, any>;
   }
-  
+
   async updateSeoSettings(settings: z.infer<typeof seoSettingsSchema>): Promise<boolean> {
     try {
       const result = await db.select().from(shopSettings).where(eq(shopSettings.key, 'seo_settings'));
-      
+
       if (result.length === 0) {
         // Если настроек еще нет, создаем их
         await db.insert(shopSettings).values({
@@ -757,7 +766,7 @@ export class DatabaseStorage implements IStorage {
           })
           .where(eq(shopSettings.key, 'seo_settings'));
       }
-      
+
       return true;
     } catch (error) {
       console.error('Ошибка при обновлении SEO настроек:', error);
@@ -796,7 +805,7 @@ export class DatabaseStorage implements IStorage {
           gte(passwordResetTokens.expiresAt, new Date())
         )
       );
-    
+
     return result.length > 0 ? result[0] : undefined;
   }
 
@@ -805,7 +814,7 @@ export class DatabaseStorage implements IStorage {
       .set({ usedAt: new Date() })
       .where(eq(passwordResetTokens.token, token))
       .returning();
-    
+
     return result.length > 0;
   }
 
@@ -818,7 +827,7 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .returning();
-    
+
     return result.length;
   }
 }

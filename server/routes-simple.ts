@@ -56,6 +56,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user role route
+  app.patch("/api/admin/users/:id/role", requireAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { role } = req.body;
+      
+      if (!role || !['user', 'admin'].includes(role)) {
+        return res.status(400).json({ message: "Некорректная роль" });
+      }
+
+      const user = await storage.updateUserRole(userId, role);
+      if (!user) {
+        return res.status(404).json({ message: "Пользователь не найден" });
+      }
+
+      res.json({ message: `Роль пользователя изменена на ${role}`, user });
+    } catch (error: any) {
+      console.error('Update role error:', error);
+      res.status(500).json({ message: "Ошибка изменения роли: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
