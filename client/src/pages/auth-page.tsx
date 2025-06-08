@@ -84,10 +84,14 @@ export default function AuthPage() {
 
   // Обработчик отправки формы регистрации
   const onRegisterSubmit = (data: RegisterFormValues) => {
-    // Удаляем поле confirmPassword перед отправкой
+    // Удаляем поле confirmPassword перед отправкой и добавляем роль
     const { confirmPassword, ...registerData } = data;
+    const fullRegisterData = {
+      ...registerData,
+      role: 'user' as const
+    };
     
-    registerMutation.mutate(registerData, {
+    registerMutation.mutate(fullRegisterData, {
       onSuccess: () => {
         toast({
           title: "Успешная регистрация",
