@@ -251,8 +251,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Bulk import route
-  app.post("/api/products/bulk-import", requireAdmin, upload.single('file'), async (req, res) => {
+  // Bulk import route with multer error handling
+  app.post("/api/products/bulk-import", requireAdmin, (req, res, next) => {
+    upload.single('file')(req, res, (err) => {
+      if (err) {
+        console.error('Multer error:', err.message);
+        return res.status(400).json({ message: "Ошибка загрузки файла: " + err.message });
+      }
+      next();
+    });
+  }, async (req, res) => {
     console.log('Import request received:', req.file?.originalname);
     try {
       if (!req.file) {
