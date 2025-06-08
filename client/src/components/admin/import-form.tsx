@@ -168,6 +168,7 @@ export default function ImportForm() {
       const response = await fetch("/api/products/bulk-import", {
         method: "POST",
         body: formData,
+        credentials: "include", // Включаем cookies для авторизации
       });
       
       clearInterval(progressInterval);
