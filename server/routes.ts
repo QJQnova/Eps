@@ -292,15 +292,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        if (categoryId) {
+        if (categoryId && product.name && product.sku && product.slug) {
           const { categoryName, ...productWithoutCategoryName } = product;
-          processedProducts.push({
-            ...productWithoutCategoryName,
-            categoryId
-          });
+          const validProduct = {
+            name: String(product.name),
+            sku: String(product.sku),
+            slug: String(product.slug),
+            price: String(product.price || '0'),
+            categoryId: categoryId,
+            description: product.description ? String(product.description) : null,
+            shortDescription: product.shortDescription ? String(product.shortDescription) : null,
+            imageUrl: product.imageUrl ? String(product.imageUrl) : null,
+            originalPrice: product.originalPrice ? String(product.originalPrice) : null,
+            stock: product.stock ? Number(product.stock) : null,
+            isActive: product.isActive !== false,
+            isFeatured: Boolean(product.isFeatured),
+            tag: product.tag ? String(product.tag) : null
+          };
+          processedProducts.push(validProduct);
         }
       }
 
+      if (processedProducts.length === 0) {
+        return res.status(400).json({ message: "Не удалось обработать ни одного продукта из файла" });
+      }
+
+      console.log('Processed products for import:', processedProducts.length);
       const result = await storage.bulkImportProducts(processedProducts);
       
       // Clean up uploaded file

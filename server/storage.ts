@@ -359,30 +359,58 @@ export class DatabaseStorage implements IStorage {
     let success = 0;
     let failed = 0;
     
+    // Валидируем и преобразуем продукты
+    const validProducts: InsertProduct[] = [];
+    
     for (const productData of productsToImport) {
       try {
-        // Преобразовать в формат, подходящий для createProduct
-        const productInput: ProductInput = {
-          sku: productData.sku,
-          name: productData.name,
-          slug: productData.slug,
+        // Проверяем обязательные поля
+        if (!productData.name || !productData.sku || !productData.slug || !productData.categoryId) {
+          console.log('Пропущен продукт с недостающими полями:', productData);
+          failed++;
+          continue;
+        }
+
+        const validProduct: InsertProduct = {
+          sku: String(productData.sku),
+          name: String(productData.name),
+          slug: String(productData.slug),
           description: productData.description || null,
           shortDescription: productData.shortDescription || null,
-          price: productData.price,
-          originalPrice: productData.originalPrice || null,
+          price: String(productData.price || '0'),
+          originalPrice: productData.originalPrice ? String(productData.originalPrice) : null,
           imageUrl: productData.imageUrl || null,
-          stock: productData.stock || null,
-          categoryId: productData.categoryId,
-          isActive: productData.isActive ?? true,
-          isFeatured: productData.isFeatured ?? false,
+          stock: productData.stock ? Number(productData.stock) : null,
+          categoryId: Number(productData.categoryId),
+          isActive: productData.isActive !== false,
+          isFeatured: Boolean(productData.isFeatured),
           tag: productData.tag || null,
         };
         
-        await this.createProduct(productInput);
-        success++;
+        validProducts.push(validProduct);
       } catch (error) {
-        console.error("Ошибка при импорте товара:", error);
+        console.error("Ошибка валидации продукта:", error);
         failed++;
+      }
+    }
+
+    // Batch-вставка валидных продуктов
+    if (validProducts.length > 0) {
+      try {
+        const result = await db.insert(products).values(validProducts).returning();
+        success = result.length;
+      } catch (error) {
+        console.error("Ошибка batch-вставки:", error);
+        // Fallback: вставляем по одному
+        for (const productData of validProducts) {
+          try {
+            await db.insert(products).values(productData);
+            success++;
+          } catch (error) {
+            console.error("Ошибка при импорте товара:", error);
+            failed++;
+          }
+        }
       }
     }
     
