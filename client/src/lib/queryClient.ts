@@ -39,20 +39,26 @@ export async function apiRequest(
     : `${url}?_nocache=${Date.now()}`;
   
   try {
-    const res = await fetch(noCacheUrl, {
+    const requestConfig: RequestInit = {
       method,
+      credentials: "include",
+      cache: 'no-store',
       headers: {
-        ...data ? { "Content-Type": "application/json" } : {},
-        // Добавляем заголовки против кэширования
         'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
         'Pragma': 'no-cache',
         'Expires': '0'
-      },
-      body: data ? JSON.stringify(data) : undefined,
-      credentials: "include",
-      // Отключаем кэширование в fetch
-      cache: 'no-store'
-    });
+      }
+    };
+
+    if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+      requestConfig.headers = {
+        ...requestConfig.headers,
+        "Content-Type": "application/json"
+      };
+      requestConfig.body = JSON.stringify(data);
+    }
+
+    const res = await fetch(noCacheUrl, requestConfig);
 
     // Специальная обработка для DELETE запросов
     if (method === 'DELETE') {
