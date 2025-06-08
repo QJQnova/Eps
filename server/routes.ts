@@ -252,9 +252,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Bulk import route
-  app.post("/api/admin/products/import", requireAdmin, upload.single('file'), async (req, res) => {
+  app.post("/api/products/bulk-import", requireAdmin, upload.single('file'), async (req, res) => {
+    console.log('Import request received:', req.file?.originalname);
     try {
       if (!req.file) {
+        console.log('No file in request');
         return res.status(400).json({ message: "Файл не загружен" });
       }
 
@@ -327,9 +329,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error('Error deleting uploaded file:', error);
       }
 
-      res.json({
+      res.setHeader('Content-Type', 'application/json');
+      res.status(200).json({
         message: `Импорт завершен. Успешно: ${result.success}, Ошибок: ${result.failed}`,
-        ...result
+        success: result.success,
+        failed: result.failed
       });
     } catch (error: any) {
       console.error('Import error:', error);
