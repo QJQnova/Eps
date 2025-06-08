@@ -299,10 +299,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (existingCategory) {
             categoryId = existingCategory;
           } else {
-            // Create new category
+            // Create new category with proper slug generation
+            let categorySlug = categoryName
+              .toLowerCase()
+              .replace(/[^a-zа-я0-9\s]/gi, '')
+              .replace(/\s+/g, '-')
+              .substring(0, 50);
+            
+            // Ensure slug is not empty
+            if (!categorySlug || categorySlug === '') {
+              categorySlug = `category-${Date.now()}`;
+            }
+            
             const newCategory = await storage.createCategory({
               name: categoryName,
-              slug: categoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+              slug: categorySlug
             });
             categoryMap.set(categoryName.toLowerCase(), newCategory.id);
             categoryId = newCategory.id;
