@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes-simple";
 import { setupVite, serveStatic, log } from "./vite";
+import router from "./routes.js";
 
 const app = express();
 app.use(express.json());
@@ -14,15 +15,15 @@ app.use((req, res, next) => {
   res.header('Expires', '-1');
   res.header('Surrogate-Control', 'no-store');
   res.header('Vary', '*');
-  
+
   // Добавляем случайный заголовок для обхода промежуточных кэшей
   res.header('X-No-Cache', Date.now().toString());
-  
+
   // Если это API запрос, дополнительно убедимся в отсутствии кэширования
   if (req.path.startsWith('/api/')) {
     res.header('X-API-Time', new Date().toISOString());
   }
-  
+
   next();
 });
 
@@ -58,6 +59,8 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
+
+  app.use("/api", router);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

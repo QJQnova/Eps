@@ -18,6 +18,9 @@ import path from "path";
 import { randomUUID } from "crypto";
 import { storage } from "./storage";
 import { sendPasswordResetEmail } from "./services/email";
+import express from 'express';
+
+const router = express.Router();
 
 // Функция валидации данных
 const validateData = <T>(schema: z.ZodType<T>, data: any): T => {
@@ -56,12 +59,12 @@ async function ensureTempDir() {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   await ensureTempDir();
-  
+
   // Настройка авторизации
   setupAuth(app);
 
   // User Routes для администрирования
-  app.post("/api/admin/users", requireAdmin, async (req, res) => {
+  router.post("/admin/users", requireAdmin, async (req, res) => {
     try {
       const userData = validateData(insertUserSchema, req.body);
       const hashedPassword = await bcrypt.hash(userData.password, 10);
@@ -69,7 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...userData,
         password: hashedPassword,
       });
-      
+
       const { password, ...userWithoutPassword } = user;
       res.status(201).json(userWithoutPassword);
     } catch (error: any) {
@@ -77,20 +80,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/users/:id", requireAdmin, async (req, res) => {
+  router.put("/admin/users/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const updateData = req.body;
-      
+
       if (updateData.password) {
         updateData.password = await bcrypt.hash(updateData.password, 10);
       }
-      
+
       const user = await storage.updateUser(id, updateData);
       if (!user) {
         return res.status(404).json({ message: "Пользователь не найден" });
       }
-      
+
       const { password, ...userWithoutPassword } = user;
       res.json(userWithoutPassword);
     } catch (error: any) {
@@ -98,7 +101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/users/:id", requireAdmin, async (req, res) => {
+  router.delete("/admin/users/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const success = await storage.deleteUser(id);
@@ -111,7 +114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/users", requireAdmin, async (req, res) => {
+  router.get("/admin/users", requireAdmin, async (req, res) => {
     try {
       const params = validateData(userSearchSchema, req.query);
       const result = await storage.searchUsers(params);
@@ -122,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Category Routes
-  app.get("/api/categories", async (req, res) => {
+  router.get("/categories", async (req, res) => {
     try {
       const categories = await storage.getAllCategories();
       res.json(categories);
@@ -131,7 +134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/categories/:id", async (req, res) => {
+  router.get("/categories/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const category = await storage.getCategoryById(id);
@@ -144,7 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/categories", requireAdmin, async (req, res) => {
+  router.post("/admin/categories", requireAdmin, async (req, res) => {
     try {
       const categoryData = validateData(insertCategorySchema, req.body);
       const category = await storage.createCategory(categoryData);
@@ -154,7 +157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/categories/:id", requireAdmin, async (req, res) => {
+  router.put("/admin/categories/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const updateData = validateData(insertCategorySchema.partial(), req.body);
@@ -168,7 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/categories/:id", requireAdmin, async (req, res) => {
+  router.delete("/admin/categories/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const success = await storage.deleteCategory(id);
@@ -182,7 +185,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Product Routes
-  app.get("/api/products", async (req, res) => {
+  router.get("/products", async (req, res) => {
     try {
       const params = validateData(productSearchSchema, req.query);
       const result = await storage.searchProducts(params);
@@ -192,7 +195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/products/featured", async (req, res) => {
+  router.get("/products/featured", async (req, res) => {
     try {
       const products = await storage.getFeaturedProducts();
       res.json(products);
@@ -201,7 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/products/:id", async (req, res) => {
+  router.get("/products/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const product = await storage.getProductById(id);
@@ -214,7 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/products", requireAdmin, async (req, res) => {
+  router.post("/admin/products", requireAdmin, async (req, res) => {
     try {
       const productData = validateData(productInputSchema, req.body);
       const product = await storage.createProduct(productData);
@@ -224,7 +227,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/products/:id", requireAdmin, async (req, res) => {
+  router.put("/admin/products/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const updateData = validateData(productInputSchema.partial(), req.body);
@@ -238,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
+  router.delete("/admin/products/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const success = await storage.deleteProduct(id);
@@ -252,7 +255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Bulk import route with multer error handling
-  app.post("/api/products/bulk-import", (req, res, next) => {
+  router.post("/products/bulk-import", (req, res, next) => {
     console.log('Import route hit, checking auth...');
     requireAdmin(req, res, next);
   }, (req, res, next) => {
@@ -274,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const fileExtension = path.extname(req.file.originalname).toLowerCase();
       const products = await parseImportFile(req.file.path, fileExtension);
-      
+
       if (products.length === 0) {
         return res.status(400).json({ message: "Файл пуст или не содержит валидных данных" });
       }
@@ -287,12 +290,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const processedProducts = [];
       for (const product of products) {
         let categoryId = product.categoryId;
-        
+
         // If categoryName is provided but categoryId is not
         if (!categoryId && product.categoryName) {
           const categoryName = product.categoryName.trim();
           const existingCategory = categoryMap.get(categoryName.toLowerCase());
-          
+
           if (existingCategory) {
             categoryId = existingCategory;
           } else {
@@ -333,7 +336,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('Processed products for import:', processedProducts.length);
       const result = await storage.bulkImportProducts(processedProducts);
-      
+
       // Clean up uploaded file
       try {
         await fs.unlink(req.file.path);
@@ -362,7 +365,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cart Routes
-  app.get("/api/cart/:cartId", async (req, res) => {
+  router.get("/cart/:cartId", async (req, res) => {
     try {
       const cartId = req.params.cartId;
       const items = await storage.getCartItemWithProduct(cartId);
@@ -372,7 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/cart", async (req, res) => {
+  router.post("/cart", async (req, res) => {
     try {
       const cartItemData = validateData(insertCartItemSchema, req.body);
       const item = await storage.addToCart(cartItemData);
@@ -382,7 +385,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/cart/:id", async (req, res) => {
+  router.put("/cart/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const { quantity } = req.body;
@@ -396,7 +399,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/cart/:id", async (req, res) => {
+  router.delete("/cart/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const success = await storage.removeFromCart(id);
@@ -409,7 +412,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/cart/clear/:cartId", async (req, res) => {
+  router.delete("/cart/clear/:cartId", async (req, res) => {
     try {
       const cartId = req.params.cartId;
       const success = await storage.clearCart(cartId);
@@ -420,10 +423,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Order Routes
-  app.post("/api/orders", async (req, res) => {
+  router.post("/orders", async (req, res) => {
     try {
       const orderData = validateData(orderInputSchema, req.body);
-      
+
       // Get cart items
       const cartItems = await storage.getCartItemWithProduct(orderData.cartId);
       if (cartItems.length === 0) {
@@ -431,17 +434,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const order = await storage.createOrder(orderData, cartItems);
-      
+
       // Clear cart after successful order
       await storage.clearCart(orderData.cartId);
-      
+
       res.status(201).json(order);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
   });
 
-  app.get("/api/orders/:id", async (req, res) => {
+  router.get("/orders/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const order = await storage.getOrderById(id);
@@ -454,7 +457,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/orders", requireAdmin, async (req, res) => {
+  router.get("/admin/orders", requireAdmin, async (req, res) => {
     try {
       const params = validateData(orderSearchSchema, req.query);
       const result = await storage.searchOrders(params);
@@ -464,7 +467,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/orders/:id/status", requireAdmin, async (req, res) => {
+  router.put("/admin/orders/:id/status", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const { status } = req.body;
@@ -479,7 +482,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Settings Routes
-  app.get("/api/admin/settings/shop", requireAdmin, async (req, res) => {
+  router.get("/admin/settings/shop", requireAdmin, async (req, res) => {
     try {
       const settings = await storage.getShopSettings();
       res.json(settings);
@@ -488,7 +491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/settings/shop", requireAdmin, async (req, res) => {
+  router.put("/admin/settings/shop", requireAdmin, async (req, res) => {
     try {
       const settings = validateData(shopSettingsSchema, req.body);
       const success = await storage.updateShopSettings(settings);
@@ -498,7 +501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/settings/seo", requireAdmin, async (req, res) => {
+  router.get("/admin/settings/seo", requireAdmin, async (req, res) => {
     try {
       const settings = await storage.getSeoSettings();
       res.json(settings);
@@ -507,7 +510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/settings/seo", requireAdmin, async (req, res) => {
+  router.put("/admin/settings/seo", requireAdmin, async (req, res) => {
     try {
       const settings = validateData(seoSettingsSchema, req.body);
       const success = await storage.updateSeoSettings(settings);
@@ -518,10 +521,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Password reset routes
-  app.post("/api/password-reset/request", async (req, res) => {
+  router.post("/password-reset/request", async (req, res) => {
     try {
       const { email } = validateData(passwordResetRequestSchema, req.body);
-      
+
       const user = await storage.getUserByEmail(email);
       if (!user) {
         return res.status(404).json({ message: "Пользователь с таким email не найден" });
@@ -529,9 +532,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const resetToken = await storage.createPasswordResetToken(user.id);
       const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken.token}`;
-      
+
       const emailSent = await sendPasswordResetEmail(email, resetToken.token, resetUrl);
-      
+
       if (emailSent) {
         res.json({ message: "Письмо для сброса пароля отправлено" });
       } else {
@@ -542,10 +545,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/password-reset/confirm", async (req, res) => {
+  router.post("/password-reset/confirm", async (req, res) => {
     try {
       const { token, password } = validateData(passwordResetSchema, req.body);
-      
+
       const resetToken = await storage.getPasswordResetToken(token);
       if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
         return res.status(400).json({ message: "Недействительный или истекший токен" });
@@ -554,12 +557,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hashedPassword = await bcrypt.hash(password, 10);
       await storage.updateUser(resetToken.userId, { password: hashedPassword });
       await storage.markPasswordResetTokenAsUsed(token);
-      
+
       res.json({ message: "Пароль успешно изменен" });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
   });
+
+  app.use("/api", router);
 
   const httpServer = createServer(app);
   return httpServer;
