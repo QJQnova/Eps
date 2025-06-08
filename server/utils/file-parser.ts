@@ -133,8 +133,9 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
     // Исправляем XML для СТАНИКС - добавляем корневой элемент если его нет
     let xmlContent = content.trim();
     
-    // Проверяем если файл начинается с <name> - это формат СТАНИКС
-    if (xmlContent.startsWith('<name>')) {
+    // Проверяем если файл начинается с <n> - это формат СТАНИКС
+    if (xmlContent.startsWith('<n>') || xmlContent.startsWith('﻿<n>')) {
+      console.log("Добавляем корневой элемент для СТАНИКС формата");
       xmlContent = `<stanix_catalog>${xmlContent}</stanix_catalog>`;
     } else if (!xmlContent.startsWith('<?xml') && !xmlContent.startsWith('<yml_catalog') && !xmlContent.startsWith('<catalog')) {
       // Добавляем корневой элемент для других форматов без корня
