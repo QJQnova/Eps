@@ -3,6 +3,7 @@ import { parse } from "csv-parse/sync";
 import { InsertProduct } from "@shared/schema";
 import { parseString } from "xml2js";
 import { promisify } from "util";
+import * as XLSX from "xlsx";
 
 // Расширенный тип для работы с импортом
 interface ImportProduct extends Partial<InsertProduct> {
@@ -27,8 +28,10 @@ export async function parseImportFile(filePath: string, fileExtension: string): 
         console.error("XML parsing error:", xmlError);
         throw new Error(`Ошибка при разборе XML: ${xmlError.message}`);
       }
+    } else if (fileExtension === '.xlsx' || fileExtension === '.xls') {
+      return parseXlsxFile(filePath);
     } else {
-      throw new Error('Неподдерживаемый формат файла. Пожалуйста, используйте CSV, JSON или XML.');
+      throw new Error('Неподдерживаемый формат файла. Пожалуйста, используйте CSV, JSON, XML или XLSX.');
     }
   } catch (error: any) {
     console.error("File parsing error:", error);
@@ -411,4 +414,148 @@ function parseStanixFormat(result: any): ImportProduct[] {
     
     return product;
   }).filter(Boolean) as ImportProduct[];
+}
+
+/**
+ * Парсит содержимое XLSX-файла в данные о товарах
+ */
+function parseXlsxFile(filePath: string): ImportProduct[] {
+  try {
+    // Читаем файл Excel
+    const workbook = XLSX.readFile(filePath);
+    
+    // Получаем первый лист
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    
+    // Конвертируем в JSON
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+      header: 1,
+      defval: '',
+      raw: false 
+    }) as any[][];
+    
+    if (jsonData.length < 2) {
+      throw new Error('XLSX файл должен содержать заголовки и хотя бы одну строку данных');
+    }
+    
+    // Получаем заголовки из первой строки
+    const headers = jsonData[0] as string[];
+    
+    // Создаем карту заголовков для гибкого сопоставления
+    const headerMap: Record<string, number> = {};
+    headers.forEach((header, index) => {
+      const normalizedHeader = header.toLowerCase().trim();
+      headerMap[normalizedHeader] = index;
+    });
+    
+    // Функция для получения значения по различным вариантам названий колонок
+    const getValue = (row: any[], ...possibleNames: string[]): string => {
+      for (const name of possibleNames) {
+        const index = headerMap[name.toLowerCase()];
+        if (index !== undefined && row[index] !== undefined) {
+          return String(row[index]).trim();
+        }
+      }
+      return '';
+    };
+    
+    // Обрабатываем строки данных (пропускаем заголовок)
+    return jsonData.slice(1).map((row: any[], index: number) => {
+      if (!row || row.length === 0 || row.every(cell => !cell || String(cell).trim() === '')) {
+        return null; // Пропускаем пустые строки
+      }
+      
+      const product: ImportProduct = {};
+      
+      // Название товара (обязательное поле)
+      product.name = getValue(row, 'название', 'наименование', 'name', 'товар', 'продукт');
+      if (!product.name) {
+        console.warn(`Строка ${index + 2}: пропущена - отсутствует название товара`);
+        return null;
+      }
+      
+      // SKU/Артикул
+      product.sku = getValue(row, 'sku', 'артикул', 'код', 'id', 'номер');
+      if (!product.sku) {
+        // Генерируем SKU если не указан
+        product.sku = `XLSX-${Date.now()}-${index}`;
+      }
+      
+      // Цена
+      const priceStr = getValue(row, 'цена', 'стоимость', 'price', 'cost');
+      if (priceStr) {
+        const price = parseFloat(priceStr.replace(/[^\d.,]/g, '').replace(',', '.'));
+        if (!isNaN(price) && price > 0) {
+          product.price = price;
+        }
+      }
+      
+      // Старая цена
+      const oldPriceStr = getValue(row, 'старая цена', 'старая стоимость', 'old price', 'original price');
+      if (oldPriceStr) {
+        const oldPrice = parseFloat(oldPriceStr.replace(/[^\d.,]/g, '').replace(',', '.'));
+        if (!isNaN(oldPrice) && oldPrice > 0) {
+          product.originalPrice = oldPrice;
+        }
+      }
+      
+      // Описание
+      product.description = getValue(row, 'описание', 'description', 'детали', 'характеристики');
+      
+      // Короткое описание
+      product.shortDescription = getValue(row, 'короткое описание', 'краткое описание', 'short description', 'анонс');
+      
+      // Категория
+      product.categoryName = getValue(row, 'категория', 'category', 'раздел', 'группа');
+      
+      // URL изображения
+      product.imageUrl = getValue(row, 'изображение', 'картинка', 'фото', 'image', 'picture', 'photo');
+      
+      // Количество на складе
+      const stockStr = getValue(row, 'количество', 'остаток', 'склад', 'stock', 'quantity');
+      if (stockStr) {
+        const stock = parseInt(stockStr);
+        if (!isNaN(stock)) {
+          product.stockQuantity = stock;
+        }
+      }
+      
+      // Активность товара
+      const activeStr = getValue(row, 'активен', 'доступен', 'active', 'enabled', 'published');
+      if (activeStr) {
+        const lowerActive = activeStr.toLowerCase();
+        product.isActive = ['да', 'yes', 'true', '1', 'активен', 'доступен'].includes(lowerActive);
+      } else {
+        product.isActive = true; // По умолчанию активен
+      }
+      
+      // Рекомендуемый товар
+      const featuredStr = getValue(row, 'рекомендуемый', 'популярный', 'featured', 'recommended');
+      if (featuredStr) {
+        const lowerFeatured = featuredStr.toLowerCase();
+        product.isFeatured = ['да', 'yes', 'true', '1', 'рекомендуемый'].includes(lowerFeatured);
+      } else {
+        product.isFeatured = false;
+      }
+      
+      // Теги
+      product.tag = getValue(row, 'теги', 'метки', 'tags', 'labels');
+      
+      // Генерация slug из названия
+      if (product.name) {
+        product.slug = product.name
+          .toLowerCase()
+          .replace(/[^a-zа-я0-9\s]/gi, '')
+          .replace(/\s+/g, '-')
+          .substring(0, 100);
+      }
+      
+      return product;
+    }).filter(Boolean) as ImportProduct[];
+    
+  } catch (error: any) {
+    console.error("XLSX parsing error:", error);
+    throw new Error(`Ошибка при разборе XLSX файла: ${error.message}`);
+  }
 }

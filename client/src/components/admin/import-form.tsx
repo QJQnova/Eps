@@ -125,8 +125,11 @@ export default function ImportForm() {
     // Проверяем тип файла и расширение
     if (
       (fileType !== 'text/csv' && fileType !== 'application/json' && 
-       fileType !== 'text/xml' && fileType !== 'application/xml') &&
-      (fileExtension !== 'csv' && fileExtension !== 'json' && fileExtension !== 'xml')
+       fileType !== 'text/xml' && fileType !== 'application/xml' &&
+       fileType !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' &&
+       fileType !== 'application/vnd.ms-excel') &&
+      (fileExtension !== 'csv' && fileExtension !== 'json' && fileExtension !== 'xml' && 
+       fileExtension !== 'xlsx' && fileExtension !== 'xls')
     ) {
       setError("Пожалуйста, загрузите файл в формате CSV, JSON или XML");
       return;
