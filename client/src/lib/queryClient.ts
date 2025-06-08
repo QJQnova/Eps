@@ -7,14 +7,22 @@ async function throwIfResNotOk(res: Response) {
       return;
     }
     
+    let errorMessage = res.statusText;
     try {
-      const data = await res.json();
-      throw { status: res.status, message: data.message || res.statusText, data };
-    } catch (e) {
-      // Если не можем прочитать JSON
       const text = await res.text();
-      throw { status: res.status, message: text || res.statusText };
+      if (text) {
+        try {
+          const data = JSON.parse(text);
+          errorMessage = data.message || res.statusText;
+        } catch {
+          errorMessage = text;
+        }
+      }
+    } catch {
+      // Если не можем прочитать текст, используем statusText
     }
+    
+    throw new Error(errorMessage);
   }
 }
 
@@ -60,23 +68,19 @@ export async function apiRequest(
 
     await throwIfResNotOk(res);
     
-    // Для всех запросов автоматически преобразуем ответ в JSON, если есть Content-Type
-    const contentType = res.headers.get("content-type");
-    if (contentType && contentType.includes("application/json")) {
-      return res.json();
-    }
-    
     // Для пустых ответов (204 No Content)
     if (res.status === 204) {
       return null;
     }
     
-    // Для всех остальных случаев возвращаем текст ответа
-    try {
-      return await res.text();
-    } catch (e) {
-      return null;
+    // Проверяем есть ли содержимое в ответе
+    const contentType = res.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      return res.json();
     }
+    
+    // Для всех остальных случаев возвращаем текст ответа
+    return res.text();
   } catch (error) {
     console.error(`API Request Error: ${method} ${url}`, error);
     throw error;
