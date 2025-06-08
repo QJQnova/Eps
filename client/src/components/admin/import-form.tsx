@@ -131,7 +131,7 @@ export default function ImportForm() {
       (fileExtension !== 'csv' && fileExtension !== 'json' && fileExtension !== 'xml' && 
        fileExtension !== 'xlsx' && fileExtension !== 'xls')
     ) {
-      setError("Пожалуйста, загрузите файл в формате CSV, JSON или XML");
+      setError("Пожалуйста, загрузите файл в формате CSV, JSON, XML или XLSX");
       return;
     }
     
@@ -205,7 +205,7 @@ export default function ImportForm() {
     }
   };
   
-  const downloadTemplate = (type: "csv" | "json" | "xml") => {
+  const downloadTemplate = (type: "csv" | "json" | "xml" | "xlsx") => {
     let template, fileName, mimeType;
     
     if (type === "csv") {
@@ -216,10 +216,81 @@ export default function ImportForm() {
       template = JSON_TEMPLATE;
       fileName = "product-template.json";
       mimeType = "application/json";
-    } else {
+    } else if (type === "xml") {
       template = XML_TEMPLATE;
       fileName = "product-template.xml";
       mimeType = "application/xml";
+    } else if (type === "xlsx") {
+      // Создаем простую HTML таблицу для Excel (Excel может открыть HTML как таблицу)
+      template = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Шаблон товаров</title>
+</head>
+<body>
+<table border="1">
+<tr>
+<td>Артикул</td>
+<td>Название</td>
+<td>Описание</td>
+<td>Короткое описание</td>
+<td>Цена</td>
+<td>Старая цена</td>
+<td>Количество</td>
+<td>Категория</td>
+<td>Активен</td>
+<td>Рекомендуемый</td>
+<td>Теги</td>
+<td>Изображение</td>
+</tr>
+<tr>
+<td>TP001</td>
+<td>Профессиональная Беспроводная Дрель</td>
+<td>Дрель с литий-ионным аккумулятором 18В и двухскоростным редуктором</td>
+<td>Дрель 18В с LED подсветкой</td>
+<td>12999</td>
+<td>15999</td>
+<td>43</td>
+<td>Электроинструменты</td>
+<td>Да</td>
+<td>Да</td>
+<td>Хит продаж</td>
+<td>https://images.unsplash.com/photo-1572981779307-38b8cabb2407</td>
+</tr>
+<tr>
+<td>TP002</td>
+<td>Цифровой Лазерный Дальномер</td>
+<td>Точное лазерное измерение до 50м с расчетом площади и объема</td>
+<td>Прецизионный лазерный измеритель</td>
+<td>7999</td>
+<td>8999</td>
+<td>21</td>
+<td>Измерительное оборудование</td>
+<td>Да</td>
+<td>Нет</td>
+<td></td>
+<td>https://images.unsplash.com/photo-1586864387789-628af9feed72</td>
+</tr>
+<tr>
+<td>TP003</td>
+<td>Премиум Защитные Очки</td>
+<td>Противотуманные царапиноустойчивые линзы с защитой от УФ</td>
+<td>Защитные очки с УФ защитой</td>
+<td>2499</td>
+<td>3499</td>
+<td>76</td>
+<td>Безопасность и защита</td>
+<td>Да</td>
+<td>Нет</td>
+<td>Новинка</td>
+<td>https://images.unsplash.com/photo-1530124566582-a618bc2615dc</td>
+</tr>
+</table>
+</body>
+</html>`;
+      fileName = "product-template.xls"; // Используем .xls для лучшей совместимости
+      mimeType = "application/vnd.ms-excel";
     }
     
     const blob = new Blob([template], { type: mimeType });
@@ -239,7 +310,7 @@ export default function ImportForm() {
       <CardHeader>
         <CardTitle>Массовый импорт товаров</CardTitle>
         <CardDescription>
-          Загрузите файл CSV, JSON или XML для импорта нескольких товаров одновременно.
+          Загрузите файл CSV, JSON, XML или XLSX для импорта нескольких товаров одновременно.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -254,7 +325,7 @@ export default function ImportForm() {
             type="file" 
             ref={fileInputRef}
             onChange={handleFileChange}
-            accept=".csv,.json,.xml" 
+            accept=".csv,.json,.xml,.xlsx,.xls" 
             className="hidden" 
           />
           
@@ -273,7 +344,7 @@ export default function ImportForm() {
           <p className="text-gray-500 mb-4">
             {file 
               ? `${(file.size / 1024).toFixed(2)} KB · ${file.type}`
-              : "Перетащите файл CSV, JSON или XML сюда, или нажмите для выбора файла"}
+              : "Перетащите файл CSV, JSON, XML или XLSX сюда, или нажмите для выбора файла"}
           </p>
           
           {!file && (
@@ -309,6 +380,13 @@ export default function ImportForm() {
               onClick={() => downloadTemplate("xml")}
             >
               Шаблон XML
+            </Button>
+            <Button 
+              variant="link" 
+              className="text-primary"
+              onClick={() => downloadTemplate("xlsx")}
+            >
+              Шаблон XLSX
             </Button>
           </div>
         </div>
