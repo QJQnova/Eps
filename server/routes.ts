@@ -252,7 +252,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Bulk import route with multer error handling
-  app.post("/api/products/bulk-import", requireAdmin, (req, res, next) => {
+  app.post("/api/products/bulk-import", (req, res, next) => {
+    console.log('Import route hit, checking auth...');
+    requireAdmin(req, res, next);
+  }, (req, res, next) => {
+    console.log('Auth passed, processing upload...');
     upload.single('file')(req, res, (err) => {
       if (err) {
         console.error('Multer error:', err.message);
