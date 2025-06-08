@@ -132,8 +132,12 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
     
     // Исправляем XML для СТАНИКС - добавляем корневой элемент если его нет
     let xmlContent = content.trim();
-    if (!xmlContent.startsWith('<?xml') && !xmlContent.startsWith('<yml_catalog') && !xmlContent.startsWith('<catalog')) {
-      // Добавляем корневой элемент для файлов СТАНИКС
+    
+    // Проверяем если файл начинается с <n> - это формат СТАНИКС
+    if (xmlContent.startsWith('<n>')) {
+      xmlContent = `<stanix_catalog>${xmlContent}</stanix_catalog>`;
+    } else if (!xmlContent.startsWith('<?xml') && !xmlContent.startsWith('<yml_catalog') && !xmlContent.startsWith('<catalog')) {
+      // Добавляем корневой элемент для других форматов без корня
       xmlContent = `<catalog>${xmlContent}</catalog>`;
     }
     
@@ -153,20 +157,26 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
     }
     
     // Обработка формата СТАНИКС
-    if (result.catalog) {
+    if (result.stanix_catalog) {
       console.log("Обнаружен формат каталога СТАНИКС");
+      return parseStanixFormat(result.stanix_catalog);
+    }
+    
+    // Обработка обычного формата СТАНИКС с catalog оберткой
+    if (result.catalog) {
+      console.log("Обнаружен формат каталога СТАНИКС (с catalog оберткой)");
       return parseStanixFormat(result.catalog);
     }
     
     // Прямая проверка структуры СТАНИКС
-    if (result.offer || (result.name && result.categories)) {
+    if (result.offer || (result.n && result.categories)) {
       console.log("Обнаружен формат каталога СТАНИКС (прямая структура)");
       return parseStanixFormat(result);
     }
     
     // Альтернативная проверка - если в result есть элементы как в СТАНИКС
     const hasStanixStructure = Object.keys(result).some(key => 
-      ['name', 'company', 'url', 'categories', 'offer'].includes(key)
+      ['n', 'company', 'url', 'categories', 'offer'].includes(key)
     );
     
     if (hasStanixStructure) {
@@ -340,8 +350,10 @@ function parseStanixFormat(result: any): ImportProduct[] {
   return offers.map((offer: any, index: number) => {
     const product: ImportProduct = {};
     
-    // Название товара
-    if (offer.name && offer.name[0]) {
+    // Название товара - в формате СТАНИКС используется элемент <n>
+    if (offer.n && offer.n[0]) {
+      product.name = offer.n[0];
+    } else if (offer.name && offer.name[0]) {
       product.name = offer.name[0];
     }
     
