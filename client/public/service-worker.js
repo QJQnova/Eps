@@ -38,34 +38,8 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Перехват запросов с отключенным кешированием
+// НЕ перехватываем запросы - позволяем всем проходить напрямую
 self.addEventListener('fetch', (event) => {
-  // Для API запросов всегда используем сеть и никогда не кешируем
-  if (event.request.url.includes('/api/')) {
-    console.log(`Service Worker: API запрос без кеширования: ${event.request.url}`);
-    
-    // Добавляем случайный параметр для обхода кеша
-    const url = new URL(event.request.url);
-    url.searchParams.append('_nocache', Date.now());
-    
-    const noCacheRequest = new Request(url.toString(), {
-      method: event.request.method,
-      headers: new Headers(event.request.headers),
-      mode: event.request.mode,
-      credentials: event.request.credentials,
-      cache: 'no-store'
-    });
-    
-    event.respondWith(fetch(noCacheRequest));
-    return;
-  }
-  
-  // Для остальных запросов всегда обращаемся в сеть
-  event.respondWith(
-    fetch(event.request, { cache: 'no-store' })
-      .catch(() => {
-        // Только при отсутствии сети показываем сообщение
-        return new Response('Нет соединения с сетью. Обновите страницу.');
-      })
-  );
+  // НИЧЕГО НЕ ДЕЛАЕМ - позволяем всем запросам проходить как обычно
+  return;
 });

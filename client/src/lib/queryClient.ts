@@ -33,16 +33,10 @@ export async function apiRequest(
 ): Promise<any> {
   console.log(`API Request: ${method} ${url}`, data);
   
-  // Добавляем параметр для обхода кэша
-  const noCacheUrl = url.includes('?') 
-    ? `${url}&_nocache=${Date.now()}` 
-    : `${url}?_nocache=${Date.now()}`;
-  
   try {
-    const requestConfig: RequestInit = {
-      method,
+    const fetchOptions: RequestInit = {
+      method: method,
       credentials: "include",
-      cache: 'no-store',
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
         'Pragma': 'no-cache',
@@ -50,15 +44,18 @@ export async function apiRequest(
       }
     };
 
-    if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
-      requestConfig.headers = {
-        ...requestConfig.headers,
-        "Content-Type": "application/json"
+    // Добавляем тело запроса и заголовок Content-Type для методов с данными
+    if (data !== undefined && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+      fetchOptions.body = JSON.stringify(data);
+      fetchOptions.headers = {
+        ...fetchOptions.headers,
+        'Content-Type': 'application/json'
       };
-      requestConfig.body = JSON.stringify(data);
     }
 
-    const res = await fetch(noCacheUrl, requestConfig);
+    console.log('Fetch options:', fetchOptions);
+
+    const res = await fetch(url, fetchOptions);
 
     // Специальная обработка для DELETE запросов
     if (method === 'DELETE') {

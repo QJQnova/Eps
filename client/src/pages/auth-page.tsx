@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { SimpleRegisterForm } from "@/components/simple-register-form";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Введите логин"),
@@ -137,63 +138,7 @@ export default function AuthPage() {
               </TabsContent>
 
               <TabsContent value="register" className="space-y-4">
-                <Form {...registerForm}>
-                  <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
-                    <FormField
-                      control={registerForm.control}
-                      name="username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Логин</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Введите логин" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registerForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input type="email" placeholder="Введите email" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registerForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Пароль</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="Введите пароль" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-red-600 hover:bg-red-700"
-                      disabled={registerMutation.isPending}
-                    >
-                      {registerMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Регистрация...
-                        </>
-                      ) : (
-                        "Зарегистрироваться"
-                      )}
-                    </Button>
-                  </form>
-                </Form>
+                <SimpleRegisterForm />
               </TabsContent>
             </Tabs>
           </CardContent>
