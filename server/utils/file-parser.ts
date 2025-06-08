@@ -133,8 +133,8 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
     // Исправляем XML для СТАНИКС - добавляем корневой элемент если его нет
     let xmlContent = content.trim();
     
-    // Проверяем если файл начинается с <n> - это формат СТАНИКС
-    if (xmlContent.startsWith('<n>')) {
+    // Проверяем если файл начинается с <name> - это формат СТАНИКС
+    if (xmlContent.startsWith('<name>')) {
       xmlContent = `<stanix_catalog>${xmlContent}</stanix_catalog>`;
     } else if (!xmlContent.startsWith('<?xml') && !xmlContent.startsWith('<yml_catalog') && !xmlContent.startsWith('<catalog')) {
       // Добавляем корневой элемент для других форматов без корня
@@ -169,14 +169,14 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
     }
     
     // Прямая проверка структуры СТАНИКС
-    if (result.offer || (result.n && result.categories)) {
+    if (result.offer || (result.name && result.categories)) {
       console.log("Обнаружен формат каталога СТАНИКС (прямая структура)");
       return parseStanixFormat(result);
     }
     
     // Альтернативная проверка - если в result есть элементы как в СТАНИКС
     const hasStanixStructure = Object.keys(result).some(key => 
-      ['n', 'company', 'url', 'categories', 'offer'].includes(key)
+      ['name', 'company', 'url', 'categories', 'offer'].includes(key)
     );
     
     if (hasStanixStructure) {
@@ -372,7 +372,7 @@ function parseStanixFormat(result: any): ImportProduct[] {
     if (offer.price && offer.price[0]) {
       const priceValue = parseFloat(offer.price[0]);
       if (!isNaN(priceValue)) {
-        product.price = priceValue.toString();
+        product.price = priceValue;
       }
     }
     
