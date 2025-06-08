@@ -143,43 +143,50 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
     if (result.yml_catalog) {
       console.log("Обнаружен формат YML-каталога");
       
-      if (!result.yml_catalog.shop || !result.yml_catalog.shop.offers || !result.yml_catalog.shop.offers.offer) {
+      // Извлекаем shop - может быть массивом или объектом
+      const shop = Array.isArray(result.yml_catalog.shop) 
+        ? result.yml_catalog.shop[0] 
+        : result.yml_catalog.shop;
+      
+      if (!shop || !shop.offers || !shop.offers[0] || !shop.offers[0].offer) {
+        console.log("Структура shop:", JSON.stringify(shop, null, 2));
         throw new Error('XML файл не содержит необходимых данных о товарах (формат YML)');
       }
       
       // Обрабатываем категории, если они есть
       const categoriesMap: Record<string, {id: number, name: string}> = {};
       
-      if (result.yml_catalog.shop.categories && result.yml_catalog.shop.categories.category) {
+      if (shop.categories && shop.categories[0] && shop.categories[0].category) {
         // Если есть только одна категория, преобразуем в массив
-        const categories = Array.isArray(result.yml_catalog.shop.categories.category)
-          ? result.yml_catalog.shop.categories.category
-          : [result.yml_catalog.shop.categories.category];
+        const categories = Array.isArray(shop.categories[0].category)
+          ? shop.categories[0].category
+          : [shop.categories[0].category];
         
         categories.forEach((cat: any) => {
-          if (cat.id && cat._) {
-            categoriesMap[cat.id] = {
-              id: Number(cat.id),
-              name: cat._.toString()
+          if (cat.$ && cat.$.id && cat._) {
+            categoriesMap[cat.$.id] = {
+              id: Number(cat.$.id),
+              name: cat._
             };
           }
         });
       }
       
       // Получаем список товаров
-      const offers = Array.isArray(result.yml_catalog.shop.offers.offer)
-        ? result.yml_catalog.shop.offers.offer
-        : [result.yml_catalog.shop.offers.offer];
+      const offers = Array.isArray(shop.offers[0].offer)
+        ? shop.offers[0].offer
+        : [shop.offers[0].offer];
       
       // Преобразуем каждый товар
       return offers.map((offer: any, index: number) => {
         const product: ImportProduct = {};
         
         // Получаем название товара из разных возможных полей
-        if (offer.name) product.name = offer.name;
-        else if (offer.n) product.name = offer.n;
-        else if (offer._) product.name = offer._;
-        else if (offer.model) product.name = offer.model;
+        if (offer.name && offer.name[0]) product.name = offer.name[0];
+        else if (offer.model && offer.model[0]) product.name = offer.model[0];
+        else if (offer.typePrefix && offer.typePrefix[0] && offer.vendor && offer.vendor[0] && offer.model && offer.model[0]) {
+          product.name = `${offer.typePrefix[0]} ${offer.vendor[0]} ${offer.model[0]}`;
+        }
         
         // Если нет имени, пропускаем этот товар
         if (!product.name) {
@@ -187,84 +194,52 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
           return null;
         }
         
-        // Формируем SKU из имени, если нет ID
-        if (offer.id) {
-          product.sku = offer.id.toString();
-        } else if (offer.n) {
-          // Генерация SKU из названия
+        // SKU/Артикул
+        if (offer.$ && offer.$.id) product.sku = offer.$.id;
+        else if (offer.vendorCode && offer.vendorCode[0]) product.sku = offer.vendorCode[0];
+        else if (offer.article && offer.article[0]) product.sku = offer.article[0];
+        else {
+          // Генерация SKU из ID или уникального значения
           const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-          product.sku = `SKU-${randomPart}`;
-        } else if (product.name) {
-          // Генерация SKU из названия с добавлением уникального идентификатора
-          const cleanedName = product.name
-            .replace(/\s+/g, '-')
-            .replace(/[^a-zA-Zа-яА-ЯёЁ0-9-]/g, '')
-            .substring(0, 10);
-          const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-          product.sku = `${cleanedName}-${randomPart}`;
+          product.sku = `YML-${randomPart}`;
         }
         
-        // Парсим другие поля
-        if (offer.description) product.description = offer.description;
-        if (offer.price) product.price = parseFloat(offer.price).toString();
-        if (offer.oldprice) product.originalPrice = parseFloat(offer.oldprice).toString();
-        if (offer.picture) product.imageUrl = offer.picture;
-        if (offer.categoryId && categoriesMap[offer.categoryId]) {
-          product.categoryId = categoriesMap[offer.categoryId].id;
-          // Сохраняем название категории для автоматического создания
-          product.categoryName = categoriesMap[offer.categoryId].name;
-        } else if (offer.categoryid && categoriesMap[offer.categoryid]) {
-          // Альтернативное название атрибута (с маленькой буквы)
-          product.categoryId = categoriesMap[offer.categoryid].id;
-          // Сохраняем название категории для автоматического создания
-          product.categoryName = categoriesMap[offer.categoryid].name;
-        } else {
-          // Используем категорию по умолчанию, если не указана
-          product.categoryId = 1;
-        }
+        // Цена
+        if (offer.price && offer.price[0]) product.price = parseFloat(offer.price[0]);
+        else if (offer.oldprice && offer.oldprice[0]) product.price = parseFloat(offer.oldprice[0]);
         
-        // Статус доступности
-        if (offer.available) {
-          product.isActive = offer.available.toLowerCase() === 'true';
-          product.stock = product.isActive ? 100 : 0; // Примерное значение для наличия
-        } else {
-          // По умолчанию товар активен и в наличии
-          product.isActive = true;
-          product.stock = 100;
-        }
+        // Описание
+        if (offer.description && offer.description[0]) product.description = offer.description[0];
         
-        // Доп. характеристики
-        // Параметры сохраняем в shortDescription в формате строки
-        if (offer.param && Array.isArray(offer.param)) {
-          const specs: Record<string, string> = {};
-          offer.param.forEach((param: any) => {
-            if (param.name && param._) {
-              specs[param.name] = param._;
-            }
-          });
-          if (Object.keys(specs).length > 0) {
-            const specsArr = Object.entries(specs).map(([name, value]) => `${name}: ${value}`);
-            product.shortDescription = specsArr.join(', ');
+        // URL изображения
+        if (offer.picture) {
+          if (Array.isArray(offer.picture) && offer.picture.length > 0) {
+            product.imageUrl = offer.picture[0];
           }
         }
         
-        // Создаем slug из названия
-        if (product.name) {
-          const cyrillicPattern = /[^a-zA-Zа-яА-ЯёЁ0-9 ]/g;
-          product.slug = product.name
-            .toLowerCase()
-            .replace(cyrillicPattern, '')
-            .replace(/\s+/g, '-')
-            .substring(0, 50); // Ограничиваем длину slug
-            
-          // Добавляем уникальный идентификатор к slug
-          const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-          product.slug = `${product.slug}-${randomPart}`;
+        // Категория
+        if (offer.categoryId && offer.categoryId[0] && categoriesMap[offer.categoryId[0]]) {
+          product.categoryName = categoriesMap[offer.categoryId[0]].name;
         }
         
+        // Статус активности (по умолчанию активный)
+        product.isActive = offer.$ ? offer.$.available !== 'false' : true;
+        product.isFeatured = false;
+        
+        // Генерируем slug из названия
+        product.slug = product.name
+          .toLowerCase()
+          .replace(/[^a-zа-я0-9\s]/gi, '')
+          .replace(/\s+/g, '-')
+          .substring(0, 100);
+        
         return product;
-      }).filter(Boolean) as Partial<InsertProduct>[];
-    } else {
+      }).filter(Boolean) as ImportProduct[];
+    }
+    
+    // Стандартная обработка XML (не YML формат)
+    else {
       // Обработка других форматов XML
       console.log("XML не соответствует формату YML, пробуем другие форматы");
       throw new Error('Формат XML не распознан. Поддерживается только формат YML.');
