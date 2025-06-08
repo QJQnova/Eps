@@ -130,8 +130,15 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
     // Создаем типизированную промисифицированную функцию
     const parseXmlAsync = promisify<string, object>(parseString);
     
+    // Исправляем XML для СТАНИКС - добавляем корневой элемент если его нет
+    let xmlContent = content.trim();
+    if (!xmlContent.startsWith('<?xml') && !xmlContent.startsWith('<yml_catalog') && !xmlContent.startsWith('<catalog')) {
+      // Добавляем корневой элемент для файлов СТАНИКС
+      xmlContent = `<catalog>${xmlContent}</catalog>`;
+    }
+    
     // Парсим XML
-    const result = await parseXmlAsync(content);
+    const result = await parseXmlAsync(xmlContent);
     
     console.log("Результат парсинга XML:", JSON.stringify(result, null, 2).substring(0, 500) + "...");
     
@@ -145,9 +152,25 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
       return parseYmlFormat(result);
     }
     
-    // Обработка формата СТАНИКС (прямые offer элементы в корне)
-    if (result.offer || (result.name && result.categories)) {
+    // Обработка формата СТАНИКС
+    if (result.catalog) {
       console.log("Обнаружен формат каталога СТАНИКС");
+      return parseStanixFormat(result.catalog);
+    }
+    
+    // Прямая проверка структуры СТАНИКС
+    if (result.offer || (result.name && result.categories)) {
+      console.log("Обнаружен формат каталога СТАНИКС (прямая структура)");
+      return parseStanixFormat(result);
+    }
+    
+    // Альтернативная проверка - если в result есть элементы как в СТАНИКС
+    const hasStanixStructure = Object.keys(result).some(key => 
+      ['name', 'company', 'url', 'categories', 'offer'].includes(key)
+    );
+    
+    if (hasStanixStructure) {
+      console.log("Обнаружен формат каталога СТАНИКС (альтернативная структура)");
       return parseStanixFormat(result);
     }
     
@@ -264,10 +287,29 @@ function parseStanixFormat(result: any): ImportProduct[] {
   // Обрабатываем категории
   const categoriesMap: Record<string, string> = {};
   
+  // Проверяем разные варианты структуры категорий
   if (result.categories && result.categories[0] && result.categories[0].category) {
     const categories = Array.isArray(result.categories[0].category)
       ? result.categories[0].category
       : [result.categories[0].category];
+    
+    categories.forEach((cat: any) => {
+      if (cat.$ && cat.$.id && cat._) {
+        categoriesMap[cat.$.id] = cat._;
+      }
+    });
+  } else if (result.categories && Array.isArray(result.categories)) {
+    // Альтернативная структура - categories как массив
+    result.categories.forEach((cat: any) => {
+      if (cat.$ && cat.$.id && cat._) {
+        categoriesMap[cat.$.id] = cat._;
+      }
+    });
+  } else if (result.categories && result.categories.category) {
+    // Прямая структура category элементов
+    const categories = Array.isArray(result.categories.category)
+      ? result.categories.category
+      : [result.categories.category];
     
     categories.forEach((cat: any) => {
       if (cat.$ && cat.$.id && cat._) {
@@ -281,6 +323,18 @@ function parseStanixFormat(result: any): ImportProduct[] {
   if (result.offer) {
     offers = Array.isArray(result.offer) ? result.offer : [result.offer];
   }
+  
+  // Также проверяем все ключи в корне результата для поиска offer элементов
+  Object.keys(result).forEach(key => {
+    if (key === 'offer' || (typeof result[key] === 'object' && result[key].$ && result[key].$.id && result[key].name)) {
+      // Это может быть offer элемент
+      if (key !== 'offer') {
+        if (!offers.includes(result[key])) {
+          offers.push(result[key]);
+        }
+      }
+    }
+  });
   
   // Преобразуем каждый товар
   return offers.map((offer: any, index: number) => {
