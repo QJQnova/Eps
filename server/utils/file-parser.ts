@@ -144,7 +144,8 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
     // Парсим XML
     const result = await parseXmlAsync(xmlContent);
     
-    console.log("Результат парсинга XML:", JSON.stringify(result, null, 2).substring(0, 500) + "...");
+    console.log("Ключи верхнего уровня XML:", Object.keys(result));
+    console.log("Результат парсинга XML (первые 800 символов):", JSON.stringify(result, null, 2).substring(0, 800) + "...");
     
     if (!result) {
       throw new Error('XML файл не может быть прочитан');
