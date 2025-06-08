@@ -142,43 +142,62 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
     // Обработка YML-формата (Яндекс.Маркет)
     if (result.yml_catalog) {
       console.log("Обнаружен формат YML-каталога");
-      
-      // Извлекаем shop - может быть массивом или объектом
-      const shop = Array.isArray(result.yml_catalog.shop) 
-        ? result.yml_catalog.shop[0] 
-        : result.yml_catalog.shop;
-      
-      if (!shop || !shop.offers || !shop.offers[0] || !shop.offers[0].offer) {
-        console.log("Структура shop:", JSON.stringify(shop, null, 2));
-        throw new Error('XML файл не содержит необходимых данных о товарах (формат YML)');
+      return parseYmlFormat(result);
+    }
+    
+    // Обработка формата СТАНИКС (прямые offer элементы в корне)
+    if (result.offer || (result.name && result.categories)) {
+      console.log("Обнаружен формат каталога СТАНИКС");
+      return parseStanixFormat(result);
+    }
+    
+    throw new Error('XML не содержит необходимой структуры данных для товаров');
+  } catch (error: any) {
+    console.error("XML parsing error:", error);
+    throw new Error(`Ошибка при разборе XML: ${error.message}`);
+  }
+}
+
+/**
+ * Парсит YML-формат (Яндекс.Маркет)
+ */
+function parseYmlFormat(result: any): ImportProduct[] {
+  // Извлекаем shop - может быть массивом или объектом
+  const shop = Array.isArray(result.yml_catalog.shop) 
+    ? result.yml_catalog.shop[0] 
+    : result.yml_catalog.shop;
+  
+  if (!shop || !shop.offers || !shop.offers[0] || !shop.offers[0].offer) {
+    console.log("Структура shop:", JSON.stringify(shop, null, 2));
+    throw new Error('XML файл не содержит необходимых данных о товарах (формат YML)');
+  }
+  
+  // Обрабатываем категории, если они есть
+  const categoriesMap: Record<string, {id: number, name: string}> = {};
+  
+  if (shop.categories && shop.categories[0] && shop.categories[0].category) {
+    // Если есть только одна категория, преобразуем в массив
+    const categories = Array.isArray(shop.categories[0].category)
+      ? shop.categories[0].category
+      : [shop.categories[0].category];
+    
+    categories.forEach((cat: any) => {
+      if (cat.$ && cat.$.id && cat._) {
+        categoriesMap[cat.$.id] = {
+          id: Number(cat.$.id),
+          name: cat._
+        };
       }
-      
-      // Обрабатываем категории, если они есть
-      const categoriesMap: Record<string, {id: number, name: string}> = {};
-      
-      if (shop.categories && shop.categories[0] && shop.categories[0].category) {
-        // Если есть только одна категория, преобразуем в массив
-        const categories = Array.isArray(shop.categories[0].category)
-          ? shop.categories[0].category
-          : [shop.categories[0].category];
-        
-        categories.forEach((cat: any) => {
-          if (cat.$ && cat.$.id && cat._) {
-            categoriesMap[cat.$.id] = {
-              id: Number(cat.$.id),
-              name: cat._
-            };
-          }
-        });
-      }
-      
-      // Получаем список товаров
-      const offers = Array.isArray(shop.offers[0].offer)
-        ? shop.offers[0].offer
-        : [shop.offers[0].offer];
-      
-      // Преобразуем каждый товар
-      return offers.map((offer: any, index: number) => {
+    });
+  }
+  
+  // Получаем список товаров
+  const offers = Array.isArray(shop.offers[0].offer)
+    ? shop.offers[0].offer
+    : [shop.offers[0].offer];
+  
+  // Преобразуем каждый товар
+  return offers.map((offer: any, index: number) => {
         const product: ImportProduct = {};
         
         // Получаем название товара из разных возможных полей
@@ -236,16 +255,92 @@ async function parseXmlFile(content: string): Promise<ImportProduct[]> {
         
         return product;
       }).filter(Boolean) as ImportProduct[];
+}
+
+/**
+ * Парсит формат СТАНИКС (прямые offer элементы в корне)
+ */
+function parseStanixFormat(result: any): ImportProduct[] {
+  // Обрабатываем категории
+  const categoriesMap: Record<string, string> = {};
+  
+  if (result.categories && result.categories[0] && result.categories[0].category) {
+    const categories = Array.isArray(result.categories[0].category)
+      ? result.categories[0].category
+      : [result.categories[0].category];
+    
+    categories.forEach((cat: any) => {
+      if (cat.$ && cat.$.id && cat._) {
+        categoriesMap[cat.$.id] = cat._;
+      }
+    });
+  }
+  
+  // Получаем список товаров - offer может быть массивом или одним элементом
+  let offers = [];
+  if (result.offer) {
+    offers = Array.isArray(result.offer) ? result.offer : [result.offer];
+  }
+  
+  // Преобразуем каждый товар
+  return offers.map((offer: any, index: number) => {
+    const product: ImportProduct = {};
+    
+    // Название товара
+    if (offer.name && offer.name[0]) {
+      product.name = offer.name[0];
     }
     
-    // Стандартная обработка XML (не YML формат)
-    else {
-      // Обработка других форматов XML
-      console.log("XML не соответствует формату YML, пробуем другие форматы");
-      throw new Error('Формат XML не распознан. Поддерживается только формат YML.');
+    // Если нет имени, пропускаем этот товар
+    if (!product.name) {
+      console.warn(`Товар #${index} пропущен - отсутствует название`);
+      return null;
     }
-  } catch (error: any) {
-    console.error("Ошибка парсинга XML:", error);
-    throw new Error(`Ошибка формата XML: ${error.message}`);
-  }
+    
+    // SKU/Артикул из атрибута id
+    if (offer.$ && offer.$.id) {
+      product.sku = `STANIX-${offer.$.id}`;
+    }
+    
+    // Цена
+    if (offer.price && offer.price[0]) {
+      const priceValue = parseFloat(offer.price[0]);
+      if (!isNaN(priceValue)) {
+        product.price = priceValue.toString();
+      }
+    }
+    
+    // Описание
+    if (offer.description && offer.description[0]) {
+      product.description = offer.description[0];
+    }
+    
+    // Изображение
+    if (offer.picture && offer.picture[0]) {
+      product.imageUrl = offer.picture[0];
+    }
+    
+    // Категория
+    if (offer.categoryId && offer.categoryId[0] && categoriesMap[offer.categoryId[0]]) {
+      product.categoryName = categoriesMap[offer.categoryId[0]];
+    }
+    
+    // Доступность товара
+    if (offer.$ && offer.$.available) {
+      product.isActive = offer.$.available === 'true';
+    } else {
+      product.isActive = true; // По умолчанию активен
+    }
+    
+    // Генерация slug из названия
+    if (product.name) {
+      product.slug = product.name
+        .toLowerCase()
+        .replace(/[^a-zа-я0-9\s]/gi, '')
+        .replace(/\s+/g, '-')
+        .substring(0, 100);
+    }
+    
+    return product;
+  }).filter(Boolean) as ImportProduct[];
 }
