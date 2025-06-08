@@ -11,9 +11,9 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
-import { hashPassword } from "./auth";
+import { hashPassword } from "./simple-auth";
 import { parseImportFile } from "./utils/file-parser";
-import { setupAuth } from "./auth";
+import { setupSimpleAuth, requireAuth, requireAdmin } from "./simple-auth";
 import multer from "multer";
 import fs from "fs/promises";
 import path from "path";
@@ -75,24 +75,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await ensureTempDir();
   
   // Настройка авторизации
-  setupAuth(app);
+  setupSimpleAuth(app);
 
   // User Routes для администрирования
-  // Middleware для проверки прав администратора
-  const isAdmin = (req: Request, res: Response, next: any) => {
-    if (!req.isAuthenticated() || !req.user) {
-      return res.status(401).json({ message: "Необходима авторизация" });
-    }
-    
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ message: "Недостаточно прав" });
-    }
-    
-    next();
-  };
+  // Middleware для проверки прав администратора заменен на requireAdmin
   
   // Получение списка пользователей (только для админов)
-  app.get("/api/admin/users", isAdmin, async (req, res) => {
+  app.get("/api/admin/users", requireAdmin, async (req, res) => {
     try {
       const params = validateData(userSearchSchema, req.query);
       
@@ -115,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Получение отдельного пользователя по ID
-  app.get("/api/admin/users/:id", isAdmin, async (req, res) => {
+  app.get("/api/admin/users/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const user = await storage.getUser(id);
@@ -133,7 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Создание нового пользователя администратором
-  app.post("/api/admin/users", isAdmin, async (req, res) => {
+  app.post("/api/admin/users", requireAdmin, async (req, res) => {
     try {
       // Особая валидация для админского создания пользователя
       const userData = validateData(insertUserSchema, req.body);
@@ -154,7 +143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Обновление пользователя
-  app.patch("/api/admin/users/:id", isAdmin, async (req, res) => {
+  app.patch("/api/admin/users/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       let updateData = req.body;
@@ -179,7 +168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Изменение статуса пользователя (активация/деактивация)
-  app.patch("/api/admin/users/:id/status", isAdmin, async (req, res) => {
+  app.patch("/api/admin/users/:id/status", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const { isActive } = req.body;
@@ -203,7 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Удаление пользователя
-  app.delete("/api/admin/users/:id", isAdmin, async (req, res) => {
+  app.delete("/api/admin/users/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       
@@ -843,7 +832,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Маршрут для удаления всех товаров с использованием прямого SQL-запроса
-  app.delete("/api/admin/products/delete-all", isAdmin, async (req, res) => {
+  app.delete("/api/admin/products/delete-all", requireAdmin, async (req, res) => {
     try {
       console.log("Запрос на удаление всех товаров (новый метод)");
       
@@ -928,7 +917,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Маршрут для SQL-удаления товара с обновлением категорий
-  app.delete("/api/admin/hard-delete-product/:id", isAdmin, async (req, res) => {
+  app.delete("/api/admin/hard-delete-product/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -1121,7 +1110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Маршруты для настроек
   // Получить настройки магазина
-  app.get("/api/admin/settings/shop", isAdmin, async (req, res) => {
+  app.get("/api/admin/settings/shop", requireAdmin, async (req, res) => {
     try {
       const settings = await storage.getShopSettings();
       res.status(200).json(settings);
@@ -1131,7 +1120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Обновить настройки магазина
-  app.put("/api/admin/settings/shop", isAdmin, async (req, res) => {
+  app.put("/api/admin/settings/shop", requireAdmin, async (req, res) => {
     try {
       // Используем схему с дефолтными значениями для необязательных полей
       const validatedData = shopSettingsSchema.parse(req.body);
@@ -1150,7 +1139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Получить настройки SEO
-  app.get("/api/admin/settings/seo", isAdmin, async (req, res) => {
+  app.get("/api/admin/settings/seo", requireAdmin, async (req, res) => {
     try {
       const settings = await storage.getSeoSettings();
       res.status(200).json(settings);
@@ -1160,7 +1149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Обновить настройки SEO
-  app.put("/api/admin/settings/seo", isAdmin, async (req, res) => {
+  app.put("/api/admin/settings/seo", requireAdmin, async (req, res) => {
     try {
       const settingsData = validateData(seoSettingsSchema, req.body);
       const success = await storage.updateSeoSettings(settingsData);
