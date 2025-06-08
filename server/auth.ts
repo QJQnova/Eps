@@ -167,11 +167,31 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 }
 
 // Admin middleware
-export function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  const user = (req.session as any)?.user;
-  if (!user || user.role !== 'admin') {
-    return res.status(403).json({ message: "Требуются права администратора" });
+export async function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  const sessionUser = (req.session as any)?.user;
+  if (!sessionUser) {
+    return res.status(401).json({ message: "Требуется авторизация" });
   }
-  req.user = user;
-  next();
+
+  try {
+    // Обновляем данные пользователя из базы данных для актуальной роли
+    const currentUser = await storage.getUser(sessionUser.id);
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ message: "Требуются права администратора" });
+    }
+
+    // Обновляем сессию с актуальными данными
+    (req.session as any).user = {
+      id: currentUser.id,
+      username: currentUser.username,
+      email: currentUser.email,
+      role: currentUser.role
+    };
+
+    req.user = currentUser;
+    next();
+  } catch (error) {
+    console.error('Error checking admin rights:', error);
+    return res.status(500).json({ message: "Ошибка проверки прав доступа" });
+  }
 }
