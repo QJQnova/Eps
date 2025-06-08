@@ -5,8 +5,7 @@ import {
   insertUserSchema, insertCategorySchema, insertProductSchema, insertCartItemSchema,
   insertOrderSchema, productSearchSchema, orderSearchSchema, userSearchSchema,
   productInputSchema, orderInputSchema, bulkImportSchema,
-  passwordResetRequestSchema, passwordResetSchema, shopSettingsSchema, seoSettingsSchema,
-  passwordResetSchema, products, cartItems
+  passwordResetRequestSchema, passwordResetSchema, shopSettingsSchema, seoSettingsSchema
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
@@ -515,7 +514,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { token, password } = validateData(passwordResetSchema, req.body);
       
       const resetToken = await storage.getPasswordResetToken(token);
-      if (!resetToken || resetToken.used || resetToken.expiresAt < new Date()) {
+      if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
         return res.status(400).json({ message: "Недействительный или истекший токен" });
       }
 

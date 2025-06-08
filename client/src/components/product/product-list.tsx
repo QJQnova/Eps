@@ -33,12 +33,7 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
   // Fetch products с оптимизированным кешированием
   const { data, isLoading } = useQuery<{
     products: Product[],
-    pagination: {
-      page: number,
-      limit: number,
-      total: number,
-      totalPages: number
-    }
+    total: number
   }>({ 
     queryKey: [`/api/products?${queryParams.toString()}`],
     staleTime: 60000, // 1 минута - разумное время для кеширования списка товаров

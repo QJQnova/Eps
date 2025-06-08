@@ -1,60 +1,43 @@
-import { useState, useEffect } from "react";
-import { z } from "zod";
+import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, ShoppingBag, Users, Wrench } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
-import { useLocation, Link } from "wouter";
+import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
-// Схема для валидации данных формы логина
 const loginSchema = z.object({
-  username: z.string().min(1, { message: "Имя пользователя обязательно" }),
-  password: z.string().min(1, { message: "Пароль обязателен" }),
+  username: z.string().min(1, "Введите логин"),
+  password: z.string().min(1, "Введите пароль"),
 });
 
-// Схема для валидации данных формы регистрации
 const registerSchema = z.object({
-  username: z.string().min(3, { message: "Имя пользователя должно содержать минимум 3 символа" }),
-  email: z.string().email({ message: "Введите корректный email" }),
-  password: z.string().min(6, { message: "Пароль должен содержать минимум 6 символов" }),
-  confirmPassword: z.string().min(1, { message: "Подтвердите пароль" }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Пароли не совпадают",
-  path: ["confirmPassword"],
+  username: z.string().min(3, "Логин должен содержать минимум 3 символа"),
+  email: z.string().email("Неверный формат email"),
+  password: z.string().min(6, "Пароль должен содержать минимум 6 символов"),
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
-type RegisterFormValues = z.infer<typeof registerSchema>;
+type LoginForm = z.infer<typeof loginSchema>;
+type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
-  const [activeTab, setActiveTab] = useState<string>("login");
-  
-  // Проверяем URL-параметры для определения начальной вкладки
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get("tab");
-    if (tab === "register") {
-      setActiveTab("register");
-    }
-  }, []);
-  const [location, setLocation] = useLocation();
-  const { toast } = useToast();
   const { user, loginMutation, registerMutation } = useAuth();
+  const [, setLocation] = useLocation();
+  const [activeTab, setActiveTab] = useState("login");
 
-  // Редирект, если пользователь уже авторизован
-  useEffect(() => {
-    if (user) {
-      setLocation("/");
-    }
-  }, [user, setLocation]);
+  // Redirect if already logged in
+  if (user) {
+    setLocation("/");
+    return null;
+  }
 
-  // Форма для входа
-  const loginForm = useForm<LoginFormValues>({
+  const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       username: "",
@@ -62,83 +45,60 @@ export default function AuthPage() {
     },
   });
 
-  // Форма для регистрации
-  const registerForm = useForm<RegisterFormValues>({
+  const registerForm = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       username: "",
       email: "",
       password: "",
-      confirmPassword: "",
     },
   });
 
-  // Обработчик отправки формы входа
-  const onLoginSubmit = (data: LoginFormValues) => {
+  const onLogin = (data: LoginForm) => {
     loginMutation.mutate(data, {
       onSuccess: () => {
         setLocation("/");
-      }
+      },
     });
   };
 
-  // Обработчик отправки формы регистрации
-  const onRegisterSubmit = (data: RegisterFormValues) => {
-    // Удаляем поле confirmPassword перед отправкой и добавляем роль
-    const { confirmPassword, ...registerData } = data;
-    const fullRegisterData = {
-      ...registerData,
-      role: 'user' as const
-    };
-    
-    registerMutation.mutate(fullRegisterData, {
+  const onRegister = (data: RegisterForm) => {
+    registerMutation.mutate(data, {
       onSuccess: () => {
-        toast({
-          title: "Успешная регистрация",
-          description: `Аккаунт ${registerData.username} успешно создан!`,
-        });
         setLocation("/");
       },
-      onError: (error) => {
-        toast({
-          title: "Ошибка регистрации",
-          description: error.message || "Не удалось зарегистрировать пользователя",
-          variant: "destructive",
-        });
-      }
     });
   };
 
   return (
-    <div className="flex min-h-screen">
-      {/* Форма */}
-      <div className="w-full lg:w-1/2 p-8 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-yellow-50 flex">
+      {/* Left side - Forms */}
+      <div className="flex-1 flex items-center justify-center p-8">
         <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold">Авторизация</CardTitle>
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-red-600">ЭПС</CardTitle>
             <CardDescription>
-              Войдите в свой аккаунт или создайте новый
+              Профессиональные инструменты для мастеров
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-8">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Вход</TabsTrigger>
                 <TabsTrigger value="register">Регистрация</TabsTrigger>
               </TabsList>
 
-              {/* Форма входа */}
-              <TabsContent value="login">
+              <TabsContent value="login" className="space-y-4">
                 <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                  <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
                     <FormField
                       control={loginForm.control}
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Имя пользователя</FormLabel>
+                          <FormLabel>Логин</FormLabel>
                           <FormControl>
-                            <Input placeholder="Введите имя пользователя" {...field} />
+                            <Input placeholder="Введите логин" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -159,32 +119,33 @@ export default function AuthPage() {
                     />
                     <Button 
                       type="submit" 
-                      className="w-full" 
+                      className="w-full bg-red-600 hover:bg-red-700"
                       disabled={loginMutation.isPending}
                     >
-                      {loginMutation.isPending ? "Выполняется вход..." : "Войти"}
+                      {loginMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Вход...
+                        </>
+                      ) : (
+                        "Войти"
+                      )}
                     </Button>
                   </form>
                 </Form>
-                <div className="mt-4 text-center">
-                  <Link href="/password-reset">
-                    <span className="text-sm text-blue-600 hover:underline">Забыли пароль?</span>
-                  </Link>
-                </div>
               </TabsContent>
 
-              {/* Форма регистрации */}
-              <TabsContent value="register">
+              <TabsContent value="register" className="space-y-4">
                 <Form {...registerForm}>
-                  <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                  <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
                     <FormField
                       control={registerForm.control}
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Имя пользователя</FormLabel>
+                          <FormLabel>Логин</FormLabel>
                           <FormControl>
-                            <Input placeholder="Введите имя пользователя" {...field} />
+                            <Input placeholder="Введите логин" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -216,25 +177,19 @@ export default function AuthPage() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={registerForm.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Подтверждение пароля</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="Подтвердите пароль" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                     <Button 
                       type="submit" 
-                      className="w-full" 
+                      className="w-full bg-red-600 hover:bg-red-700"
                       disabled={registerMutation.isPending}
                     >
-                      {registerMutation.isPending ? "Выполняется регистрация..." : "Зарегистрироваться"}
+                      {registerMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Регистрация...
+                        </>
+                      ) : (
+                        "Зарегистрироваться"
+                      )}
                     </Button>
                   </form>
                 </Form>
@@ -244,32 +199,45 @@ export default function AuthPage() {
         </Card>
       </div>
 
-      {/* Информация о компании */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-r from-orange-500 to-red-600 p-12 text-white flex-col justify-center">
-        <div className="max-w-xl">
-          <h1 className="text-4xl font-bold mb-6">ЭПС - ваш надежный партнер в мире инструментов</h1>
-          <p className="text-xl mb-8">
-            Более 15 лет мы предоставляем качественные инструменты и оборудование для профессионалов и любителей.
-          </p>
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-xl font-semibold">Преимущества покупки у нас:</h3>
-              <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>Широкий ассортимент инструментов</li>
-                <li>Гарантия качества на всю продукцию</li>
-                <li>Профессиональные консультации</li>
-                <li>Быстрая доставка по всей России</li>
-                <li>Специальные предложения для постоянных клиентов</li>
-              </ul>
+      {/* Right side - Hero section */}
+      <div className="flex-1 bg-gradient-to-br from-red-600 to-yellow-500 p-8 flex items-center justify-center text-white">
+        <div className="max-w-lg text-center">
+          <div className="mb-8">
+            <div className="flex justify-center space-x-4 mb-6">
+              <div className="bg-white/20 p-4 rounded-full">
+                <Wrench className="h-8 w-8" />
+              </div>
+              <div className="bg-white/20 p-4 rounded-full">
+                <ShoppingBag className="h-8 w-8" />
+              </div>
+              <div className="bg-white/20 p-4 rounded-full">
+                <Users className="h-8 w-8" />
+              </div>
             </div>
-            
-            <div>
-              <h3 className="text-xl font-semibold">Контактная информация:</h3>
-              <p className="mt-2">
-                Адрес: г. Волгоград, ул. им. Маршала Еременко 44<br />
-                Телефон: 8 800 101 38 35<br />
-                Часы работы: пн. - пт.: 8:00 - 18:00
-              </p>
+            <h1 className="text-4xl font-bold mb-4">
+              Добро пожаловать в ЭПС
+            </h1>
+            <p className="text-xl text-white/90 mb-6">
+              Крупнейший поставщик профессионального инструмента в России
+            </p>
+          </div>
+          
+          <div className="space-y-4 text-left">
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+              <span>Более 1000 товаров в каталоге</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+              <span>Быстрая доставка по всей России</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+              <span>Гарантия качества на все товары</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+              <span>Техническая поддержка 24/7</span>
             </div>
           </div>
         </div>

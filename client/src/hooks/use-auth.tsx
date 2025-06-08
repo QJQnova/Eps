@@ -3,44 +3,70 @@ import {
   useQuery,
   useMutation,
   UseMutationResult,
+  useQueryClient,
 } from "@tanstack/react-query";
-import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema";
-import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
+import { apiRequest } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
-type AuthContextType = {
-  user: SelectUser | null;
-  isLoading: boolean;
-  error: Error | null;
-  loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
-  logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
+type User = {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
 };
 
-type LoginData = Pick<InsertUser, "username" | "password">;
+type AuthContextType = {
+  user: User | null;
+  isLoading: boolean;
+  error: Error | null;
+  loginMutation: UseMutationResult<User, Error, LoginData>;
+  logoutMutation: UseMutationResult<void, Error, void>;
+  registerMutation: UseMutationResult<User, Error, RegisterData>;
+};
+
+type LoginData = {
+  username: string;
+  password: string;
+};
+
+type RegisterData = {
+  username: string;
+  email: string;
+  password: string;
+};
 
 export const AuthContext = createContext<AuthContextType | null>(null);
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const {
     data: user,
     error,
     isLoading,
-  } = useQuery<SelectUser | null, Error>({
+  } = useQuery<User | null, Error>({
     queryKey: ["/api/user"],
-    queryFn: getQueryFn({ on401: "returnNull" }),
+    queryFn: async () => {
+      try {
+        const res = await apiRequest("GET", "/api/user");
+        return await res.json();
+      } catch (error: any) {
+        if (error.message.includes('401')) {
+          return null;
+        }
+        throw error;
+      }
+    },
+    retry: false,
   });
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
       const res = await apiRequest("POST", "/api/login", credentials);
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || "Ошибка входа");
-      }
-      return data;
+      return await res.json();
     },
-    onSuccess: (user: SelectUser) => {
+    onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
       toast({
         title: "Успешный вход",
@@ -50,32 +76,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onError: (error: Error) => {
       toast({
         title: "Ошибка входа",
-        description: error.message || "Неверное имя пользователя или пароль",
+        description: error.message,
         variant: "destructive",
       });
     },
   });
 
   const registerMutation = useMutation({
-    mutationFn: async (credentials: InsertUser) => {
+    mutationFn: async (credentials: RegisterData) => {
       const res = await apiRequest("POST", "/api/register", credentials);
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || "Ошибка регистрации");
-      }
-      return data;
+      return await res.json();
     },
-    onSuccess: (user: SelectUser) => {
+    onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
       toast({
-        title: "Успешная регистрация",
-        description: `Аккаунт ${user.username} успешно создан!`,
+        title: "Регистрация успешна",
+        description: `Добро пожаловать, ${user.username}!`,
       });
     },
     onError: (error: Error) => {
       toast({
         title: "Ошибка регистрации",
-        description: error.message || "Не удалось зарегистрировать пользователя",
+        description: error.message,
         variant: "destructive",
       });
     },
@@ -89,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.setQueryData(["/api/user"], null);
       toast({
         title: "Выход выполнен",
-        description: "Вы успешно вышли из аккаунта",
+        description: "До свидания!",
       });
     },
     onError: (error: Error) => {
