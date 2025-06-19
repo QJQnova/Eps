@@ -101,7 +101,7 @@ function parseCsvFile(content: string): ImportProduct[] {
       }
 
       // Обязательные поля с более гибкой проверкой названий колонок
-      const name = record.name || record['название'] || record.Name || record['Название'];
+      const name = record.name || record['название'] || record.Name || record['Название'] || record['Наименование'] || record['наименование'];
       const price = record.price || record['цена'] || record.Price || record['Цена'];
 
       if (!name || !price) {
@@ -117,7 +117,7 @@ function parseCsvFile(content: string): ImportProduct[] {
       const sku = record.sku || record['артикул'] || record.SKU || record['Артикул'];
       const description = record.description || record['описание'] || record.Description || record['Описание'];
       const shortDescription = record.shortDescription || record['короткое описание'] || record['краткое описание'];
-      const imageUrl = record.imageUrl || record['изображение'] || record['картинка'];
+      const imageUrl = record.imageUrl || record['изображение'] || record['картинка'] || record['Изображение'];
       const categoryName = record.categoryName || record['категория'] || record.category || record['Категория'];
       const originalPrice = record.originalPrice || record['старая цена'] || record['originalPrice'];
       const stock = record.stock || record['остаток'] || record['количество'] || record.Stock || record['Остаток'];
