@@ -481,8 +481,15 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
     const headerMap: Record<string, number> = {};
     headers.forEach((header, index) => {
       if (header && typeof header === 'string') {
-        const normalizedHeader = header.toLowerCase().trim();
+        // Убираем переносы строк и нормализуем заголовок
+        const normalizedHeader = header.toLowerCase().trim().replace(/[\r\n]+/g, ' ');
         headerMap[normalizedHeader] = index;
+        
+        // Также добавляем только первую часть заголовка (до первого переноса)
+        const firstPart = header.split(/[\r\n]+/)[0].toLowerCase().trim();
+        if (firstPart && firstPart !== normalizedHeader) {
+          headerMap[firstPart] = index;
+        }
       }
     });
 
@@ -492,9 +499,14 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
     // Функция для получения значения по различным вариантам названий колонок
     const getValue = (row: any[], ...possibleNames: string[]): string => {
       for (const name of possibleNames) {
-        const index = headerMap[name.toLowerCase()];
+        const normalizedName = name.toLowerCase().trim();
+        const index = headerMap[normalizedName];
         if (index !== undefined && row[index] !== undefined && row[index] !== null) {
-          return String(row[index]).trim();
+          const value = String(row[index]).trim();
+          // Пропускаем пустые значения и значения, содержащие только переносы строк
+          if (value && value !== '' && !value.match(/^[\r\n\s]*$/)) {
+            return value;
+          }
         }
       }
       return '';
@@ -513,21 +525,21 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
       const product: ImportProduct = {};
 
       // Название товара (обязательное поле)
-      product.name = getValue(row, 'название', 'наименование', 'name', 'товар', 'продукт', 'item');
+      product.name = getValue(row, 'название', 'наименование', 'name', 'товар', 'продукт', 'item', 'наименование product name', 'product name');
       if (!product.name) {
         console.warn(`Строка ${i + 1}: пропущена - отсутствует название товара`);
         continue;
       }
 
       // SKU/Артикул
-      product.sku = getValue(row, 'sku', 'артикул', 'код', 'id', 'номер', 'article');
+      product.sku = getValue(row, 'sku', 'артикул', 'код', 'id', 'номер', 'article', 'артикул bojet');
       if (!product.sku) {
         // Генерируем SKU если не указан
         product.sku = `XLSX-${Date.now()}-${i}`;
       }
 
       // Цена
-      const priceStr = getValue(row, 'цена', 'стоимость', 'price', 'cost', 'сумма');
+      const priceStr = getValue(row, 'цена', 'стоимость', 'price', 'cost', 'сумма', 'ррц цена retail price', 'retail price', 'ррц цена');
       if (priceStr) {
         const price = parseFloat(priceStr.replace(/[^\d.,]/g, '').replace(',', '.'));
         if (!isNaN(price) && price > 0) {
@@ -555,13 +567,13 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
       product.shortDescription = getValue(row, 'короткое описание', 'краткое описание', 'short description', 'анонс');
 
       // Категория
-      product.categoryName = getValue(row, 'категория', 'category', 'раздел', 'группа');
+      product.categoryName = getValue(row, 'категория', 'category', 'раздел', 'группа', 'категория category', 'группа товара', 'группа товара product group');
 
       // URL изображения
       product.imageUrl = getValue(row, 'изображение', 'картинка', 'фото', 'image', 'picture', 'photo');
 
       // Количество на складе
-      const stockStr = getValue(row, 'количество', 'остаток', 'склад', 'stock', 'quantity');
+      const stockStr = getValue(row, 'количество', 'остаток', 'склад', 'stock', 'quantity', 'остаток, шт');
       if (stockStr) {
         const stock = parseInt(stockStr);
         if (!isNaN(stock)) {
