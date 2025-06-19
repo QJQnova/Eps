@@ -60,9 +60,6 @@ async function ensureTempDir() {
 export async function registerRoutes(app: Express): Promise<Server> {
   await ensureTempDir();
 
-  // Обновляем счетчики категорий при старте
-  await updateCategoryProductCounts();
-
   // Настройка авторизации
   setupAuth(app);
 
@@ -224,9 +221,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const productData = validateData(productInputSchema, req.body);
       const product = await storage.createProduct(productData);
-      // Обновляем счетчик товаров в категории
-      await updateCategoryProductCounts();
-
       res.status(201).json(product);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -242,9 +236,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Товар не найден" });
       }
 
-      // Обновляем счетчик товаров в категории
-      await updateCategoryProductCounts();
-
       res.json(product);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -258,9 +249,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!success) {
         return res.status(404).json({ message: "Товар не найден" });
       }
-
-      // Обновляем счетчик товаров в категории
-      await updateCategoryProductCounts();
 
       res.json({ message: "Товар удален" });
     } catch (error: any) {
@@ -363,9 +351,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('Processed products for import:', processedProducts.length);
       const result = await storage.bulkImportProducts(processedProducts);
-
-      // Обновляем счетчики товаров в категориях после импорта
-      await updateCategoryProductCounts();
 
       res.setHeader('Content-Type', 'application/json');
       res.status(200).json({
@@ -593,20 +578,3 @@ export async function registerRoutes(app: Express): Promise<Server> {
   return httpServer;
 }
 
-// Функция для обновления счетчиков товаров в категориях
-async function updateCategoryProductCounts() {
-  try {
-    const result = await db.execute(`
-      UPDATE categories 
-      SET product_count = (
-        SELECT COUNT(*) 
-        FROM products 
-        WHERE products.category_id = categories.id 
-        AND products.is_active = true
-      )
-    `);
-    console.log('Счетчики категорий обновлены');
-  } catch (error) {
-    console.error('Ошибка при обновлении счетчиков категорий:', error);
-  }
-}

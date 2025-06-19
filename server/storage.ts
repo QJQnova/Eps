@@ -199,24 +199,16 @@ export class DatabaseStorage implements IStorage {
       .where(eq(products.isActive, true))
       .groupBy(products.categoryId);
 
-    console.log('Product counts query result:', productCounts.slice(0, 5));
-
     // Создаем Map для быстрого поиска счетчиков
     const countMap = new Map(
       productCounts.map(pc => [pc.categoryId, Number(pc.count)])
     );
 
-    console.log('Count map:', Array.from(countMap.entries()).slice(0, 5));
-
     // Объединяем данные
-    const result = allCategories.map(category => ({
+    return allCategories.map(category => ({
       ...category,
       productCount: countMap.get(category.id) || 0
     })) as Category[];
-
-    console.log('Final result sample:', result.slice(0, 3));
-    
-    return result;
   }
 
   async getCategoryById(id: number): Promise<Category | undefined> {
