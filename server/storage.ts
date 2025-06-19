@@ -186,27 +186,37 @@ export class DatabaseStorage implements IStorage {
 
   // Category operations
   async getAllCategories(): Promise<Category[]> {
-    const result = await db
+    // Получаем все категории
+    const allCategories = await db.select().from(categories).orderBy(categories.name);
+    
+    // Получаем счетчики товаров для всех категорий одним запросом
+    const productCounts = await db
       .select({
-        id: categories.id,
-        name: categories.name,
-        slug: categories.slug,
-        description: categories.description,
-        icon: categories.icon,
-        productCount: sql<number>`(
-          SELECT COUNT(*)::int 
-          FROM products 
-          WHERE products.category_id = ${categories.id} 
-          AND products.is_active = true
-        )`.as('productCount')
+        categoryId: products.categoryId,
+        count: sql<number>`count(*)`.as('count')
       })
-      .from(categories)
-      .orderBy(categories.name);
+      .from(products)
+      .where(eq(products.isActive, true))
+      .groupBy(products.categoryId);
 
-    return result.map(cat => ({
-      ...cat,
-      productCount: cat.productCount || 0
+    console.log('Product counts query result:', productCounts.slice(0, 5));
+
+    // Создаем Map для быстрого поиска счетчиков
+    const countMap = new Map(
+      productCounts.map(pc => [pc.categoryId, Number(pc.count)])
+    );
+
+    console.log('Count map:', Array.from(countMap.entries()).slice(0, 5));
+
+    // Объединяем данные
+    const result = allCategories.map(category => ({
+      ...category,
+      productCount: countMap.get(category.id) || 0
     })) as Category[];
+
+    console.log('Final result sample:', result.slice(0, 3));
+    
+    return result;
   }
 
   async getCategoryById(id: number): Promise<Category | undefined> {
