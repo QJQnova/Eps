@@ -89,29 +89,51 @@ function parseCsvFile(content: string): ImportProduct[] {
       trim: true
     });
 
-    return records.map((record: any) => {
+    return records.map((record: any, index: number) => {
       // Конвертируем строковые значения в соответствующие типы
       const product: ImportProduct = {};
 
-      // Обязательные поля
-      if (!record.name || !record.price) {
-        throw new Error('Каждый товар должен иметь как минимум название и цену');
+      // Проверяем, что запись не пустая
+      const hasAnyData = Object.values(record).some(value => value && String(value).trim() !== '');
+      if (!hasAnyData) {
+        console.warn(`Строка ${index + 2} пропущена - пустая строка`);
+        return null;
+      }
+
+      // Обязательные поля с более гибкой проверкой названий колонок
+      const name = record.name || record['название'] || record.Name || record['Название'];
+      const price = record.price || record['цена'] || record.Price || record['Цена'];
+
+      if (!name || !price) {
+        console.warn(`Строка ${index + 2} пропущена - отсутствует название или цена`);
+        return null;
       }
 
       // Маппинг полей с преобразованием типов
-      product.name = record.name;
-      product.price = parseFloat(record.price).toString();
+      product.name = name;
+      product.price = parseFloat(price).toString();
 
-      // Опциональные поля
-      if (record.sku) product.sku = record.sku;
-      if (record.description) product.description = record.description;
-      if (record.shortDescription) product.shortDescription = record.shortDescription;
-      if (record.imageUrl) product.imageUrl = record.imageUrl;
+      // Опциональные поля с поддержкой русских заголовков
+      const sku = record.sku || record['артикул'] || record.SKU || record['Артикул'];
+      const description = record.description || record['описание'] || record.Description || record['Описание'];
+      const shortDescription = record.shortDescription || record['короткое описание'] || record['краткое описание'];
+      const imageUrl = record.imageUrl || record['изображение'] || record['картинка'];
+      const categoryName = record.categoryName || record['категория'] || record.category || record['Категория'];
+      const originalPrice = record.originalPrice || record['старая цена'] || record['originalPrice'];
+      const stock = record.stock || record['остаток'] || record['количество'] || record.Stock || record['Остаток'];
+      const isActive = record.isActive || record['активен'] || record['доступен'];
+      const isFeatured = record.isFeatured || record['рекомендуемый'];
+
+      if (sku) product.sku = sku;
+      if (description) product.description = description;
+      if (shortDescription) product.shortDescription = shortDescription;
+      if (imageUrl) product.imageUrl = imageUrl;
+      if (categoryName) product.categoryName = categoryName;
       if (record.categoryId) product.categoryId = parseInt(record.categoryId, 10);
-      if (record.originalPrice) product.originalPrice = parseFloat(record.originalPrice).toString();
-      if (record.stock) product.stock = parseInt(record.stock, 10);
-      if (record.isActive) product.isActive = record.isActive.toLowerCase() === 'true';
-      if (record.isFeatured) product.isFeatured = record.isFeatured.toLowerCase() === 'true';
+      if (originalPrice) product.originalPrice = parseFloat(originalPrice).toString();
+      if (stock) product.stock = parseInt(stock, 10);
+      if (isActive) product.isActive = isActive.toLowerCase() === 'true';
+      if (isFeatured) product.isFeatured = isFeatured.toLowerCase() === 'true';
       if (record.slug) product.slug = record.slug;
       else if (product.name) {
         // Генерация slug из названия
@@ -123,7 +145,7 @@ function parseCsvFile(content: string): ImportProduct[] {
       }
 
       return product;
-    });
+    }).filter(Boolean) as ImportProduct[];
   } catch (error: any) {
     throw new Error(`Некорректный формат CSV: ${error.message}`);
   }
