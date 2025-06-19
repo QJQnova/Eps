@@ -566,8 +566,8 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
       // Короткое описание
       product.shortDescription = getValue(row, 'короткое описание', 'краткое описание', 'short description', 'анонс');
 
-      // Категория
-      product.categoryName = getValue(row, 'категория', 'category', 'раздел', 'группа', 'категория category', 'группа товара', 'группа товара product group');
+      // Категория - приоритет русским названиям
+      product.categoryName = getValue(row, 'категория', 'группа товара', 'category', 'раздел', 'группа', 'категория category', 'группа товара product group', 'product group');
 
       // URL изображения
       product.imageUrl = getValue(row, 'изображение', 'картинка', 'фото', 'image', 'picture', 'photo');

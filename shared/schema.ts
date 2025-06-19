@@ -113,7 +113,9 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
-export type Category = typeof categories.$inferSelect;
+export type Category = typeof categories.$inferSelect & {
+  productCount?: number;
+};
 
 // Базовый тип InsertProduct от схемы
 export type InsertProduct = z.infer<typeof insertProductSchema> & {

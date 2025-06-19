@@ -21,16 +21,16 @@ export default function CategoryCard({ category }: CategoryCardProps) {
   const getIcon = () => {
     return <Bolt className="h-8 w-8" />;
   };
-  
+
   // Определим цвет категории на основе ее названия
   const getCategoryColor = () => {
     const colors = ["eps-orange", "eps-red", "eps-yellow"];
     const index = Math.abs(category.id) % 3; // используем ID для определения цвета
     return colors[index];
   };
-  
+
   const colorClass = getCategoryColor();
-  
+
   return (
     <Link href={`/category/${category.slug}`}>
       <Card className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition duration-200 group border-t-4 border-t-transparent hover:border-t-[color:var(--color-eps-orange)]">

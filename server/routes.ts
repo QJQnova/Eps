@@ -298,6 +298,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           if (existingCategory) {
             categoryId = existingCategory;
+            console.log(`Товар "${product.name}" назначен в существующую категорию: ${categoryName} (ID: ${categoryId})`);
           } else {
             // Create new category with proper slug generation
             let categorySlug = categoryName
@@ -317,6 +318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
             categoryMap.set(categoryName.toLowerCase(), newCategory.id);
             categoryId = newCategory.id;
+            console.log(`Создана новая категория: ${categoryName} (ID: ${categoryId}) для товара "${product.name}"`);
           }
         }
 
