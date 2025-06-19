@@ -191,11 +191,13 @@ export class DatabaseStorage implements IStorage {
         id: categories.id,
         name: categories.name,
         slug: categories.slug,
+        description: categories.description,
+        icon: categories.icon,
         productCount: sql<number>`(
           SELECT COUNT(*)::int 
-          FROM ${products} 
-          WHERE ${products.categoryId} = ${categories.id} 
-          AND ${products.isActive} = true
+          FROM products 
+          WHERE products.category_id = ${categories.id} 
+          AND products.is_active = true
         )`.as('productCount')
       })
       .from(categories)
