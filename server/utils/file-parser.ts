@@ -539,7 +539,7 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
       }
 
       // Цена
-      const priceStr = getValue(row, 'цена', 'стоимость', 'price', 'cost', 'сумма', 'ррц цена retail price', 'retail price', 'ррц цена');
+      const priceStr = getValue(row, 'цена', 'стоимость', 'price', 'cost', 'сумма', 'ррц цена retail price', 'retail price', 'ррц цена', 'розничная цена', 'цена за шт');
       if (priceStr) {
         const price = parseFloat(priceStr.replace(/[^\d.,]/g, '').replace(',', '.'));
         if (!isNaN(price) && price > 0) {
@@ -547,8 +547,10 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
         }
       }
 
+      // Если цена не найдена, пропускаем товар с предупреждением
       if (!product.price) {
-        product.price = '0'; // Устанавливаем минимальную цену
+        console.warn(`Строка ${i + 1}: товар "${product.name}" пропущен - отсутствует валидная цена`);
+        continue;
       }
 
       // Старая цена
@@ -570,7 +572,7 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
       product.categoryName = getValue(row, 'категория', 'группа товара', 'category', 'раздел', 'группа', 'категория category', 'группа товара product group', 'product group');
 
       // URL изображения
-      product.imageUrl = getValue(row, 'изображение', 'картинка', 'фото', 'image', 'picture', 'photo');
+      product.imageUrl = getValue(row, 'изображение', 'картинка', 'фото', 'image', 'picture', 'photo', 'img', 'url изображения', 'ссылка на изображение', 'image_url', 'image url', 'фотография');
 
       // Количество на складе
       const stockStr = getValue(row, 'количество', 'остаток', 'склад', 'stock', 'quantity', 'остаток, шт');
