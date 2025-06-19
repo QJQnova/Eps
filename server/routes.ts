@@ -221,6 +221,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const productData = validateData(productInputSchema, req.body);
       const product = await storage.createProduct(productData);
+      // Обновляем счетчик товаров в категории
+      await updateCategoryProductCounts();
+
       res.status(201).json(product);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -235,6 +238,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!product) {
         return res.status(404).json({ message: "Товар не найден" });
       }
+
+      // Обновляем счетчик товаров в категории
+      await updateCategoryProductCounts();
+
       res.json(product);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -248,6 +255,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!success) {
         return res.status(404).json({ message: "Товар не найден" });
       }
+
+      // Обновляем счетчик товаров в категории
+      await updateCategoryProductCounts();
+
       res.json({ message: "Товар удален" });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -306,12 +317,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               .replace(/[^a-zа-я0-9\s]/gi, '')
               .replace(/\s+/g, '-')
               .substring(0, 50);
-            
+
             // Ensure slug is not empty
             if (!categorySlug || categorySlug === '') {
               categorySlug = `category-${Date.now()}`;
             }
-            
+
             const newCategory = await storage.createCategory({
               name: categoryName,
               slug: categorySlug
@@ -350,12 +361,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Processed products for import:', processedProducts.length);
       const result = await storage.bulkImportProducts(processedProducts);
 
-      // Clean up uploaded file
-      try {
-        await fs.unlink(req.file.path);
-      } catch (error) {
-        console.error('Error deleting uploaded file:', error);
-      }
+      // Обновляем счетчики товаров в категориях после импорта
+      await updateCategoryProductCounts();
 
       res.setHeader('Content-Type', 'application/json');
       res.status(200).json({
@@ -581,4 +588,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   return httpServer;
+}
+
+// Функция для обновления счетчиков товаров в категориях
+async function updateCategoryProductCounts() {
+  try {
+    const result = await db.execute(`
+      UPDATE categories 
+      SET productCount = (
+        SELECT COUNT(*) 
+        FROM products 
+        WHERE products.categoryId = categories.id 
+        AND products.isActive = 1
+      )
+    `);
+    console.log('Счетчики категорий обновлены');
+  } catch (error) {
+    console.error('Ошибка при обновлении счетчиков категорий:', error);
+  }
 }
