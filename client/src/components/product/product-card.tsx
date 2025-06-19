@@ -13,6 +13,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const { addToCart, isLoading } = useCart();
   
   const handleAddToCart = () => {
@@ -35,9 +36,10 @@ export default function ProductCard({ product }: ProductCardProps) {
         <Link href={`/product/${product.slug}`}>
           <div className="bg-gray-50 pt-6 px-6 pb-4 flex items-center justify-center">
             <img 
-              src={product.imageUrl || "https://placehold.co/400x300?text=Нет+изображения"} 
+              src={imageError || !product.imageUrl ? "/placeholder-product.svg" : product.imageUrl} 
               alt={product.name}
               className="w-full h-48 object-contain product-image"
+              onError={() => setImageError(true)}
             />
           </div>
         </Link>
