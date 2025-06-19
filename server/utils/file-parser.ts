@@ -3,7 +3,7 @@ import { parse } from "csv-parse/sync";
 import { InsertProduct } from "@shared/schema";
 import { parseString } from "xml2js";
 import { promisify } from "util";
-import * as XLSX from "xlsx";
+import XLSX from "xlsx";
 
 // Расширенный тип для работы с импортом
 interface ImportProduct extends Partial<InsertProduct> {
@@ -425,8 +425,10 @@ function parseStanixFormat(result: any): ImportProduct[] {
  */
 function parseXlsxFile(filePath: string): ImportProduct[] {
   try {
-    // Читаем файл Excel
-    const workbook = XLSX.readFile(filePath);
+    // Читаем файл Excel как буфер
+    const fs = require('fs');
+    const data = fs.readFileSync(filePath);
+    const workbook = XLSX.read(data, { type: 'buffer' });
     
     // Получаем первый лист
     const sheetName = workbook.SheetNames[0];

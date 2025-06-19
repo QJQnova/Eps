@@ -35,7 +35,7 @@ const validateData = <T>(schema: z.ZodType<T>, data: any): T => {
 const upload = multer({
   dest: 'temp/',
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB
+    fileSize: 50 * 1024 * 1024, // 50MB
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['.csv', '.json', '.xml', '.xlsx', '.xls'];
