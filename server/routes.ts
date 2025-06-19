@@ -598,11 +598,11 @@ async function updateCategoryProductCounts() {
   try {
     const result = await db.execute(`
       UPDATE categories 
-      SET productCount = (
+      SET product_count = (
         SELECT COUNT(*) 
         FROM products 
-        WHERE products.categoryId = categories.id 
-        AND products.isActive = 1
+        WHERE products.category_id = categories.id 
+        AND products.is_active = true
       )
     `);
     console.log('Счетчики категорий обновлены');
