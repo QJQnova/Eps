@@ -871,4 +871,23 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
+// Функция для обновления счетчиков товаров в категориях
+async function updateCategoryProductCounts() {
+  try {
+    // Обновляем счетчики всех категорий
+    const result = await db.execute(sql`
+      UPDATE ${categories} 
+      SET product_count = (
+        SELECT COUNT(*) 
+        FROM ${products} 
+        WHERE ${products.categoryId} = ${categories.id} 
+        AND ${products.isActive} = 1
+      )
+    `);
+    console.log('Счетчики категорий обновлены');
+  } catch (error) {
+    console.error('Ошибка при обновлении счетчиков категорий:', error);
+  }
+}
+
 export const storage = new DatabaseStorage();

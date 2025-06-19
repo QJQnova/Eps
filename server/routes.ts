@@ -60,6 +60,9 @@ async function ensureTempDir() {
 export async function registerRoutes(app: Express): Promise<Server> {
   await ensureTempDir();
 
+  // Обновляем счетчики категорий при старте
+  await updateCategoryProductCounts();
+
   // Настройка авторизации
   setupAuth(app);
 
