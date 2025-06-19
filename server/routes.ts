@@ -38,12 +38,12 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024, // 10MB
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['.csv', '.json', '.xml'];
+    const allowedTypes = ['.csv', '.json', '.xml', '.xlsx', '.xls'];
     const ext = path.extname(file.originalname).toLowerCase();
     if (allowedTypes.includes(ext)) {
       cb(null, true);
     } else {
-      cb(new Error('Поддерживаются только файлы CSV, JSON и XML'));
+      cb(new Error('Поддерживаются только файлы CSV, JSON, XML и XLSX'));
     }
   }
 });

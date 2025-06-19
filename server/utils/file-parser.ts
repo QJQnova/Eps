@@ -15,6 +15,12 @@ interface ImportProduct extends Partial<InsertProduct> {
  */
 export async function parseImportFile(filePath: string, fileExtension: string): Promise<ImportProduct[]> {
   try {
+    // For XLSX/XLS files, we don't read as UTF-8 text
+    if (fileExtension === '.xlsx' || fileExtension === '.xls') {
+      return parseXlsxFile(filePath);
+    }
+    
+    // For text-based files, read as UTF-8
     const fileContent = await fs.readFile(filePath, 'utf8');
     
     if (fileExtension === '.json') {
@@ -28,8 +34,6 @@ export async function parseImportFile(filePath: string, fileExtension: string): 
         console.error("XML parsing error:", xmlError);
         throw new Error(`Ошибка при разборе XML: ${xmlError.message}`);
       }
-    } else if (fileExtension === '.xlsx' || fileExtension === '.xls') {
-      return parseXlsxFile(filePath);
     } else {
       throw new Error('Неподдерживаемый формат файла. Пожалуйста, используйте CSV, JSON, XML или XLSX.');
     }
