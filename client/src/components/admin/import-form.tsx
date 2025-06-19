@@ -15,10 +15,12 @@ import { Progress } from "@/components/ui/progress";
 import { parseFile } from "@/lib/file-parser";
 
 // Sample templates
-const CSV_TEMPLATE = `sku,name,slug,description,shortDescription,price,originalPrice,stock,categoryId,isActive,isFeatured,tag,imageUrl
-TP001,Professional Cordless Drill,professional-cordless-drill,"18V lithium-ion battery drill with 2-speed gearbox","18V drill with LED work light",129.99,159.99,43,1,true,true,Best Seller,https://images.unsplash.com/photo-1572981779307-38b8cabb2407
-TP002,Digital Laser Measure,digital-laser-measure,"Accurate laser measuring up to 50m with area and volume calculations","Precision laser measure",79.99,89.99,21,3,true,false,,https://images.unsplash.com/photo-1586864387789-628af9feed72
-TP003,Premium Safety Glasses,premium-safety-glasses,"Anti-fog scratch-resistant lenses with UV protection","Safety glasses with UV protection",24.99,34.99,76,4,true,false,New,https://images.unsplash.com/photo-1530124566582-a618bc2615dc`;
+const CSV_TEMPLATE = `артикул,название,цена,категория,описание,остаток
+УТ-00004800,"Компрессор СБ4/С-50.АВ365 А",580,"Компрессоры с горизонтальным расположением ресивера","Компрессор с горизонтальным расположением ресивера 50л 2/1 385л/мин 10бар 2.2кВт 220В 63кг 850х450х870мм",5
+УТ-00004799,"Компрессор СБ4/С-50.АВ365",635,"Компрессоры с горизонтальным расположением ресивера","Компрессор с горизонтальным расположением ресивера 50л 2/1 385л/мин 10бар 2.2кВт 380В 70кг 850х450х870мм",5
+SENIX-SLS-FLCR32-100,"Лазерный дальномер FLCR32-100",2990,"Измерительные инструменты","Лазерный дальномер с дальностью измерения до 100 метров",15
+SENIX-Drill-HSS-10,"Сверло по металлу HSS 10.0мм",175,"Сверла и буры","Сверло по металлу HSS диаметром 10.0мм",25
+SENIX-Wrench-14-17,"Ключ комбинированный 14-17мм",350,"Ключи и отвертки","Комбинированный ключ 14-17мм",10`;
 
 const JSON_TEMPLATE = `[
   {
