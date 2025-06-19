@@ -29,8 +29,14 @@ export async function parseFile(file: File): Promise<any[]> {
           } catch (error: any) {
             reject(new Error('Ошибка при разборе XML: ' + (error.message || 'Неизвестная ошибка')));
           }
+        } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+          // Для XLSX файлов отправляем простую заглушку, так как реальная обработка происходит на сервере
+          resolve([{ 
+            name: 'Предпросмотр недоступен для XLSX файлов',
+            description: 'Файл будет обработан при загрузке на сервер'
+          }]);
         } else {
-          reject(new Error('Неподдерживаемый формат файла. Пожалуйста, используйте CSV, JSON или XML.'));
+          reject(new Error('Неподдерживаемый формат файла. Пожалуйста, используйте CSV, JSON, XML или XLSX.'));
         }
       } catch (error) {
         reject(error);
@@ -48,11 +54,21 @@ export async function parseFile(file: File): Promise<any[]> {
       file.type === 'text/csv' || 
       file.type === 'application/xml' || 
       file.type === 'text/xml' ||
-      ['json', 'csv', 'xml'].includes(fileExtension || '')
+      file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      file.type === 'application/vnd.ms-excel' ||
+      ['json', 'csv', 'xml', 'xlsx', 'xls'].includes(fileExtension || '')
     ) {
-      fileReader.readAsText(file);
+      if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+        // Для XLSX файлов вызываем обработчик напрямую
+        resolve([{ 
+          name: 'Предпросмотр недоступен для XLSX файлов',
+          description: 'Файл будет обработан при загрузке на сервер'
+        }]);
+      } else {
+        fileReader.readAsText(file);
+      }
     } else {
-      reject(new Error('Неподдерживаемый тип файла. Пожалуйста, загрузите файл CSV, JSON или XML.'));
+      reject(new Error('Неподдерживаемый тип файла. Пожалуйста, загрузите файл CSV, JSON, XML или XLSX.'));
     }
   });
 }
