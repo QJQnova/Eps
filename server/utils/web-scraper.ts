@@ -64,8 +64,8 @@ export const SUPPLIERS: SupplierConfig[] = [
     name: 'PATRIOT',
     baseUrl: 'https://patriot-garden.ru',
     catalogUrls: [
-      'https://patriot-garden.ru/catalog/instrumenty/svarochnoe-oborudovanie/',
-      'https://patriot-garden.ru/catalog/instrumenty/kompressory/'
+      'https://patriot-garden.ru/catalog/',
+      'https://patriot-garden.ru/'
     ],
     updateInterval: 24,
     isActive: true
@@ -75,8 +75,8 @@ export const SUPPLIERS: SupplierConfig[] = [
     name: 'REDVERG',
     baseUrl: 'https://redverg.ru',
     catalogUrls: [
-      'https://redverg.ru/catalog/svarochnoe-oborudovanie/',
-      'https://redverg.ru/catalog/kompressory/'
+      'https://redverg.ru/catalog/',
+      'https://redverg.ru/'
     ],
     updateInterval: 12,
     isActive: true
@@ -163,7 +163,25 @@ async function scrapePageWithClaude(url: string, supplier: SupplierConfig): Prom
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      throw new Error(`HTTP ошибка: ${response.status} ${response.statusText}`);
+      console.log(`HTTP ошибка ${response.status} для ${url}, попробуем главную страницу`);
+      // Если конкретная страница не найдена, попробуем главную страницу
+      const fallbackResponse = await fetch(supplier.baseUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        },
+        signal: controller.signal
+      });
+      
+      if (!fallbackResponse.ok) {
+        throw new Error(`HTTP ошибка: ${response.status} ${response.statusText}`);
+      }
+      
+      const fallbackHtml = await fallbackResponse.text();
+      const cleanedFallbackHtml = cleanHtmlForAnalysis(fallbackHtml);
+      console.log(`Получен HTML с главной страницы, размер: ${cleanedFallbackHtml.length} символов`);
+      
+      // Анализируем главную страницу с Claude
+      return await analyzeHtmlWithClaude(cleanedFallbackHtml, supplier.baseUrl, supplier);
     }
 
     const html = await response.text();
