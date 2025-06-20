@@ -43,6 +43,7 @@ import SettingsManagement from "@/pages/admin/settings-management";
 import SqlDeletePage from "@/pages/admin/sql-delete";
 import CatalogAdapter from "@/pages/admin/catalog-adapter";
 import WebScraper from "@/pages/admin/web-scraper";
+import MassScraper from "@/pages/admin/mass-scraper";
 
 function Router() {
   const [location] = useLocation();
@@ -85,6 +86,7 @@ function Router() {
           <ProtectedRoute path="/admin/import" component={BulkImport} />
           <ProtectedRoute path="/admin/catalog-adapter" component={CatalogAdapter} />
           <ProtectedRoute path="/admin/web-scraper" component={WebScraper} />
+          <ProtectedRoute path="/admin/mass-scraper" component={MassScraper} />
           <ProtectedRoute path="/admin/categories" component={CategoryManagement} />
           <ProtectedRoute path="/admin/orders" component={OrderManagement} />
           <ProtectedRoute path="/admin/users" component={UserManagement} />

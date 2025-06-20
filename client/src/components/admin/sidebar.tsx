@@ -14,7 +14,8 @@ import {
   X,
   Trash2,
   Bot,
-  Globe
+  Globe,
+  Database
 } from "lucide-react";
 import { useState } from "react";
 
@@ -75,6 +76,11 @@ export default function AdminSidebar() {
       icon: Globe,
       label: "Парсинг поставщиков",
       href: "/admin/web-scraper",
+    },
+    {
+      icon: Database,
+      label: "Массовый парсинг",
+      href: "/admin/mass-scraper",
     },
     {
       icon: Tag,

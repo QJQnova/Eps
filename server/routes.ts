@@ -719,7 +719,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           if (scrapeResult.success && scrapeResult.products.length > 0) {
             // Преобразуем в формат для импорта
-            const productsToImport = scrapeResult.products.map(product => ({
+            const productsToImport = scrapeResult.products.map((product: any) => ({
               name: product.name,
               sku: product.sku,
               slug: product.name.toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-'),
