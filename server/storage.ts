@@ -268,44 +268,44 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchProducts(params: ProductSearchParams): Promise<{ products: Product[], total: number }> {
-    // Строим WHERE условия
-    const whereConditions: any[] = [eq(products.isActive, true)];
+    let baseQuery = db.select().from(products);
+    let countQuery = db.select({ count: sql<number>`count(*)` }).from(products);
+    
+    const conditions: any[] = [eq(products.isActive, true)];
 
-    // Поиск по тексту
-    if (params.query && params.query.trim()) {
-      const searchTerm = params.query.trim();
-      whereConditions.push(
-        or(
-          like(products.name, `%${searchTerm}%`),
-          like(products.description, `%${searchTerm}%`),
-          like(products.sku, `%${searchTerm}%`)
-        )
+    // Текстовый поиск
+    if (params.query?.trim()) {
+      const searchTerm = params.query.trim().toLowerCase();
+      conditions.push(
+        sql`(
+          LOWER(${products.name}) LIKE ${`%${searchTerm}%`} OR 
+          LOWER(${products.description}) LIKE ${`%${searchTerm}%`} OR 
+          LOWER(${products.sku}) LIKE ${`%${searchTerm}%`}
+        )`
       );
     }
 
     // Фильтр по категории
     if (params.categoryId) {
-      whereConditions.push(eq(products.categoryId, params.categoryId));
+      conditions.push(eq(products.categoryId, params.categoryId));
     }
 
-    // Фильтры по цене
+    // Фильтр по цене
     if (params.minPrice !== undefined) {
-      whereConditions.push(gte(sql`CAST(${products.price} AS NUMERIC)`, params.minPrice));
+      conditions.push(sql`CAST(${products.price} AS DECIMAL) >= ${params.minPrice}`);
     }
-
     if (params.maxPrice !== undefined) {
-      whereConditions.push(lte(sql`CAST(${products.price} AS NUMERIC)`, params.maxPrice));
+      conditions.push(sql`CAST(${products.price} AS DECIMAL) <= ${params.maxPrice}`);
     }
 
-    // Основной запрос с условиями
-    let query = db.select().from(products).where(and(...whereConditions));
+    // Применяем условия к запросам
+    const whereClause = and(...conditions);
+    baseQuery = baseQuery.where(whereClause);
+    countQuery = countQuery.where(whereClause);
 
-    // Подсчет общего количества
-    const [countResult] = await db.select({ 
-      count: sql<number>`cast(count(*) as integer)` 
-    }).from(products).where(and(...whereConditions));
-    
-    const total = countResult?.count || 0;
+    // Получаем общее количество
+    const [{ count }] = await countQuery;
+    const total = Number(count) || 0;
 
     // Сортировка
     if (params.sort) {
