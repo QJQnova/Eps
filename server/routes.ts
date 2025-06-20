@@ -373,6 +373,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Claude AI Catalog Adaptation Route
+  router.post("/admin/adapt-catalog", (req, res, next) => {
+    console.log('Claude adapter route hit, checking auth...');
+    requireAdmin(req, res, next);
+  }, (req, res, next) => {
+    console.log('Auth passed, processing catalog upload...');
+    upload.single('file')(req, res, (err) => {
+      if (err) {
+        console.error('Multer error in catalog adapter:', err.message);
+        return res.status(400).json({ message: "Ошибка загрузки файла: " + err.message });
+      }
+      next();
+    });
+  }, async (req, res) => {
+    console.log('Claude adapter request received:', req.file?.originalname);
+    try {
+      if (!req.file) {
+        console.log('No file in catalog adapter request');
+        return res.status(400).json({ 
+          success: false, 
+          message: "Файл не загружен" 
+        });
+      }
+
+      const fileExtension = path.extname(req.file.originalname).toLowerCase();
+      console.log(`Processing file: ${req.file.originalname} with extension: ${fileExtension}`);
+
+      // Use Claude AI to adapt the catalog
+      const result = await adaptCatalogWithClaude(req.file.path, fileExtension);
+
+      // Clean up uploaded file
+      try {
+        await fs.unlink(req.file.path);
+      } catch (cleanupError) {
+        console.error('Error deleting uploaded file after processing:', cleanupError);
+      }
+
+      res.setHeader('Content-Type', 'application/json');
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error('Claude adapter error:', error);
+      // Clean up uploaded file in case of error
+      if (req.file) {
+        try {
+          await fs.unlink(req.file.path);
+        } catch (cleanupError) {
+          console.error('Error deleting uploaded file during cleanup:', cleanupError);
+        }
+      }
+      res.status(500).json({ 
+        success: false, 
+        message: "Ошибка адаптации каталога: " + error.message 
+      });
+    }
+  });
+
   // Cart Routes
   router.get("/cart/:cartId", async (req, res) => {
     try {
