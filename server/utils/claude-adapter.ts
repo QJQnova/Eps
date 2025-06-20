@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { parseImportFile } from './file-parser';
+import { getPlaceholderImageUrl } from './image-generator';
 
 // the newest Anthropic model is "claude-sonnet-4-20250514" which was released May 14, 2025. Use this by default unless user has already selected claude-3-7-sonnet-20250219
 const anthropic = new Anthropic({
@@ -40,34 +41,26 @@ export async function adaptCatalogWithClaude(filePath: string, fileExtension: st
     const sampleData = rawProducts.slice(0, 10); // Берем первые 10 записей как образец
     const dataForAnalysis = JSON.stringify(sampleData, null, 2);
 
-    const prompt = `Ты - эксперт по адаптации каталогов товаров. Проанализируй данные из каталога поставщика и адаптируй их в стандартный формат для интернет-магазина инструментов ЭПС.
+    const prompt = `Адаптируй каталог товаров для интернет-магазина инструментов. Извлекай только ключевую информацию.
 
-ВХОДНЫЕ ДАННЫЕ:
+ДАННЫЕ ПОСТАВЩИКА:
 ${dataForAnalysis}
 
-ЗАДАЧА:
-1. Проанализируй структуру данных
-2. Определи соответствие полей
-3. Адаптируй ВСЕ товары в следующий стандартный формат:
-
-ТРЕБУЕМЫЕ ПОЛЯ:
-- name: Понятное название товара на русском языке
-- sku: Уникальный артикул (если отсутствует - создай на основе имеющихся данных)
-- price: Цена в рублях (только число, без валюты)
-- category: Категория товара (выбери из: Электроинструмент, Ручной инструмент, Садовый инструмент, Сварочные аппараты, Компрессоры, Расходные материалы)
-- description: Описание товара
-- imageUrl: URL изображения (если есть)
+ИЗВЛЕКАЕМЫЕ ПОЛЯ:
+- name: Название товара на русском языке
+- sku: Артикул (используй оригинальный или создай понятный)
+- category: Категория на основе анализа названия (выбери: Электроинструмент, Ручной инструмент, Садовый инструмент, Сварочные аппараты, Компрессоры, Расходные материалы)
+- description: Полное описание с характеристиками
+- imageUrl: Всегда оставляй пустым ""
 
 ПРАВИЛА:
-- Все названия должны быть на русском языке
-- Цены должны быть числовыми значениями без валюты, ТОЛЬКО если цена указана в исходных данных
-- Если цена НЕ указана в исходных данных - оставь поле price пустым или укажи 0
-- Категории должны точно соответствовать указанным выше
-- Артикулы должны быть уникальными
-- Описания должны быть информативными
+1. НАЗВАНИЕ: Переведи на русский, сделай понятным
+2. КАТЕГОРИЯ: Анализируй название и выбери точную категорию
+3. ОПИСАНИЕ: Объедини все технические данные и характеристики
+4. БЕЗ ЦЕН: Цены не обрабатываем
+5. БЕЗ ИЗОБРАЖЕНИЙ: imageUrl всегда пустой
 
-Верни результат в виде JSON массива объектов, где каждый объект содержит все требуемые поля.
-НЕ добавляй никаких комментариев или объяснений - только чистый JSON.`;
+Ответ: JSON массив без комментариев.`;
 
     console.log('Отправляем запрос к Claude API...');
 
@@ -118,10 +111,10 @@ ${dataForAnalysis}
         const adaptedProduct: AdaptedProduct = {
           name: rawProduct.name || 'Неизвестный товар',
           sku: rawProduct.sku || `AUTO-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          price: rawProduct.price || '0', // 0 для товаров без цены
+          price: '0', // Цены не обрабатываем - всегда 0
           category: rawProduct.categoryName || 'Электроинструмент',
           description: rawProduct.description || rawProduct.shortDescription || '',
-          imageUrl: rawProduct.imageUrl || ''
+          imageUrl: getPlaceholderImageUrl(rawProduct.categoryName || 'Электроинструмент', rawProduct.name || 'Неизвестный товар')
         };
         
         adaptedProducts.push(adaptedProduct);
