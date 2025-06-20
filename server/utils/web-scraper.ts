@@ -157,6 +157,105 @@ export const SUPPLIERS: SupplierConfig[] = [
     ],
     updateInterval: 24,
     isActive: true
+  },
+  {
+    id: 'altec',
+    name: 'ALTEC',
+    baseUrl: 'https://altecopt.ru',
+    catalogUrls: [
+      'https://altecopt.ru/',
+      'https://altecopt.ru/catalog/'
+    ],
+    updateInterval: 12,
+    isActive: true
+  },
+  {
+    id: 'oli',
+    name: 'OLI RUSSIA',
+    baseUrl: 'https://olirussia.ru',
+    catalogUrls: [
+      'https://olirussia.ru/',
+      'https://olirussia.ru/catalog/'
+    ],
+    updateInterval: 24,
+    isActive: true
+  },
+  {
+    id: 'rusgeocom',
+    name: 'RUSGEOCOM',
+    baseUrl: 'https://rostov.rusgeocom.ru',
+    catalogUrls: [
+      'https://rostov.rusgeocom.ru/',
+      'https://rostov.rusgeocom.ru/catalog/'
+    ],
+    updateInterval: 12,
+    isActive: true
+  },
+  {
+    id: 'kornor',
+    name: 'KORNOR',
+    baseUrl: 'https://kornor.ru',
+    catalogUrls: [
+      'https://kornor.ru/',
+      'https://kornor.ru/catalog/'
+    ],
+    updateInterval: 24,
+    isActive: true
+  },
+  {
+    id: 'abrasives',
+    name: 'ABRASIVES.RU',
+    baseUrl: 'https://www.abrasives.ru',
+    catalogUrls: [
+      'https://www.abrasives.ru/',
+      'https://www.abrasives.ru/catalog/'
+    ],
+    updateInterval: 12,
+    isActive: true
+  },
+  {
+    id: 'rusklimat',
+    name: 'РУСКЛИМАТ',
+    baseUrl: 'https://www.rusklimat.ru',
+    catalogUrls: [
+      'https://www.rusklimat.ru/',
+      'https://www.rusklimat.ru/catalog/'
+    ],
+    updateInterval: 24,
+    isActive: true
+  },
+  {
+    id: 'champion',
+    name: 'CHAMPION TOOL',
+    baseUrl: 'https://championtool.ru',
+    catalogUrls: [
+      'https://championtool.ru/',
+      'https://championtool.ru/catalog/'
+    ],
+    updateInterval: 12,
+    isActive: true
+  },
+  {
+    id: 'pittools',
+    name: 'PIT TOOLS',
+    baseUrl: 'https://pittools.ru',
+    catalogUrls: [
+      'https://pittools.ru/',
+      'https://pittools.ru/catalog/'
+    ],
+    updateInterval: 24,
+    isActive: true
+  },
+  {
+    id: 'interskol',
+    name: 'ИНТЕРСКОЛ',
+    baseUrl: 'https://shop.interskol.ru',
+    catalogUrls: [
+      'https://shop.interskol.ru/',
+      'https://shop.interskol.ru/catalog/'
+    ],
+    updateInterval: 12,
+    isActive: true
   }
 ];
 
