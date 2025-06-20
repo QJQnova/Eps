@@ -270,93 +270,8 @@ async function scrapePageWithClaude(url: string, supplier: SupplierConfig): Prom
       throw new Error("Получена слишком короткая HTML страница");
     }
 
-    // Используем Claude для анализа HTML и извлечения данных о товарах
-    const prompt = `
-Ты - эксперт по анализу HTML каталогов интернет-магазинов инструментов. Проанализируй HTML код страницы с сайта "${supplier.name}" и извлеки информацию о товарах.
-
-ОБЯЗАТЕЛЬНЫЕ ПОЛЯ для каждого товара:
-1. name - полное название товара
-2. sku - артикул/код товара (ищи в атрибутах data-sku, data-code, data-id, артикул, код, model)
-3. category - категория товара (сварочное оборудование, компрессоры, электроинструмент и т.д.)
-4. description - описание или характеристики товара
-5. imageUrl - URL изображения товара
-
-ВАЖНЫЕ ПРАВИЛА:
-- Артикул (sku) ОБЯЗАТЕЛЕН - если его нет, пропусти товар
-- Ищи товары в блоках с классами product, item, card, goods
-- URL изображений делай полными относительно ${supplier.baseUrl}
-- Если товар не имеет всех обязательных полей - пропусти его
-- Возвращай ТОЛЬКО валидный JSON массив без комментариев
-
-ФОРМАТ ОТВЕТА:
-[
-  {
-    "name": "Название товара",
-    "sku": "артикул",
-    "category": "Категория",
-    "description": "Описание товара",
-    "imageUrl": "полный URL изображения",
-    "sourceUrl": "${url}"
-  }
-]
-
-HTML КОД:
-${cleanedHtml}
-`;
-
-    const claudeResponse = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 4000,
-      messages: [{ role: 'user', content: prompt }],
-    });
-
-    if (!claudeResponse.content || claudeResponse.content.length === 0) {
-      throw new Error("Пустой ответ от Claude API");
-    }
-
-    const content = claudeResponse.content[0];
-    if (content.type !== 'text') {
-      throw new Error("Неожиданный тип ответа от Claude API");
-    }
-
-    const responseText = content.text;
-    console.log(`Ответ Claude получен, размер: ${responseText.length} символов`);
-
-    // Парсим JSON ответ от Claude
-    let products: ScrapedProduct[];
-    try {
-      // Ищем JSON массив в ответе
-      const jsonMatch = responseText.match(/\[[\s\S]*?\]/);
-      if (jsonMatch) {
-        products = JSON.parse(jsonMatch[0]);
-        console.log(`Успешно распарсен JSON с ${products.length} товарами`);
-      } else {
-        console.log("JSON массив не найден в ответе Claude, используем fallback");
-        console.log("Ответ Claude:", responseText.substring(0, 500));
-        // Если Claude не вернул JSON, создаем демо-данные для демонстрации
-        throw new Error("JSON не найден в ответе Claude");
-      }
-    } catch (parseError) {
-      console.error("Ошибка парсинга JSON от Claude:", parseError);
-      console.log("Используем демо-данные для демонстрации системы");
-      throw new Error(`Невозможно распарсить ответ Claude: ${parseError}`);
-    }
-
-    // Обрабатываем и нормализуем данные товаров
-    const processedProducts = products.map(product => ({
-      ...product,
-      price: '0', // B2B - все цены скрыты
-      imageUrl: normalizeImageUrl(product.imageUrl, supplier.baseUrl),
-      sourceUrl: url
-    })).filter(product => 
-      product.name && 
-      product.sku && 
-      product.name.trim().length > 0 && 
-      product.sku.trim().length > 0
-    );
-
-    console.log(`Успешно обработано ${processedProducts.length} товаров из ${products.length} найденных`);
-    return processedProducts;
+    // Анализируем HTML с Claude через новую функцию
+    return await analyzeHtmlWithClaude(cleanedHtml, url, supplier);
 
   } catch (error: any) {
     console.error(`Ошибка парсинга сайта ${url}:`, error);
@@ -372,19 +287,22 @@ ${cleanedHtml}
 }
 
 async function analyzeHtmlWithClaude(cleanedHtml: string, url: string, supplier: SupplierConfig): Promise<ScrapedProduct[]> {
-  const prompt = `Анализируй HTML код российского поставщика инструментов "${supplier.name}" и извлеки товары.
+  // Используем Buffer для безопасной кодировки русского текста
+  const safeHtml = Buffer.from(cleanedHtml, 'utf8').toString('base64');
+  
+  const prompt = `Analyze this Russian tool supplier HTML content (base64 encoded) and extract product information.
 
-ОБЯЗАТЕЛЬНЫЕ ПОЛЯ:
-1. name - название товара
-2. sku - артикул/код товара  
-3. category - категория товара
-4. description - описание товара
-5. imageUrl - URL изображения
+Extract products with these fields:
+1. name - product name in Russian
+2. sku - product code/article 
+3. category - product category
+4. description - product description
+5. imageUrl - image URL
 
-Отвечай ТОЛЬКО JSON массивом:
-[{"name":"Товар","sku":"код","category":"Категория","description":"Описание","imageUrl":"url"}]
+Return ONLY a JSON array format:
+[{"name":"Product Name","sku":"code","category":"Category","description":"Description","imageUrl":"url"}]
 
-HTML: ${cleanedHtml}`;
+Base64 HTML: ${safeHtml}`;
 
   try {
     const response = await anthropic.messages.create({
