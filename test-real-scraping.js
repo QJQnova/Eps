@@ -1,5 +1,5 @@
 // Direct test of Claude-powered web scraping with real Russian suppliers
-const Anthropic = require('@anthropic-ai/sdk');
+import Anthropic from '@anthropic-ai/sdk';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
