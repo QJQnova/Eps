@@ -268,45 +268,44 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchProducts(params: ProductSearchParams): Promise<{ products: Product[], total: number }> {
-    const conditions: any[] = [];
+    // Строим WHERE условия
+    const whereConditions: any[] = [eq(products.isActive, true)];
 
-    // Добавляем базовое условие активности товаров
-    conditions.push(eq(products.isActive, true));
-
-    // Фильтрация по поисковому запросу
-    if (params.query) {
-      conditions.push(
-        sql`(${products.name} ILIKE ${'%' + params.query + '%'} OR ${products.description} ILIKE ${'%' + params.query + '%'})`
+    // Поиск по тексту
+    if (params.query && params.query.trim()) {
+      const searchTerm = params.query.trim();
+      whereConditions.push(
+        or(
+          like(products.name, `%${searchTerm}%`),
+          like(products.description, `%${searchTerm}%`),
+          like(products.sku, `%${searchTerm}%`)
+        )
       );
     }
 
-    // Фильтрация по категории
+    // Фильтр по категории
     if (params.categoryId) {
-      conditions.push(eq(products.categoryId, params.categoryId));
+      whereConditions.push(eq(products.categoryId, params.categoryId));
     }
 
-    // Фильтрация по цене
+    // Фильтры по цене
     if (params.minPrice !== undefined) {
-      conditions.push(sql`CAST(${products.price} AS NUMERIC) >= ${params.minPrice}`);
+      whereConditions.push(gte(sql`CAST(${products.price} AS NUMERIC)`, params.minPrice));
     }
 
     if (params.maxPrice !== undefined) {
-      conditions.push(sql`CAST(${products.price} AS NUMERIC) <= ${params.maxPrice}`);
+      whereConditions.push(lte(sql`CAST(${products.price} AS NUMERIC)`, params.maxPrice));
     }
 
-    // Строим основной запрос с комбинированными условиями
-    let query = db.select().from(products);
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
+    // Основной запрос с условиями
+    let query = db.select().from(products).where(and(...whereConditions));
 
-    // Подсчет общего количества товаров для пагинации
-    let countQuery = db.select({ count: sql<number>`count(*)` }).from(products);
-    if (conditions.length > 0) {
-      countQuery = countQuery.where(and(...conditions));
-    }
-    const countResult = await countQuery;
-    const total = countResult[0]?.count || 0;
+    // Подсчет общего количества
+    const [countResult] = await db.select({ 
+      count: sql<number>`cast(count(*) as integer)` 
+    }).from(products).where(and(...whereConditions));
+    
+    const total = countResult?.count || 0;
 
     // Сортировка
     if (params.sort) {
