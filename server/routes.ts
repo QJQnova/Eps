@@ -189,12 +189,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Product Routes
   router.get("/products", async (req, res) => {
     try {
-      // Используем parse вместо validateData для корректной обработки значений по умолчанию
-      const params = productSearchSchema.parse(req.query);
+      // Прямая обработка параметров без Zod
+      const params = {
+        query: req.query.query as string | undefined,
+        categoryId: req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined,
+        minPrice: req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined,
+        maxPrice: req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined,
+        sort: req.query.sort as any,
+        page: req.query.page ? parseInt(req.query.page as string) : 1,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 12,
+      };
+
       const result = await storage.searchProducts(params);
       res.json(result);
     } catch (error: any) {
-      res.status(400).json({ message: error.message });
+      res.status(500).json({ message: error.message });
     }
   });
 
