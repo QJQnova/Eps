@@ -189,7 +189,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Product Routes
   router.get("/products", async (req, res) => {
     try {
-      const params = validateData(productSearchSchema, req.query);
+      // Используем parse вместо validateData для корректной обработки значений по умолчанию
+      const params = productSearchSchema.parse(req.query);
       const result = await storage.searchProducts(params);
       res.json(result);
     } catch (error: any) {

@@ -157,6 +157,8 @@ export const productSearchSchema = z.object({
   limit: z.coerce.number().default(12),
 });
 
+export type ProductSearchParams = z.infer<typeof productSearchSchema>;
+
 // Создаем более гибкую схему для импорта
 export const bulkImportSchema = z.array(
   z.object({
@@ -181,8 +183,6 @@ export const bulkImportSchema = z.array(
     tag: z.string().optional().nullable(),
   })
 );
-
-export type ProductSearchParams = z.infer<typeof productSearchSchema>;
 
 // Orders Schema
 export const orders = pgTable("orders", {
