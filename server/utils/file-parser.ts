@@ -7,7 +7,20 @@ import { promisify } from "util";
 import XLSX from "xlsx";
 
 // Расширенный тип для работы с импортом
-interface ImportProduct extends Partial<InsertProduct> {
+interface ImportProduct {
+  name?: string;
+  sku?: string;
+  slug?: string;
+  description?: string | null;
+  shortDescription?: string | null;
+  price?: string;
+  originalPrice?: string;
+  imageUrl?: string | null;
+  stock?: number;
+  categoryId?: number;
+  isActive?: boolean;
+  isFeatured?: boolean;
+  tag?: string | null;
   categoryName?: string;
 }
 
@@ -293,8 +306,9 @@ function parseYmlFormat(result: any): ImportProduct[] {
         }
 
         // Цена
-        if (offer.price && offer.price[0]) product.price = parseFloat(offer.price[0]);
-        else if (offer.oldprice && offer.oldprice[0]) product.price = parseFloat(offer.oldprice[0]);
+        if (offer.price && offer.price[0]) product.price = (parseFloat(offer.price[0]) || 0).toString();
+        else if (offer.oldprice && offer.oldprice[0]) product.price = (parseFloat(offer.oldprice[0]) || 0).toString();
+        else product.price = "0";
 
         // Описание
         if (offer.description && offer.description[0]) product.description = offer.description[0];
@@ -408,8 +422,10 @@ function parseStanixFormat(result: any): ImportProduct[] {
     if (offer.price && offer.price[0]) {
       const priceValue = parseFloat(offer.price[0]);
       if (!isNaN(priceValue)) {
-        product.price = priceValue;
+        product.price = priceValue.toString();
       }
+    } else {
+      product.price = "0";
     }
 
     // Описание
