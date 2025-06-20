@@ -448,38 +448,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const result = await scrapeSupplierCatalog(supplierId);
       
-      if (result.success) {
+      if (result.success && result.products && result.products.length > 0) {
         // Импортируем спарсенные товары в базу данных
         const productsToImport = result.products.map(product => ({
           name: product.name,
           sku: product.sku,
           slug: product.name.toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-'),
-          description: product.description,
-          shortDescription: product.description.substring(0, 200),
-          price: '0', // B2B - все цены скрыты
+          description: product.description || `Профессиональный инструмент ${product.name}`,
+          shortDescription: (product.description || product.name).substring(0, 200),
+          price: "0", // B2B - все цены скрыты
           originalPrice: null,
           imageUrl: product.imageUrl,
           stock: null,
-          categoryId: 1, // Временно используем первую категорию
+          categoryId: 46, // Используем категорию "Инструменты"
           isActive: true,
           isFeatured: false,
-          tag: supplierId,
-          categoryName: product.category
+          tag: supplierId
         }));
 
         const importResult = await storage.bulkImportProducts(productsToImport);
         
-        res.json({
+        return res.json({
           success: true,
           scraped: result.products.length,
           imported: importResult.success,
           failed: importResult.failed,
-          products: result.products
+          message: `Успешно импортировано ${importResult.success} товаров от поставщика ${supplierId.toUpperCase()}`
         });
       } else {
-        res.status(400).json({
+        return res.status(400).json({
           success: false,
-          error: result.error
+          error: result.error || "Не удалось получить данные о товарах",
+          message: `Ошибка парсинга каталога поставщика ${supplierId.toUpperCase()}`
         });
       }
     } catch (error: any) {
