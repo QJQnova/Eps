@@ -12,7 +12,8 @@ import {
   LogOut,
   Menu,
   X,
-  Trash2
+  Trash2,
+  Bot
 } from "lucide-react";
 import { useState } from "react";
 
@@ -64,7 +65,11 @@ export default function AdminSidebar() {
       label: "Импорт товаров",
       href: "/admin/import",
     },
-
+    {
+      icon: Bot,
+      label: "Адаптация каталогов",
+      href: "/admin/catalog-adapter",
+    },
     {
       icon: Tag,
       label: "Категории",

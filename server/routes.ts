@@ -10,6 +10,7 @@ import {
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
 import { parseImportFile } from "./utils/file-parser";
+import { adaptCatalogWithClaude } from "./utils/claude-adapter";
 import { setupAuth, requireAuth, requireAdmin } from "./auth";
 import bcrypt from "bcrypt";
 import multer from "multer";
