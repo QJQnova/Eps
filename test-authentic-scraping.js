@@ -1,5 +1,6 @@
 // Comprehensive test of authentic Russian tool supplier scraping
-const https = require('https');
+import https from 'https';
+import { Buffer } from 'buffer';
 
 async function testComprehensiveScrapingSystem() {
   console.log('=== COMPREHENSIVE TEST: Authentic Russian Tool Supplier Scraping ===\n');
