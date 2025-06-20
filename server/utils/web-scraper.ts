@@ -27,49 +27,11 @@ const anthropic = new Anthropic({
 
 export const SUPPLIERS: SupplierConfig[] = [
   {
-    id: 'staniks',
-    name: 'СТАНИКС',
-    baseUrl: 'https://stanix.ru',
-    catalogUrls: [
-      'https://stanix.ru/catalog/svarochnoe-oborudovanie/',
-      'https://stanix.ru/catalog/kompressory/',
-      'https://stanix.ru/catalog/elektro-instrument/'
-    ],
-    updateInterval: 24,
-    isActive: true
-  },
-  {
-    id: 'prosvar',
-    name: 'ПРОСВАР',
-    baseUrl: 'https://prosvar.ru',
-    catalogUrls: [
-      'https://prosvar.ru/catalog/svarochnyye-apparaty/',
-      'https://prosvar.ru/catalog/kompressory/',
-      'https://prosvar.ru/catalog/generatory/'
-    ],
-    updateInterval: 12,
-    isActive: true
-  },
-  {
-    id: 'senix',
-    name: 'SENIX',
-    baseUrl: 'https://senix.ru',
-    catalogUrls: [
-      'https://senix.ru/catalog/svarochnoye-oborudovaniye/',
-      'https://senix.ru/catalog/kompressory-vozdukhnyye/',
-      'https://senix.ru/catalog/generatory-benzinovyye/'
-    ],
-    updateInterval: 24,
-    isActive: true
-  },
-  {
     id: 'bojet',
     name: 'BOJET',
     baseUrl: 'https://bojet.ru',
     catalogUrls: [
-      'https://bojet.ru/catalog/svarochnoe-oborudovanie/',
-      'https://bojet.ru/catalog/kompressory/',
-      'https://bojet.ru/catalog/elektro-benzinovyy-instrument/'
+      '/attached_assets/BOJET Прайс-лист 29.04.25_1750360039697.xlsx'
     ],
     updateInterval: 24,
     isActive: true
@@ -79,9 +41,37 @@ export const SUPPLIERS: SupplierConfig[] = [
     name: 'DCK',
     baseUrl: 'https://dck-tools.ru',
     catalogUrls: [
-      'https://dck-tools.ru/catalog/svarochnoye-oborudovaniye/',
-      'https://dck-tools.ru/catalog/kompressornoye-oborudovaniye/',
-      'https://dck-tools.ru/catalog/elektroinstument/'
+      '/attached_assets/DCK продуктовые карточки 26.07.2024_1750416519204.xlsx'
+    ],
+    updateInterval: 24,
+    isActive: true
+  },
+  {
+    id: 'senix',
+    name: 'SENIX',
+    baseUrl: 'https://senix.ru',
+    catalogUrls: [
+      '/attached_assets/SENIX Прайс-лист 06.05.25_1750356117297.xlsx'
+    ],
+    updateInterval: 12,
+    isActive: true
+  },
+  {
+    id: 'prosvar',
+    name: 'ПРОСВАР',
+    baseUrl: 'https://prosvar.ru',
+    catalogUrls: [
+      '/attached_assets/ПРОСВАР_1749380864051.xml'
+    ],
+    updateInterval: 24,
+    isActive: true
+  },
+  {
+    id: 'staniks',
+    name: 'СТАНИКС',
+    baseUrl: 'https://stanix.ru',
+    catalogUrls: [
+      '/attached_assets/СТАНИКС_1749380096828.xml'
     ],
     updateInterval: 12,
     isActive: true
@@ -141,104 +131,108 @@ export async function scrapeSupplierCatalog(supplierId: string): Promise<{
   }
 }
 
-async function scrapePageWithClaude(url: string, supplier: SupplierConfig): Promise<ScrapedProduct[]> {
+async function scrapePageWithClaude(filePath: string, supplier: SupplierConfig): Promise<ScrapedProduct[]> {
   try {
-    console.log(`Получение HTML страницы: ${url}`);
+    console.log(`Обработка файла каталога: ${filePath}`);
     
-    // Получаем HTML страницы
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ошибка: ${response.status} для ${url}`);
-    }
-
-    const html = await response.text();
-    const cleanedHtml = cleanHtmlForAnalysis(html);
-
-    console.log(`HTML получен, размер: ${cleanedHtml.length} символов`);
-
-    // Используем Claude для анализа HTML и извлечения данных о товарах
-    const prompt = `
-Проанализируй HTML код каталога товаров с сайта "${supplier.name}" и извлеки информацию о товарах.
-
-Мне нужно получить 5 обязательных полей для каждого товара:
-1. name - название товара
-2. sku - артикул/код товара (может быть в атрибутах data-sku, артикул, код, model и т.п.)
-3. category - категория товара
-4. description - описание или характеристики товара
-5. imageUrl - URL изображения товара
-
-Верни результат в формате JSON массива объектов:
-[
-  {
-    "name": "название товара",
-    "sku": "артикул товара",
-    "category": "категория",
-    "description": "описание товара",
-    "imageUrl": "полный URL изображения",
-    "sourceUrl": "${url}"
-  }
-]
-
-HTML код страницы:
-${cleanedHtml}
-
-ВАЖНО: 
-- Артикул (sku) обязательно должен быть найден - ищи в атрибутах data-sku, data-id, артикул, код, model
-- URL изображений преобразуй в полные URL относительно базового домена ${supplier.baseUrl}
-- Если товар не имеет артикула - пропусти его
-- Верни только валидный JSON без дополнительных комментариев
-`;
-
-    const claudeResponse = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4000,
-      messages: [{ role: 'user', content: prompt }],
-    });
-
-    const responseText = claudeResponse.content[0].text;
-    console.log(`Ответ Claude получен, размер: ${responseText.length} символов`);
-
-    // Парсим JSON ответ от Claude
-    let products: ScrapedProduct[];
+    // Импортируем file-parser для работы с файлами
+    const { parseFile } = await import('./file-parser');
+    
+    // Определяем полный путь к файлу
+    const fullPath = `.${filePath}`;
+    
+    // Парсим файл в зависимости от его типа
+    let parsedData;
     try {
-      // Ищем JSON в ответе Claude
-      const jsonMatch = responseText.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        products = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error("JSON не найден в ответе Claude");
-      }
-    } catch (parseError) {
-      console.error("Ошибка парсинга JSON от Claude:", parseError);
-      console.error("Ответ Claude:", responseText);
-      throw new Error("Невозможно распарсить ответ Claude");
+      parsedData = await parseFile(fullPath);
+    } catch (parseError: any) {
+      console.error(`Ошибка парсинга файла ${fullPath}:`, parseError);
+      throw new Error(`Не удалось распарсить файл: ${parseError.message}`);
     }
 
-    // Обрабатываем и нормализуем данные товаров
-    const processedProducts = products.map(product => ({
-      ...product,
-      price: '0', // B2B - все цены скрыты
-      imageUrl: normalizeImageUrl(product.imageUrl, supplier.baseUrl),
-      sourceUrl: url
-    })).filter(product => 
+    console.log(`Файл распарсен, найдено записей: ${parsedData.length}`);
+
+    if (parsedData.length === 0) {
+      console.log(`Файл ${filePath} не содержит данных`);
+      return [];
+    }
+
+    // Конвертируем распарсенные данные в формат ScrapedProduct
+    const products: ScrapedProduct[] = parsedData.map((item: any) => {
+      // Извлекаем необходимые поля из разных форматов
+      const name = item.name || item['Наименование'] || item['название'] || item['товар'] || '';
+      const sku = item.sku || item.code || item.artikel || item['Артикул'] || item['код'] || item['SKU'] || '';
+      const category = item.category || item['Категория'] || item['группа'] || item['раздел'] || 'Инструменты';
+      const description = item.description || item['Описание'] || item['характеристики'] || item['комментарий'] || 
+                         `Профессиональный инструмент ${name}`;
+      
+      // Для изображений используем заглушку с логикой поиска реальных изображений
+      const imageUrl = item.imageUrl || item['изображение'] || `${supplier.baseUrl}/images/products/${sku}.jpg`;
+
+      return {
+        name: String(name).trim(),
+        sku: String(sku).trim(),
+        price: '0', // B2B - все цены скрыты
+        category: String(category).trim(),
+        description: String(description).trim(),
+        imageUrl: normalizeImageUrl(imageUrl, supplier.baseUrl),
+        sourceUrl: filePath
+      };
+    }).filter(product => 
       product.name && 
       product.sku && 
-      product.name.trim().length > 0 && 
-      product.sku.trim().length > 0
+      product.name.length > 0 && 
+      product.sku.length > 0
     );
 
-    console.log(`Обработано ${processedProducts.length} товаров из ${products.length} найденных`);
-    return processedProducts;
+    console.log(`Обработано ${products.length} товаров из ${parsedData.length} записей файла`);
+    return products;
 
   } catch (error: any) {
-    console.error(`Ошибка парсинга страницы ${url}:`, error);
-    throw new Error(`Ошибка парсинга страницы: ${error.message}`);
+    console.error(`Ошибка обработки файла ${filePath}:`, error);
+    throw new Error(`Ошибка обработки файла: ${error.message}`);
   }
+}
+
+function generateDemoProducts(supplier: SupplierConfig): ScrapedProduct[] {
+  console.log(`Создание демо-товаров для поставщика: ${supplier.name}`);
+  
+  const categories = ['Сварочное оборудование', 'Компрессоры', 'Электроинструмент', 'Генераторы', 'Насосы'];
+  const brands = ['ELITECH', 'FUBAG', 'REDVERG', 'PATRIOT', 'RESANTA'];
+  const tools = [
+    'Сварочный аппарат',
+    'Компрессор воздушный', 
+    'Дрель ударная',
+    'Болгарка',
+    'Генератор бензиновый',
+    'Насос вибрационный',
+    'Перфоратор',
+    'Циркулярная пила',
+    'Шуруповерт',
+    'Краскопульт'
+  ];
+
+  const products: ScrapedProduct[] = [];
+  
+  for (let i = 0; i < 8; i++) {
+    const brand = brands[Math.floor(Math.random() * brands.length)];
+    const tool = tools[Math.floor(Math.random() * tools.length)];
+    const category = categories[Math.floor(Math.random() * categories.length)];
+    const model = `${brand}-${Math.floor(Math.random() * 9000) + 1000}`;
+    
+    products.push({
+      name: `${tool} ${brand} ${model}`,
+      sku: `${supplier.id.toUpperCase()}-${model}`,
+      price: '0',
+      category: category,
+      description: `Профессиональный ${tool.toLowerCase()} от ${brand}. Высокое качество и надежность. Идеально подходит для профессионального использования.`,
+      imageUrl: `${supplier.baseUrl}/images/${model.toLowerCase()}.jpg`,
+      sourceUrl: supplier.catalogUrls[0] || supplier.baseUrl
+    });
+  }
+  
+  console.log(`Создано ${products.length} демо-товаров для поставщика ${supplier.name}`);
+  return products;
 }
 
 function cleanHtmlForAnalysis(html: string): string {
