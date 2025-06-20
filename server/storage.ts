@@ -311,31 +311,31 @@ export class DatabaseStorage implements IStorage {
     if (params.sort) {
       switch (params.sort) {
         case "price-low":
-          query = query.orderBy(asc(products.price));
+          baseQuery = baseQuery.orderBy(asc(products.price));
           break;
         case "price-high":
-          query = query.orderBy(desc(products.price));
+          baseQuery = baseQuery.orderBy(desc(products.price));
           break;
         case "newest":
-          query = query.orderBy(desc(products.id));
+          baseQuery = baseQuery.orderBy(desc(products.id));
           break;
         case "popular":
-          query = query.orderBy(desc(products.isFeatured));
-          query = query.orderBy(desc(products.id));
+          baseQuery = baseQuery.orderBy(desc(products.isFeatured));
+          baseQuery = baseQuery.orderBy(desc(products.id));
           break;
         case "featured":
         default:
-          query = query.orderBy(desc(products.isFeatured));
-          query = query.orderBy(asc(products.name));
+          baseQuery = baseQuery.orderBy(desc(products.isFeatured));
+          baseQuery = baseQuery.orderBy(asc(products.name));
           break;
       }
     }
 
     // Пагинация
     const offset = (params.page - 1) * params.limit;
-    query = query.limit(params.limit).offset(offset);
+    baseQuery = baseQuery.limit(params.limit).offset(offset);
 
-    const productsResult = await query;
+    const productsResult = await baseQuery;
 
     return {
       products: productsResult,

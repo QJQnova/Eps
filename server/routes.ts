@@ -190,7 +190,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   router.get("/products", async (req, res) => {
     try {
       // Прямая обработка параметров без Zod
-      const params = {
+      const params: any = {
         query: req.query.query as string | undefined,
         categoryId: req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined,
         minPrice: req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined,
