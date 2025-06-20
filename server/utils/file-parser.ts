@@ -82,11 +82,15 @@ function parseJsonFile(content: string): ImportProduct[] {
  */
 function parseCsvFile(content: string): ImportProduct[] {
   try {
-    // Парсим CSV-файл с заголовками
+    // Парсим CSV-файл с заголовками и правильной обработкой кавычек
     const records = parse(content, {
       columns: true,
       skip_empty_lines: true,
-      trim: true
+      trim: true,
+      quote: '"',
+      escape: '"',
+      relax_quotes: true,
+      relax_column_count: true
     });
 
     return records.map((record: any, index: number) => {
@@ -102,16 +106,16 @@ function parseCsvFile(content: string): ImportProduct[] {
 
       // Обязательные поля с более гибкой проверкой названий колонок
       const name = record.name || record['название'] || record.Name || record['Название'] || record['Наименование'] || record['наименование'];
-      const price = record.price || record['цена'] || record.Price || record['Цена'];
+      const price = record.price || record['цена'] || record.Price || record['Цена'] || '0';
 
-      if (!name || !price) {
-        console.warn(`Строка ${index + 2} пропущена - отсутствует название или цена`);
+      if (!name) {
+        console.warn(`Строка ${index + 2} пропущена - отсутствует название товара`);
         return null;
       }
 
       // Маппинг полей с преобразованием типов
       product.name = name;
-      product.price = parseFloat(price).toString();
+      product.price = (parseFloat(price) || 0).toString();
 
       // Опциональные поля с поддержкой русских заголовков
       const sku = record.sku || record['артикул'] || record.SKU || record['Артикул'];
@@ -130,7 +134,7 @@ function parseCsvFile(content: string): ImportProduct[] {
       if (imageUrl) product.imageUrl = imageUrl;
       if (categoryName) product.categoryName = categoryName;
       if (record.categoryId) product.categoryId = parseInt(record.categoryId, 10);
-      if (originalPrice) product.originalPrice = parseFloat(originalPrice).toString();
+      if (originalPrice) product.originalPrice = (parseFloat(originalPrice) || 0).toString();
       if (stock) product.stock = parseInt(stock, 10);
       if (isActive) product.isActive = isActive.toLowerCase() === 'true';
       if (isFeatured) product.isFeatured = isFeatured.toLowerCase() === 'true';

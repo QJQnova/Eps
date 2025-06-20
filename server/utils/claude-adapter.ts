@@ -121,23 +121,26 @@ ${dataForAnalysis}
       }
     }
 
-    // Генерируем CSV данные
+    // Генерируем упрощенные CSV данные с автоматическими изображениями
     const csvHeader = 'name,sku,price,category,description,imageUrl\n';
     const csvRows = adaptedProducts.map(product => {
       const escapeCsv = (str: string) => {
-        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes(';')) {
           return `"${str.replace(/"/g, '""')}"`;
         }
         return str;
       };
       
+      // Автоматически генерируем заглушку изображения для товара
+      const imageUrl = getPlaceholderImageUrl(product.category, product.name);
+      
       return [
         escapeCsv(product.name),
         escapeCsv(product.sku),
-        product.price,
+        '0', // Всегда 0 для новой системы ценообразования
         escapeCsv(product.category),
         escapeCsv(product.description || ''),
-        product.imageUrl || ''
+        escapeCsv(imageUrl)
       ].join(',');
     });
     
