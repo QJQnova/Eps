@@ -275,13 +275,13 @@ export class DatabaseStorage implements IStorage {
 
     // Текстовый поиск
     if (params.query?.trim()) {
-      const searchTerm = params.query.trim().toLowerCase();
+      const searchTerm = `%${params.query.trim()}%`;
       conditions.push(
-        sql`(
-          LOWER(${products.name}) LIKE ${`%${searchTerm}%`} OR 
-          LOWER(${products.description}) LIKE ${`%${searchTerm}%`} OR 
-          LOWER(${products.sku}) LIKE ${`%${searchTerm}%`}
-        )`
+        or(
+          sql`${products.name} ILIKE ${searchTerm}`,
+          sql`${products.description} ILIKE ${searchTerm}`,
+          sql`${products.sku} ILIKE ${searchTerm}`
+        )
       );
     }
 
