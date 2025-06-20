@@ -270,34 +270,43 @@ export class DatabaseStorage implements IStorage {
   async searchProducts(params: ProductSearchParams): Promise<{ products: Product[], total: number }> {
     const conditions: any[] = [];
 
-    // Базовый запрос для поиска товаров
-    let query = db.select().from(products);
+    // Добавляем базовое условие активности товаров
+    conditions.push(eq(products.isActive, true));
 
     // Фильтрация по поисковому запросу
     if (params.query) {
-      query = query.where(
+      conditions.push(
         sql`(${products.name} ILIKE ${'%' + params.query + '%'} OR ${products.description} ILIKE ${'%' + params.query + '%'})`
       );
     }
 
     // Фильтрация по категории
     if (params.categoryId) {
-      query = query.where(eq(products.categoryId, params.categoryId));
+      conditions.push(eq(products.categoryId, params.categoryId));
     }
 
     // Фильтрация по цене
     if (params.minPrice !== undefined) {
-      query = query.where(sql`${products.price} >= ${params.minPrice.toString()}`);
+      conditions.push(sql`CAST(${products.price} AS NUMERIC) >= ${params.minPrice}`);
     }
 
     if (params.maxPrice !== undefined) {
-      query = query.where(sql`${products.price} <= ${params.maxPrice.toString()}`);
+      conditions.push(sql`CAST(${products.price} AS NUMERIC) <= ${params.maxPrice}`);
+    }
+
+    // Строим основной запрос с комбинированными условиями
+    let query = db.select().from(products);
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
     }
 
     // Подсчет общего количества товаров для пагинации
-    const countQuery = sql`SELECT COUNT(*) FROM (${query}) AS count_query`;
-    const countResult = await db.execute(countQuery);
-    const total = parseInt(countResult.rows[0]?.count || '0');
+    let countQuery = db.select({ count: sql<number>`count(*)` }).from(products);
+    if (conditions.length > 0) {
+      countQuery = countQuery.where(and(...conditions));
+    }
+    const countResult = await countQuery;
+    const total = countResult[0]?.count || 0;
 
     // Сортировка
     if (params.sort) {
