@@ -41,8 +41,18 @@ export default function CatalogAdapter() {
       const formData = new FormData();
       formData.append("file", file);
       
-      const response = await apiRequest("POST", "/api/admin/adapt-catalog", formData);
-      return response;
+      const response = await fetch("/api/admin/adapt-catalog", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Ошибка адаптации");
+      }
+      
+      return await response.json();
     },
     onSuccess: (data: AdapterResponse) => {
       if (data.success && data.products) {
@@ -119,19 +129,8 @@ export default function CatalogAdapter() {
       return;
     }
 
-    setProgress(10);
+    setProgress(0);
     adaptCatalogMutation.mutate(selectedFile);
-    
-    // Симуляция прогресса
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 90) {
-          clearInterval(interval);
-          return prev;
-        }
-        return prev + 10;
-      });
-    }, 1000);
   };
 
   const handleDownloadCsv = () => {
@@ -208,10 +207,10 @@ export default function CatalogAdapter() {
                     )}
                   </div>
 
-                  {progress > 0 && progress < 100 && (
+                  {adaptCatalogMutation.isPending && (
                     <div className="space-y-2">
                       <Label>Прогресс обработки</Label>
-                      <Progress value={progress} className="w-full" />
+                      <Progress value={75} className="w-full" />
                       <p className="text-sm text-gray-600">
                         Claude AI анализирует структуру каталога...
                       </p>
