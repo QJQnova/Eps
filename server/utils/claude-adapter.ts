@@ -60,8 +60,8 @@ ${dataForAnalysis}
 
 ПРАВИЛА:
 - Все названия должны быть на русском языке
-- Цены должны быть числовыми значениями без валюты
-- Если нет цены - поставь 1
+- Цены должны быть числовыми значениями без валюты, ТОЛЬКО если цена указана в исходных данных
+- Если цена НЕ указана в исходных данных - оставь поле price пустым или укажи 0
 - Категории должны точно соответствовать указанным выше
 - Артикулы должны быть уникальными
 - Описания должны быть информативными
@@ -118,8 +118,8 @@ ${dataForAnalysis}
         const adaptedProduct: AdaptedProduct = {
           name: rawProduct.name || 'Неизвестный товар',
           sku: rawProduct.sku || `AUTO-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          price: rawProduct.price || '1',
-          category: rawProduct.categoryName || 'Инструменты',
+          price: rawProduct.price || '0', // 0 для товаров без цены
+          category: rawProduct.categoryName || 'Электроинструмент',
           description: rawProduct.description || rawProduct.shortDescription || '',
           imageUrl: rawProduct.imageUrl || ''
         };
