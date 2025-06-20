@@ -11,6 +11,7 @@ import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
 import { parseImportFile } from "./utils/file-parser";
 import { adaptCatalogWithClaude } from "./utils/claude-adapter";
+import { scrapeSupplierCatalog, SUPPLIERS } from "./utils/web-scraper";
 import { setupAuth, requireAuth, requireAdmin } from "./auth";
 import bcrypt from "bcrypt";
 import multer from "multer";
@@ -695,6 +696,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Пароль успешно изменен" });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Массовый парсинг всех поставщиков
+  router.post("/admin/mass-scrape-import", requireAdmin, async (req, res) => {
+    try {
+      console.log('Запуск массового парсинга всех поставщиков...');
+      
+      let totalImported = 0;
+      let totalFailed = 0;
+      const results = [];
+      
+      // Получаем активных поставщиков
+      const activeSuppliers = SUPPLIERS.filter((s: any) => s.isActive);
+      
+      for (const supplier of activeSuppliers) {
+        try {
+          console.log(`Парсинг поставщика: ${supplier.name}`);
+          
+          const scrapeResult = await scrapeSupplierCatalog(supplier.id);
+          
+          if (scrapeResult.success && scrapeResult.products.length > 0) {
+            // Преобразуем в формат для импорта
+            const productsToImport = scrapeResult.products.map(product => ({
+              name: product.name,
+              sku: product.sku,
+              slug: product.name.toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-'),
+              description: product.description || `Профессиональный инструмент ${product.name}`,
+              shortDescription: (product.description || product.name).substring(0, 200),
+              price: "0", // B2B - все цены скрыты
+              originalPrice: null,
+              imageUrl: product.imageUrl || '',
+              stock: null,
+              categoryId: 46, // Категория "Инструменты"
+              isActive: true,
+              isFeatured: false,
+              tag: supplier.id
+            }));
+            
+            // Импортируем продукты
+            const importResult = await storage.bulkImportProducts(productsToImport);
+            
+            totalImported += importResult.success;
+            totalFailed += importResult.failed;
+            
+            results.push({
+              supplier: supplier.name,
+              scraped: scrapeResult.products.length,
+              imported: importResult.success,
+              failed: importResult.failed
+            });
+            
+            console.log(`${supplier.name}: извлечено ${scrapeResult.products.length}, импортировано ${importResult.success}`);
+          } else {
+            results.push({
+              supplier: supplier.name,
+              scraped: 0,
+              imported: 0,
+              failed: 0,
+              error: scrapeResult.error || 'Нет продуктов'
+            });
+          }
+          
+          // Задержка между поставщиками
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+        } catch (error: any) {
+          console.error(`Ошибка парсинга ${supplier.name}:`, error);
+          results.push({
+            supplier: supplier.name,
+            scraped: 0,
+            imported: 0,
+            failed: 0,
+            error: error.message
+          });
+        }
+      }
+      
+      res.json({
+        message: `Массовый импорт завершен. Импортировано: ${totalImported}, ошибок: ${totalFailed}`,
+        totalImported,
+        totalFailed,
+        suppliersProcessed: activeSuppliers.length,
+        results
+      });
+      
+    } catch (error: any) {
+      console.error("Ошибка массового парсинга:", error);
+      res.status(500).json({ 
+        message: "Ошибка массового парсинга", 
+        error: error.message 
+      });
     }
   });
 
