@@ -371,6 +371,67 @@ ${cleanedHtml}
   }
 }
 
+async function analyzeHtmlWithClaude(cleanedHtml: string, url: string, supplier: SupplierConfig): Promise<ScrapedProduct[]> {
+  const prompt = `Анализируй HTML код российского поставщика инструментов "${supplier.name}" и извлеки товары.
+
+ОБЯЗАТЕЛЬНЫЕ ПОЛЯ:
+1. name - название товара
+2. sku - артикул/код товара  
+3. category - категория товара
+4. description - описание товара
+5. imageUrl - URL изображения
+
+Отвечай ТОЛЬКО JSON массивом:
+[{"name":"Товар","sku":"код","category":"Категория","description":"Описание","imageUrl":"url"}]
+
+HTML: ${cleanedHtml}`;
+
+  try {
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514', // the newest Anthropic model is "claude-sonnet-4-20250514" which was released May 14, 2025. Use this by default unless user has already selected claude-3-7-sonnet-20250219
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: prompt }]
+    });
+
+    const content = response.content[0];
+    if (content.type !== 'text') {
+      throw new Error("Неожиданный тип ответа от Claude");
+    }
+
+    const responseText = content.text;
+    console.log(`Claude ответ получен, размер: ${responseText.length} символов`);
+
+    // Извлекаем JSON из ответа
+    const jsonMatch = responseText.match(/\[[\s\S]*?\]/);
+    if (!jsonMatch) {
+      console.log("JSON не найден в ответе Claude:", responseText.substring(0, 200));
+      throw new Error("JSON массив не найден в ответе Claude");
+    }
+
+    const products = JSON.parse(jsonMatch[0]);
+    console.log(`Успешно извлечено ${products.length} товаров`);
+
+    // Обрабатываем продукты
+    return products.map((product: any) => ({
+      name: product.name || '',
+      sku: product.sku || '',
+      category: product.category || 'Инструменты',
+      description: product.description || '',
+      imageUrl: normalizeImageUrl(product.imageUrl, supplier.baseUrl),
+      sourceUrl: url,
+      price: '0' // B2B - цены скрыты
+    })).filter((product: any) => 
+      product.name && product.sku && 
+      product.name.trim().length > 0 && 
+      product.sku.trim().length > 0
+    );
+
+  } catch (error: any) {
+    console.error("Ошибка анализа с Claude:", error.message);
+    throw error;
+  }
+}
+
 function generateDemoProducts(supplier: SupplierConfig): ScrapedProduct[] {
   console.log(`Создание демо-товаров для поставщика: ${supplier.name}`);
   
@@ -421,29 +482,43 @@ function cleanHtmlForAnalysis(html: string): string {
     .replace(/\s+/g, ' ')
     .trim();
 
-  // Ограничиваем размер для Claude (максимум ~50000 символов)
-  if (cleaned.length > 50000) {
+  // Очищаем проблемные символы для JSON
+  cleaned = cleaned
+    .replace(/[\x00-\x1F\x7F-\x9F]/g, '') // Удаляем управляющие символы
+    .replace(/"/g, "'") // Заменяем двойные кавычки на одинарные
+    .replace(/\\/g, '/') // Заменяем обратные слеши
+    .replace(/\n/g, ' ') // Убираем переносы строк
+    .replace(/\r/g, ' ') // Убираем возврат каретки
+    .replace(/\t/g, ' '); // Убираем табы
+
+  // Ограничиваем размер для Claude (максимум ~15000 символов для стабильности JSON)
+  if (cleaned.length > 15000) {
     // Ищем секцию с товарами
     const productSections = [
       /<div[^>]*class[^>]*catalog[^>]*>[\s\S]*?<\/div>/gi,
       /<div[^>]*class[^>]*product[^>]*>[\s\S]*?<\/div>/gi,
       /<section[^>]*class[^>]*catalog[^>]*>[\s\S]*?<\/section>/gi,
-      /<ul[^>]*class[^>]*product[^>]*>[\s\S]*?<\/ul>/gi
+      /<ul[^>]*class[^>]*product[^>]*>[\s\S]*?<\/ul>/gi,
+      /<div[^>]*class[^>]*item[^>]*>[\s\S]*?<\/div>/gi,
+      /<article[^>]*>[\s\S]*?<\/article>/gi
     ];
 
     for (const regex of productSections) {
       const matches = cleaned.match(regex);
       if (matches && matches.length > 0) {
-        cleaned = matches.join('\n');
+        cleaned = matches.slice(0, 5).join(' '); // Берем первые 5 элементов
         break;
       }
     }
 
     // Если все еще слишком большой, обрезаем
-    if (cleaned.length > 50000) {
-      cleaned = cleaned.substring(0, 50000) + '...';
+    if (cleaned.length > 15000) {
+      cleaned = cleaned.substring(0, 15000);
     }
   }
+
+  // Финальная очистка для JSON безопасности
+  cleaned = cleaned.replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
 
   return cleaned;
 }
