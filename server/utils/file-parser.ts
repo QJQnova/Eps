@@ -521,9 +521,9 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
     console.log('Карта заголовков:', headerMap);
     console.log('Общее количество строк в файле:', jsonData.length);
     
-    // Показываем первые несколько строк данных для диагностики
-    console.log('Первые 3 строки данных:');
-    for (let i = headerRowIndex + 1; i < Math.min(headerRowIndex + 4, jsonData.length); i++) {
+    // Показываем все строки данных для диагностики
+    console.log('Все строки данных:');
+    for (let i = headerRowIndex + 1; i < jsonData.length; i++) {
       console.log(`Строка ${i + 1}:`, jsonData[i]);
     }
 
@@ -550,6 +550,7 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
       const row = jsonData[i];
 
       if (!row || row.length === 0 || row.every(cell => !cell || String(cell).trim() === '')) {
+        console.log(`Строка ${i + 1}: пропущена - пустая строка`);
         continue; // Пропускаем пустые строки
       }
 
@@ -574,9 +575,11 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
       }
       
       if (!product.name) {
-        console.warn(`Строка ${i + 1}: пропущена - отсутствует название товара`);
+        console.warn(`Строка ${i + 1}: пропущена - отсутствует название товара. Содержимое строки:`, row);
         continue;
       }
+      
+      console.log(`Строка ${i + 1}: обрабатывается товар "${product.name}"`);
 
       // SKU/Артикул
       product.sku = getValue(row, 'sku', 'артикул', 'код', 'id', 'номер', 'article', 'артикул bojet');
@@ -689,6 +692,9 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
     }
 
     console.log(`XLSX обработано товаров: ${products.length}`);
+    console.log(`Ожидалось строк данных: ${jsonData.length - headerRowIndex - 1}`);
+    console.log(`Фактически обработано товаров: ${products.length}`);
+    
     return products;
 
   } catch (error: any) {
