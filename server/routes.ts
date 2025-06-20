@@ -718,21 +718,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const scrapeResult = await scrapeSupplierCatalog(supplier.id);
           
           if (scrapeResult.success && scrapeResult.products.length > 0) {
-            // Преобразуем в формат для импорта
+            // Преобразуем в формат для импорта с полной информацией
             const productsToImport = scrapeResult.products.map((product: any) => ({
               name: product.name,
               sku: product.sku,
               slug: product.name.toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-'),
               description: product.description || `Профессиональный инструмент ${product.name}`,
-              shortDescription: (product.description || product.name).substring(0, 200),
-              price: "0", // B2B - все цены скрыты
-              originalPrice: null,
+              shortDescription: product.shortDescription || (product.description || product.name).substring(0, 200),
+              price: product.price && product.price !== 'По запросу' ? product.price : "0",
+              originalPrice: product.originalPrice || null,
               imageUrl: product.imageUrl || '',
-              stock: null,
+              stock: product.stock || null,
               categoryId: 46, // Категория "Инструменты"
               isActive: true,
               isFeatured: false,
-              tag: supplier.id
+              tag: `${supplier.id}|brand:${product.brand || 'unknown'}|model:${product.model || 'unknown'}|warranty:${product.warranty || 'standard'}|availability:${product.availability || 'unknown'}${product.specifications ? '|specs:' + product.specifications.substring(0, 100) : ''}${product.features ? '|features:' + product.features.join(',') : ''}`
             }));
             
             // Импортируем продукты

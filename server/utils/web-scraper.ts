@@ -4,10 +4,21 @@ interface ScrapedProduct {
   name: string;
   sku: string;
   price: string;
+  originalPrice?: string;
   category: string;
   description: string;
+  shortDescription?: string;
+  specifications?: string;
   imageUrl: string;
+  imageUrls?: string[];
+  brand?: string;
+  model?: string;
+  warranty?: string;
+  availability?: string;
+  stock?: number;
   sourceUrl: string;
+  features?: string[];
+  technicalSpecs?: Record<string, string>;
 }
 
 interface SupplierConfig {
@@ -389,17 +400,49 @@ async function analyzeHtmlWithClaude(cleanedHtml: string, url: string, supplier:
   // Используем Buffer для безопасной кодировки русского текста
   const safeHtml = Buffer.from(cleanedHtml, 'utf8').toString('base64');
   
-  const prompt = `Analyze this Russian tool supplier HTML content (base64 encoded) and extract product information.
+  const prompt = `Analyze this Russian tool supplier HTML content (base64 encoded) and extract ALL AVAILABLE product information.
 
-Extract products with these fields:
-1. name - product name in Russian
-2. sku - product code/article 
-3. category - product category
-4. description - product description
-5. imageUrl - image URL
+Extract products with MAXIMUM information for each:
 
-Return ONLY a JSON array format:
-[{"name":"Product Name","sku":"code","category":"Category","description":"Description","imageUrl":"url"}]
+REQUIRED FIELDS:
+1. name - full product name in Russian
+2. sku - product code/article (mandatory)
+3. price - price in rubles or "По запросу"
+4. category - product category
+5. description - full product description
+6. imageUrl - main product image
+
+OPTIONAL FIELDS (extract if available):
+7. originalPrice - old price (if on sale)
+8. shortDescription - brief description
+9. specifications - technical specifications
+10. imageUrls - all product images (array)
+11. brand - manufacturer/brand
+12. model - product model
+13. warranty - warranty period
+14. availability - stock status ("В наличии", "Под заказ", etc)
+15. stock - quantity available (number)
+16. features - product features/benefits (array)
+
+Return ONLY a JSON array with maximum available data:
+[{
+  "name":"Full Product Name",
+  "sku":"product-code",
+  "price":"15999",
+  "originalPrice":"18999",
+  "category":"Category",
+  "description":"Full description",
+  "shortDescription":"Brief description",
+  "specifications":"Technical specs",
+  "imageUrl":"main-image-url",
+  "imageUrls":["image1","image2"],
+  "brand":"Brand",
+  "model":"Model",
+  "warranty":"2 года",
+  "availability":"В наличии",
+  "stock":15,
+  "features":["feature1","feature2"]
+}]
 
 Base64 HTML: ${safeHtml}`;
 
