@@ -452,16 +452,33 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
     const data = readFileSync(filePath);
     const workbook = XLSX.read(data, { type: 'buffer' });
 
-    // Получаем первый лист
-    const sheetName = workbook.SheetNames[0];
-    if (!sheetName) {
-      throw new Error('XLSX файл не содержит листов');
+    // Проверяем все листы и выбираем тот, который содержит больше всего данных
+    console.log('Доступные листы в файле:', workbook.SheetNames);
+    
+    let bestSheet = null;
+    let maxRows = 0;
+    let bestSheetName = '';
+    
+    for (const sheetName of workbook.SheetNames) {
+      const worksheet = workbook.Sheets[sheetName];
+      if (worksheet) {
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+        console.log(`Лист "${sheetName}": ${jsonData.length} строк`);
+        
+        if (jsonData.length > maxRows) {
+          maxRows = jsonData.length;
+          bestSheet = worksheet;
+          bestSheetName = sheetName;
+        }
+      }
     }
-
-    const worksheet = workbook.Sheets[sheetName];
-    if (!worksheet) {
-      throw new Error('Не удалось прочитать первый лист XLSX файла');
+    
+    if (!bestSheet) {
+      throw new Error('XLSX файл не содержит данных ни на одном листе');
     }
+    
+    console.log(`Выбран лист "${bestSheetName}" с ${maxRows} строками`);
+    const worksheet = bestSheet;
 
     // Конвертируем в JSON
     const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
@@ -474,11 +491,12 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
       throw new Error('XLSX файл должен содержать заголовки и хотя бы одну строку данных');
     }
 
-    // Ищем строку с заголовками - может быть не первая строка
+    // Ищем строку с заголовками - может быть в любом месте файла
     let headerRowIndex = -1;
     let headers: string[] = [];
     
-    for (let i = 0; i < Math.min(10, jsonData.length); i++) {
+    // Расширяем поиск заголовков до первых 50 строк
+    for (let i = 0; i < Math.min(50, jsonData.length); i++) {
       const row = jsonData[i] as string[];
       if (row && row.length > 0) {
         // Проверяем если строка содержит типичные заголовки
@@ -486,10 +504,22 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
         if (rowStr.includes('название') || rowStr.includes('наименование') || 
             rowStr.includes('цена') || rowStr.includes('артикул') ||
             rowStr.includes('товар') || rowStr.includes('продукт') ||
-            rowStr.includes('name') || rowStr.includes('price')) {
-          headerRowIndex = i;
-          headers = row;
-          break;
+            rowStr.includes('name') || rowStr.includes('price') ||
+            rowStr.includes('sku') || rowStr.includes('код') ||
+            // Добавляем специфичные для DCK заголовки
+            rowStr.includes('модель') || rowStr.includes('model') ||
+            rowStr.includes('категория') || rowStr.includes('category') ||
+            // Ищем строки с множественными заголовками
+            (row.filter(cell => cell && String(cell).trim().length > 0).length >= 3)) {
+          
+          // Дополнительная проверка - строка должна содержать минимум 3 непустых ячейки
+          const nonEmptyCells = row.filter(cell => cell && String(cell).trim().length > 0);
+          if (nonEmptyCells.length >= 3) {
+            headerRowIndex = i;
+            headers = row;
+            console.log(`Найдены заголовки в строке ${i + 1}:`, headers);
+            break;
+          }
         }
       }
     }
@@ -520,11 +550,19 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
     console.log('XLSX заголовки (строка', headerRowIndex + 1, '):', headers);
     console.log('Карта заголовков:', headerMap);
     console.log('Общее количество строк в файле:', jsonData.length);
+    console.log('Строк данных для обработки:', jsonData.length - headerRowIndex - 1);
     
-    // Показываем все строки данных для диагностики
-    console.log('Все строки данных:');
-    for (let i = headerRowIndex + 1; i < jsonData.length; i++) {
+    // Показываем первые и последние несколько строк для диагностики
+    console.log('Первые 5 строк данных:');
+    for (let i = headerRowIndex + 1; i < Math.min(headerRowIndex + 6, jsonData.length); i++) {
       console.log(`Строка ${i + 1}:`, jsonData[i]);
+    }
+    
+    if (jsonData.length > headerRowIndex + 10) {
+      console.log('Последние 5 строк данных:');
+      for (let i = Math.max(headerRowIndex + 1, jsonData.length - 5); i < jsonData.length; i++) {
+        console.log(`Строка ${i + 1}:`, jsonData[i]);
+      }
     }
 
     // Функция для получения значения по различным вариантам названий колонок
