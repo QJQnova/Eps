@@ -117,40 +117,20 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.shortDescription || (product.description ? product.description.substring(0, 80) : "")}
         </p>
         
-        {/* Цена и кнопка добавления в корзину */}
+        {/* Информация и кнопка связи с менеджером */}
         <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
           <div className="flex flex-col">
-            {Number(product.price) > 0 ? (
-              <>
-                {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
-                  <span className="text-sm line-through text-gray-500">
-                    {formatPrice(product.originalPrice)}
-                  </span>
-                )}
-                <span className="font-bold text-lg text-eps-red">{formatPrice(product.price)}</span>
-              </>
-            ) : (
-              <span className="text-sm font-medium text-gray-600">Узнать цену у менеджера</span>
-            )}
+            <span className="text-sm font-medium text-gray-600">Узнать цену у менеджера</span>
           </div>
           
-          {Number(product.price) > 0 ? (
-            <Button 
-              className="bg-eps-gradient hover:from-eps-red hover:to-eps-yellow text-white action-button shadow-sm"
-              onClick={handleAddToCart}
-              disabled={isLoading || !product.stock || product.stock === 0}
-            >
-              <ShoppingCart className="h-4 w-4 mr-1.5" />
-              В корзину
-            </Button>
-          ) : (
-            <Button 
-              className="bg-blue-600 hover:bg-blue-700 text-white action-button shadow-sm"
-              onClick={() => window.open('tel:+78001013835', '_self')}
-            >
-              Позвонить
-            </Button>
-          )}
+          <Button 
+            className="bg-eps-gradient hover:from-eps-red hover:to-eps-yellow text-white action-button shadow-sm"
+            onClick={handleAddToCart}
+            disabled={isLoading}
+          >
+            <ShoppingCart className="h-4 w-4 mr-1.5" />
+            В корзину
+          </Button>
         </div>
       </CardContent>
     </Card>
