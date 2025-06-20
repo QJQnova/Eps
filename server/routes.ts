@@ -429,6 +429,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Web scraping routes
+  app.get("/api/suppliers", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { SUPPLIERS } = await import("./utils/web-scraper");
+      res.json(SUPPLIERS);
+    } catch (error: any) {
+      res.status(500).json({ message: "Ошибка получения списка поставщиков: " + error.message });
+    }
+  });
+
+  app.post("/api/suppliers/:supplierId/scrape", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { supplierId } = req.params;
+      const { scrapeSupplierCatalog } = await import("./utils/web-scraper");
+      
+      console.log(`Запущен парсинг каталога поставщика: ${supplierId}`);
+      
+      const result = await scrapeSupplierCatalog(supplierId);
+      
+      if (result.success) {
+        // Импортируем спарсенные товары в базу данных
+        const productsToImport = result.products.map(product => ({
+          name: product.name,
+          sku: product.sku,
+          slug: product.name.toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-'),
+          description: product.description,
+          shortDescription: product.description.substring(0, 200),
+          price: '0', // B2B - все цены скрыты
+          originalPrice: null,
+          imageUrl: product.imageUrl,
+          stock: null,
+          categoryId: 1, // Временно используем первую категорию
+          isActive: true,
+          isFeatured: false,
+          tag: supplierId,
+          categoryName: product.category
+        }));
+
+        const importResult = await storage.bulkImportProducts(productsToImport);
+        
+        res.json({
+          success: true,
+          scraped: result.products.length,
+          imported: importResult.success,
+          failed: importResult.failed,
+          products: result.products
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          error: result.error
+        });
+      }
+    } catch (error: any) {
+      console.error("Ошибка парсинга каталога:", error);
+      res.status(500).json({ message: "Ошибка парсинга каталога: " + error.message });
+    }
+  });
+
+  app.post("/api/suppliers/schedule-updates", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { scheduleSupplierUpdates } = await import("./utils/web-scraper");
+      await scheduleSupplierUpdates();
+      res.json({ message: "Планировщик обновлений запущен" });
+    } catch (error: any) {
+      res.status(500).json({ message: "Ошибка запуска планировщика: " + error.message });
+    }
+  });
+
   // Cart Routes
   router.get("/cart/:cartId", async (req, res) => {
     try {

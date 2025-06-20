@@ -13,7 +13,8 @@ import {
   Menu,
   X,
   Trash2,
-  Bot
+  Bot,
+  Globe
 } from "lucide-react";
 import { useState } from "react";
 
@@ -69,6 +70,11 @@ export default function AdminSidebar() {
       icon: Bot,
       label: "Адаптация каталогов",
       href: "/admin/catalog-adapter",
+    },
+    {
+      icon: Globe,
+      label: "Парсинг поставщиков",
+      href: "/admin/web-scraper",
     },
     {
       icon: Tag,
