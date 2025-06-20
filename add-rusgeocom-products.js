@@ -188,13 +188,12 @@ async function login() {
 
 async function makeRequest(path, options) {
   return new Promise((resolve, reject) => {
-    const req = https.request({
+    const req = http.request({
       hostname: 'localhost',
       port: 5000,
       path: path,
       method: options.method,
-      headers: options.headers,
-      rejectUnauthorized: false
+      headers: options.headers
     }, (res) => {
       let body = '';
       res.on('data', chunk => body += chunk);
