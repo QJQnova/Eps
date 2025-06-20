@@ -519,6 +519,13 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
 
     console.log('XLSX заголовки (строка', headerRowIndex + 1, '):', headers);
     console.log('Карта заголовков:', headerMap);
+    console.log('Общее количество строк в файле:', jsonData.length);
+    
+    // Показываем первые несколько строк данных для диагностики
+    console.log('Первые 3 строки данных:');
+    for (let i = headerRowIndex + 1; i < Math.min(headerRowIndex + 4, jsonData.length); i++) {
+      console.log(`Строка ${i + 1}:`, jsonData[i]);
+    }
 
     // Функция для получения значения по различным вариантам названий колонок
     const getValue = (row: any[], ...possibleNames: string[]): string => {
@@ -587,10 +594,25 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
         }
       }
 
-      // Если цена не найдена, пропускаем товар с предупреждением
+      // Если цена не найдена по заголовкам, ищем числовые значения в строке
       if (!product.price) {
-        console.warn(`Строка ${i + 1}: товар "${product.name}" пропущен - отсутствует валидная цена`);
-        continue;
+        for (let col = 0; col < row.length; col++) {
+          const cellValue = row[col];
+          if (cellValue && String(cellValue).trim()) {
+            const cleanValue = String(cellValue).replace(/[^\d.,]/g, '').replace(',', '.');
+            const price = parseFloat(cleanValue);
+            if (!isNaN(price) && price > 0 && price < 10000000) { // разумные пределы цены
+              product.price = String(price);
+              break;
+            }
+          }
+        }
+      }
+
+      // Если цена по-прежнему не найдена, устанавливаем минимальную цену
+      if (!product.price) {
+        console.warn(`Строка ${i + 1}: товар "${product.name}" - цена не найдена, устанавливаем 1 ₽`);
+        product.price = "1";
       }
 
       // Старая цена
@@ -610,6 +632,11 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
 
       // Категория - приоритет русским названиям
       product.categoryName = getValue(row, 'категория', 'группа товара', 'category', 'раздел', 'группа', 'категория category', 'группа товара product group', 'product group');
+      
+      // Если категория не найдена, устанавливаем категорию по умолчанию
+      if (!product.categoryName) {
+        product.categoryName = 'Инструменты';
+      }
 
       // URL изображения
       product.imageUrl = getValue(row, 'изображение', 'картинка', 'фото', 'image', 'picture', 'photo', 'img', 'url изображения', 'ссылка на изображение', 'image_url', 'image url', 'фотография');
