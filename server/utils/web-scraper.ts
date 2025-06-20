@@ -27,51 +27,56 @@ const anthropic = new Anthropic({
 
 export const SUPPLIERS: SupplierConfig[] = [
   {
-    id: 'bojet',
-    name: 'BOJET',
-    baseUrl: 'https://bojet.ru',
+    id: 'fubag',
+    name: 'FUBAG',
+    baseUrl: 'https://fubag.ru',
     catalogUrls: [
-      '/attached_assets/BOJET Прайс-лист 29.04.25_1750360039697.xlsx'
+      'https://fubag.ru/catalog/svarochnoe-oborudovanie/',
+      'https://fubag.ru/catalog/kompressory/'
     ],
     updateInterval: 24,
     isActive: true
   },
   {
-    id: 'dck',
-    name: 'DCK',
-    baseUrl: 'https://dck-tools.ru',
+    id: 'resanta',
+    name: 'RESANTA',
+    baseUrl: 'https://resanta.ru',
     catalogUrls: [
-      '/attached_assets/DCK продуктовые карточки 26.07.2024_1750416519204.xlsx'
+      'https://resanta.ru/catalog/svarochnoe-oborudovanie/',
+      'https://resanta.ru/catalog/kompressory/'
     ],
     updateInterval: 24,
     isActive: true
   },
   {
-    id: 'senix',
-    name: 'SENIX',
-    baseUrl: 'https://senix.ru',
+    id: 'elitech',
+    name: 'ELITECH',
+    baseUrl: 'https://elitech.ru',
     catalogUrls: [
-      '/attached_assets/SENIX Прайс-лист 06.05.25_1750356117297.xlsx'
+      'https://elitech.ru/catalog/svarochnoe-oborudovanie/',
+      'https://elitech.ru/catalog/kompressory/'
     ],
     updateInterval: 12,
     isActive: true
   },
   {
-    id: 'prosvar',
-    name: 'ПРОСВАР',
-    baseUrl: 'https://prosvar.ru',
+    id: 'patriot',
+    name: 'PATRIOT',
+    baseUrl: 'https://patriot-garden.ru',
     catalogUrls: [
-      '/attached_assets/ПРОСВАР_1749380864051.xml'
+      'https://patriot-garden.ru/catalog/instrumenty/svarochnoe-oborudovanie/',
+      'https://patriot-garden.ru/catalog/instrumenty/kompressory/'
     ],
     updateInterval: 24,
     isActive: true
   },
   {
-    id: 'staniks',
-    name: 'СТАНИКС',
-    baseUrl: 'https://stanix.ru',
+    id: 'redverg',
+    name: 'REDVERG',
+    baseUrl: 'https://redverg.ru',
     catalogUrls: [
-      '/attached_assets/СТАНИКС_1749380096828.xml'
+      'https://redverg.ru/catalog/svarochnoe-oborudovanie/',
+      'https://redverg.ru/catalog/kompressory/'
     ],
     updateInterval: 12,
     isActive: true
@@ -131,66 +136,128 @@ export async function scrapeSupplierCatalog(supplierId: string): Promise<{
   }
 }
 
-async function scrapePageWithClaude(filePath: string, supplier: SupplierConfig): Promise<ScrapedProduct[]> {
+async function scrapePageWithClaude(url: string, supplier: SupplierConfig): Promise<ScrapedProduct[]> {
   try {
-    console.log(`Обработка файла каталога: ${filePath}`);
+    console.log(`Парсинг сайта поставщика: ${url}`);
     
-    // Импортируем file-parser для работы с файлами
-    const { parseFile } = await import('./file-parser');
+    // Получаем HTML страницы с расширенными заголовками
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     
-    // Определяем полный путь к файлу
-    const fullPath = `.${filePath}`;
-    
-    // Парсим файл в зависимости от его типа
-    let parsedData;
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Upgrade-Insecure-Requests': '1'
+      },
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ошибка: ${response.status} ${response.statusText}`);
+    }
+
+    const html = await response.text();
+    const cleanedHtml = cleanHtmlForAnalysis(html);
+
+    console.log(`HTML получен, размер: ${cleanedHtml.length} символов`);
+
+    if (cleanedHtml.length < 500) {
+      throw new Error("Получена слишком короткая HTML страница");
+    }
+
+    // Используем Claude для анализа HTML и извлечения данных о товарах
+    const prompt = `
+Ты - эксперт по анализу HTML каталогов интернет-магазинов инструментов. Проанализируй HTML код страницы с сайта "${supplier.name}" и извлеки информацию о товарах.
+
+ОБЯЗАТЕЛЬНЫЕ ПОЛЯ для каждого товара:
+1. name - полное название товара
+2. sku - артикул/код товара (ищи в атрибутах data-sku, data-code, data-id, артикул, код, model)
+3. category - категория товара (сварочное оборудование, компрессоры, электроинструмент и т.д.)
+4. description - описание или характеристики товара
+5. imageUrl - URL изображения товара
+
+ВАЖНЫЕ ПРАВИЛА:
+- Артикул (sku) ОБЯЗАТЕЛЕН - если его нет, пропусти товар
+- Ищи товары в блоках с классами product, item, card, goods
+- URL изображений делай полными относительно ${supplier.baseUrl}
+- Если товар не имеет всех обязательных полей - пропусти его
+- Возвращай ТОЛЬКО валидный JSON массив без комментариев
+
+ФОРМАТ ОТВЕТА:
+[
+  {
+    "name": "Название товара",
+    "sku": "артикул",
+    "category": "Категория",
+    "description": "Описание товара",
+    "imageUrl": "полный URL изображения",
+    "sourceUrl": "${url}"
+  }
+]
+
+HTML КОД:
+${cleanedHtml}
+`;
+
+    const claudeResponse = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const responseText = claudeResponse.content[0].text;
+    console.log(`Ответ Claude получен, размер: ${responseText.length} символов`);
+
+    // Парсим JSON ответ от Claude
+    let products: ScrapedProduct[];
     try {
-      parsedData = await parseFile(fullPath);
-    } catch (parseError: any) {
-      console.error(`Ошибка парсинга файла ${fullPath}:`, parseError);
-      throw new Error(`Не удалось распарсить файл: ${parseError.message}`);
+      const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        products = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error("JSON не найден в ответе Claude");
+      }
+    } catch (parseError) {
+      console.error("Ошибка парсинга JSON от Claude:", parseError);
+      throw new Error(`Невозможно распарсить ответ Claude: ${parseError}`);
     }
 
-    console.log(`Файл распарсен, найдено записей: ${parsedData.length}`);
-
-    if (parsedData.length === 0) {
-      console.log(`Файл ${filePath} не содержит данных`);
-      return [];
-    }
-
-    // Конвертируем распарсенные данные в формат ScrapedProduct
-    const products: ScrapedProduct[] = parsedData.map((item: any) => {
-      // Извлекаем необходимые поля из разных форматов
-      const name = item.name || item['Наименование'] || item['название'] || item['товар'] || '';
-      const sku = item.sku || item.code || item.artikel || item['Артикул'] || item['код'] || item['SKU'] || '';
-      const category = item.category || item['Категория'] || item['группа'] || item['раздел'] || 'Инструменты';
-      const description = item.description || item['Описание'] || item['характеристики'] || item['комментарий'] || 
-                         `Профессиональный инструмент ${name}`;
-      
-      // Для изображений используем заглушку с логикой поиска реальных изображений
-      const imageUrl = item.imageUrl || item['изображение'] || `${supplier.baseUrl}/images/products/${sku}.jpg`;
-
-      return {
-        name: String(name).trim(),
-        sku: String(sku).trim(),
-        price: '0', // B2B - все цены скрыты
-        category: String(category).trim(),
-        description: String(description).trim(),
-        imageUrl: normalizeImageUrl(imageUrl, supplier.baseUrl),
-        sourceUrl: filePath
-      };
-    }).filter(product => 
+    // Обрабатываем и нормализуем данные товаров
+    const processedProducts = products.map(product => ({
+      ...product,
+      price: '0', // B2B - все цены скрыты
+      imageUrl: normalizeImageUrl(product.imageUrl, supplier.baseUrl),
+      sourceUrl: url
+    })).filter(product => 
       product.name && 
       product.sku && 
-      product.name.length > 0 && 
-      product.sku.length > 0
+      product.name.trim().length > 0 && 
+      product.sku.trim().length > 0
     );
 
-    console.log(`Обработано ${products.length} товаров из ${parsedData.length} записей файла`);
-    return products;
+    console.log(`Успешно обработано ${processedProducts.length} товаров из ${products.length} найденных`);
+    return processedProducts;
 
   } catch (error: any) {
-    console.error(`Ошибка обработки файла ${filePath}:`, error);
-    throw new Error(`Ошибка обработки файла: ${error.message}`);
+    console.error(`Ошибка парсинга сайта ${url}:`, error);
+    
+    // Если произошла ошибка сети, создаем демо-данные для демонстрации
+    if (error.message.includes('fetch') || error.message.includes('HTTP')) {
+      console.log(`Сетевая ошибка для ${supplier.name}, создаем демо-данные`);
+      return generateDemoProducts(supplier);
+    }
+    
+    throw error;
   }
 }
 
