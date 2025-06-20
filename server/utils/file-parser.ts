@@ -474,8 +474,32 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
       throw new Error('XLSX файл должен содержать заголовки и хотя бы одну строку данных');
     }
 
-    // Получаем заголовки из первой строки
-    const headers = jsonData[0] as string[];
+    // Ищем строку с заголовками - может быть не первая строка
+    let headerRowIndex = -1;
+    let headers: string[] = [];
+    
+    for (let i = 0; i < Math.min(10, jsonData.length); i++) {
+      const row = jsonData[i] as string[];
+      if (row && row.length > 0) {
+        // Проверяем если строка содержит типичные заголовки
+        const rowStr = row.join(' ').toLowerCase();
+        if (rowStr.includes('название') || rowStr.includes('наименование') || 
+            rowStr.includes('цена') || rowStr.includes('артикул') ||
+            rowStr.includes('товар') || rowStr.includes('продукт') ||
+            rowStr.includes('name') || rowStr.includes('price')) {
+          headerRowIndex = i;
+          headers = row;
+          break;
+        }
+      }
+    }
+
+    // Если не нашли заголовки, используем первую строку и адаптируемся
+    if (headerRowIndex === -1) {
+      headerRowIndex = 0;
+      headers = jsonData[0] as string[];
+      console.log('Заголовки не найдены, используем первую строку и адаптивный парсинг');
+    }
 
     // Создаем карту заголовков для гибкого сопоставления
     const headerMap: Record<string, number> = {};
@@ -493,7 +517,7 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
       }
     });
 
-    console.log('XLSX заголовки:', headers);
+    console.log('XLSX заголовки (строка', headerRowIndex + 1, '):', headers);
     console.log('Карта заголовков:', headerMap);
 
     // Функция для получения значения по различным вариантам названий колонок
@@ -512,10 +536,10 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
       return '';
     };
 
-    // Обрабатываем строки данных (пропускаем заголовок)
+    // Обрабатываем строки данных (начинаем после найденных заголовков)
     const products: ImportProduct[] = [];
 
-    for (let i = 1; i < jsonData.length; i++) {
+    for (let i = headerRowIndex + 1; i < jsonData.length; i++) {
       const row = jsonData[i];
 
       if (!row || row.length === 0 || row.every(cell => !cell || String(cell).trim() === '')) {
@@ -524,8 +548,24 @@ function parseXlsxFile(filePath: string): ImportProduct[] {
 
       const product: ImportProduct = {};
 
-      // Название товара (обязательное поле)
+      // Название товара (обязательное поле) - проверяем все колонки если нет четких заголовков
       product.name = getValue(row, 'название', 'наименование', 'name', 'товар', 'продукт', 'item', 'наименование product name', 'product name');
+      
+      // Если название не найдено по заголовкам, ищем в первых непустых ячейках
+      if (!product.name) {
+        for (let col = 0; col < Math.min(5, row.length); col++) {
+          const cellValue = row[col];
+          if (cellValue && String(cellValue).trim() && 
+              String(cellValue).trim().length > 3 && 
+              !String(cellValue).toLowerCase().includes('новинки') &&
+              !String(cellValue).toLowerCase().includes('заказ') &&
+              !/^\d+$/.test(String(cellValue).trim())) {
+            product.name = String(cellValue).trim();
+            break;
+          }
+        }
+      }
+      
       if (!product.name) {
         console.warn(`Строка ${i + 1}: пропущена - отсутствует название товара`);
         continue;
