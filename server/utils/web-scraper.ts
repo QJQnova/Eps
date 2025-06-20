@@ -27,58 +27,135 @@ const anthropic = new Anthropic({
 
 export const SUPPLIERS: SupplierConfig[] = [
   {
-    id: 'fubag',
-    name: 'FUBAG',
-    baseUrl: 'https://fubag.ru',
+    id: 'tss',
+    name: 'TSS',
+    baseUrl: 'https://www.tss.ru',
     catalogUrls: [
-      'https://fubag.ru/',
-      'https://fubag.ru/catalog/'
-    ],
-    updateInterval: 24,
-    isActive: true
-  },
-  {
-    id: 'resanta',
-    name: 'RESANTA',
-    baseUrl: 'https://resanta.ru',
-    catalogUrls: [
-      'https://resanta.ru/',
-      'https://resanta.ru/catalog/'
-    ],
-    updateInterval: 24,
-    isActive: true
-  },
-  {
-    id: 'elitech',
-    name: 'ELITECH',
-    baseUrl: 'https://elitech.ru',
-    catalogUrls: [
-      'https://elitech.ru/',
-      'https://elitech.ru/catalog/'
+      'https://www.tss.ru/dealers/catalog/',
+      'https://www.tss.ru/'
     ],
     updateInterval: 12,
     isActive: true
   },
   {
-    id: 'patriot',
-    name: 'PATRIOT',
-    baseUrl: 'https://patriot-garden.ru',
+    id: 'sturm',
+    name: 'STURM TOOLS',
+    baseUrl: 'https://sturmtools.ru',
     catalogUrls: [
-      'https://patriot-garden.ru/catalog/',
-      'https://patriot-garden.ru/'
+      'https://sturmtools.ru/',
+      'https://sturmtools.ru/catalog/'
     ],
     updateInterval: 24,
     isActive: true
   },
   {
-    id: 'redverg',
-    name: 'REDVERG',
-    baseUrl: 'https://redverg.ru',
+    id: 'dck',
+    name: 'DCK TOOLS',
+    baseUrl: 'https://dcktools.ru',
     catalogUrls: [
-      'https://redverg.ru/catalog/',
-      'https://redverg.ru/'
+      'https://dcktools.ru/dealers/',
+      'https://dcktools.ru/'
     ],
     updateInterval: 12,
+    isActive: true
+  },
+  {
+    id: 'fit24',
+    name: 'FIT24',
+    baseUrl: 'https://fit24.ru',
+    catalogUrls: [
+      'https://fit24.ru/catalog/',
+      'https://fit24.ru/'
+    ],
+    updateInterval: 24,
+    isActive: true
+  },
+  {
+    id: 'instrument',
+    name: 'INSTRUMENT.RU',
+    baseUrl: 'https://instrument.ru',
+    catalogUrls: [
+      'https://instrument.ru/search/',
+      'https://instrument.ru/'
+    ],
+    updateInterval: 12,
+    isActive: true
+  },
+  {
+    id: 'zubr',
+    name: 'ZUBR',
+    baseUrl: 'https://zubr.ru',
+    catalogUrls: [
+      'https://zubr.ru/',
+      'https://zubr.ru/catalog/'
+    ],
+    updateInterval: 24,
+    isActive: true
+  },
+  {
+    id: 'svarog',
+    name: 'SVAROG',
+    baseUrl: 'https://svarog-rf.ru',
+    catalogUrls: [
+      'https://svarog-rf.ru/',
+      'https://svarog-rf.ru/dealers/'
+    ],
+    updateInterval: 12,
+    isActive: true
+  },
+  {
+    id: 'prosvar',
+    name: 'ПРОСВАР',
+    baseUrl: 'https://prosvar.com',
+    catalogUrls: [
+      'https://prosvar.com/',
+      'https://prosvar.com/product/'
+    ],
+    updateInterval: 24,
+    isActive: true
+  },
+  {
+    id: 'stanix',
+    name: 'СТАНИКС',
+    baseUrl: 'https://stanix.ru',
+    catalogUrls: [
+      'https://stanix.ru/',
+      'https://stanix.ru/catalog/'
+    ],
+    updateInterval: 12,
+    isActive: true
+  },
+  {
+    id: 'remeza',
+    name: 'REMEZA',
+    baseUrl: 'https://www.remeza.org',
+    catalogUrls: [
+      'https://www.remeza.org/',
+      'https://www.remeza.org/catalog/'
+    ],
+    updateInterval: 24,
+    isActive: true
+  },
+  {
+    id: 'senix',
+    name: 'SENIX',
+    baseUrl: 'https://senixtool.ru',
+    catalogUrls: [
+      'https://senixtool.ru/',
+      'https://senixtool.ru/catalog/'
+    ],
+    updateInterval: 12,
+    isActive: true
+  },
+  {
+    id: 'bojet',
+    name: 'BOJET',
+    baseUrl: 'https://bojet.ru',
+    catalogUrls: [
+      'https://bojet.ru/',
+      'https://bojet.ru/catalog/'
+    ],
+    updateInterval: 24,
     isActive: true
   }
 ];
