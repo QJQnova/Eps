@@ -31,8 +31,8 @@ export const SUPPLIERS: SupplierConfig[] = [
     name: 'FUBAG',
     baseUrl: 'https://fubag.ru',
     catalogUrls: [
-      'https://fubag.ru/catalog/svarochnoe-oborudovanie/',
-      'https://fubag.ru/catalog/kompressory/'
+      'https://fubag.ru/',
+      'https://fubag.ru/catalog/'
     ],
     updateInterval: 24,
     isActive: true
@@ -42,8 +42,8 @@ export const SUPPLIERS: SupplierConfig[] = [
     name: 'RESANTA',
     baseUrl: 'https://resanta.ru',
     catalogUrls: [
-      'https://resanta.ru/catalog/svarochnoe-oborudovanie/',
-      'https://resanta.ru/catalog/kompressory/'
+      'https://resanta.ru/',
+      'https://resanta.ru/catalog/'
     ],
     updateInterval: 24,
     isActive: true
@@ -53,8 +53,8 @@ export const SUPPLIERS: SupplierConfig[] = [
     name: 'ELITECH',
     baseUrl: 'https://elitech.ru',
     catalogUrls: [
-      'https://elitech.ru/catalog/svarochnoe-oborudovanie/',
-      'https://elitech.ru/catalog/kompressory/'
+      'https://elitech.ru/',
+      'https://elitech.ru/catalog/'
     ],
     updateInterval: 12,
     isActive: true
