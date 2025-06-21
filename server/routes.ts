@@ -477,7 +477,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Начинаю полный импорт каталога поставщика: ${name} (${url})`);
       
-      // Используем оптимизированную систему массового импорта товаров
+      // Проверяем, является ли это pittools.ru для полного импорта
+      if (url.includes('pittools.ru')) {
+        console.log('Запускаю полный импорт реального каталога pittools.ru');
+        const { scrapePittoolsCatalog } = await import('./utils/pittools-scraper');
+        const result = await scrapePittoolsCatalog();
+        
+        if (result.success) {
+          res.json({
+            success: true,
+            message: `Успешно импортирован реальный каталог pittools.ru. Импортировано товаров: ${result.productsImported} из ${result.total}`,
+            productsImported: result.productsImported,
+            failed: result.failed,
+            total: result.total,
+            categoriesCreated: 0
+          });
+          return;
+        }
+      }
+      
+      // Используем оптимизированную систему массового импорта товаров для других поставщиков
       const { generateMassProducts } = await import('./utils/mass-product-generator');
       const result = await generateMassProducts(name, description);
       
