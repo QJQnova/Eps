@@ -122,7 +122,23 @@ ${mainPageHtml.substring(0, 50000)}`
       }]
     });
 
-    const analysis = JSON.parse(structureAnalysis.content[0].text);
+    const contentBlock = structureAnalysis.content[0];
+    let analysisText = '';
+    
+    if (contentBlock.type === 'text') {
+      analysisText = (contentBlock as any).text;
+    } else {
+      throw new Error('Неожиданный тип ответа от ИИ');
+    }
+    
+    // Очищаем текст от markdown форматирования
+    if (analysisText.includes('```json')) {
+      analysisText = analysisText.split('```json')[1].split('```')[0];
+    } else if (analysisText.includes('```')) {
+      analysisText = analysisText.split('```')[1].split('```')[0];
+    }
+    
+    const analysis = JSON.parse(analysisText.trim());
     const baseUrl = new URL(url).origin;
     
     // Нормализуем URLs
@@ -139,9 +155,18 @@ ${mainPageHtml.substring(0, 50000)}`
       catalogUrls.push(url);
     }
     
+    // Убираем дубликаты URLs
+    const uniqueCatalogUrls: string[] = [];
+    for (const urlItem of catalogUrls) {
+      const urlString = String(urlItem);
+      if (!uniqueCatalogUrls.includes(urlString)) {
+        uniqueCatalogUrls.push(urlString);
+      }
+    }
+    
     return {
       baseUrl,
-      catalogUrls: [...new Set(catalogUrls)], // убираем дубликаты
+      catalogUrls: uniqueCatalogUrls,
       mainCategories: analysis.mainCategories || []
     };
     
@@ -227,7 +252,23 @@ ${pageHtml.substring(0, 80000)}`
         }]
       });
 
-      const extractedData = JSON.parse(extractionResult.content[0].text);
+      const extractionBlock = extractionResult.content[0];
+      let extractionText = '';
+      
+      if (extractionBlock.type === 'text') {
+        extractionText = (extractionBlock as any).text;
+      } else {
+        throw new Error('Неожиданный тип ответа от ИИ при извлечении товаров');
+      }
+      
+      // Очищаем текст от markdown форматирования
+      if (extractionText.includes('```json')) {
+        extractionText = extractionText.split('```json')[1].split('```')[0];
+      } else if (extractionText.includes('```')) {
+        extractionText = extractionText.split('```')[1].split('```')[0];
+      }
+      
+      const extractedData = JSON.parse(extractionText.trim());
       
       if (extractedData.categories && Array.isArray(extractedData.categories)) {
         for (const category of extractedData.categories) {
