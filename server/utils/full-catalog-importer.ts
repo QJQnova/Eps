@@ -189,16 +189,32 @@ async function extractAllCategoriesAndProducts(siteStructure: {
   const allCategories: ExtractedCategory[] = [];
   let totalProducts = 0;
   
-  for (const catalogUrl of siteStructure.catalogUrls) {
+  // Ограничиваем количество страниц для обработки, чтобы не превысить лимиты API
+  const limitedUrls = siteStructure.catalogUrls.slice(0, 3);
+  
+  for (let i = 0; i < limitedUrls.length; i++) {
+    const catalogUrl = limitedUrls[i];
     try {
-      console.log(`Извлекаю данные со страницы: ${catalogUrl}`);
+      console.log(`Извлекаю данные со страницы ${i + 1}/${limitedUrls.length}: ${catalogUrl}`);
+      
+      // Добавляем задержку между запросами для соблюдения лимитов API
+      if (i > 0) {
+        console.log('Ожидание 30 секунд для соблюдения лимитов API...');
+        await delay(30000);
+      }
+      
       const pageHtml = await fetchPageWithRetry(catalogUrl);
       
-      // Используем Claude для извлечения всех товаров и категорий со страницы
-      const extractionResult = await anthropic.messages.create({
+      // Уменьшаем размер HTML для экономии токенов
+      const truncatedHtml = pageHtml.substring(0, 15000);
+      
+      // Обработка лимитов API с автоматическим ожиданием
+      let extractionResult;
+      try {
+        extractionResult = await anthropic.messages.create({
         model: "claude-sonnet-4-20250514",
-        max_tokens: 8000,
-        system: `Ты эксперт по извлечению данных о товарах с сайтов поставщиков. Проанализируй HTML код и извлеки:
+        max_tokens: 2000,
+        system: `Извлеки товары из HTML. Верни JSON:
 
 1. ВСЕ товары со страницы с полной информацией:
    - Название товара

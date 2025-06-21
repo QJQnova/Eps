@@ -477,7 +477,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Начинаю полный импорт каталога поставщика: ${name} (${url})`);
       
-      const result = await importFullSupplierCatalog(url, name, description);
+      const { simpleSupplierImport } = await import('./utils/simple-importer');
+      const result = await simpleSupplierImport(url, name, description);
       
       if (result.success) {
         res.json({
