@@ -482,8 +482,8 @@ export default function ProductDetails() {
                     
                     <div className="flex justify-between p-3 bg-white border border-gray-100 rounded-lg">
                       <span className="text-sm text-gray-600">Наличие</span>
-                      <span className={`text-sm font-medium ${product.stock && product.stock > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                        {product.stock && product.stock > 0 ? `В наличии (${product.stock} шт.)` : 'Нет в наличии'}
+                      <span className={`text-sm font-medium ${product?.stock && product.stock > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        {product?.stock && product.stock > 0 ? `В наличии (${product.stock} шт.)` : 'Нет в наличии'}
                       </span>
                     </div>
                   </div>
@@ -541,7 +541,7 @@ export default function ProductDetails() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Похожие товары</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {relatedProducts
-              .filter(p => p.id !== product.id)
+              .filter(p => p.id !== product?.id)
               .slice(0, 4)
               .map(relatedProduct => (
                 <ProductCard key={relatedProduct.id} product={relatedProduct} />

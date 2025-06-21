@@ -24,6 +24,28 @@ import express from 'express';
 
 const router = express.Router();
 
+// Функция для создания/получения категории по названию
+async function getCategoryByName(categoryName: string): Promise<number> {
+  // Проверяем, существует ли категория
+  const existingCategory = await storage.getCategoryBySlug(
+    categoryName.toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-')
+  );
+  
+  if (existingCategory) {
+    return existingCategory.id;
+  }
+  
+  // Создаем новую категорию
+  const newCategory = await storage.createCategory({
+    name: categoryName,
+    slug: categoryName.toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-'),
+    description: `Категория ${categoryName}`,
+    icon: 'tool'
+  });
+  
+  return newCategory.id;
+}
+
 // Функция валидации данных
 const validateData = <T>(schema: z.ZodType<T>, data: any): T => {
   const result = schema.safeParse(data);
@@ -460,21 +482,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await scrapeSupplierCatalog(supplierId);
       
       if (result.success && result.products && result.products.length > 0) {
-        // Импортируем спарсенные товары в базу данных
-        const productsToImport = result.products.map(product => ({
-          name: product.name,
-          sku: product.sku,
-          slug: product.name.toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-'),
-          description: product.description || `Профессиональный инструмент ${product.name}`,
-          shortDescription: (product.description || product.name).substring(0, 200),
-          price: "0", // B2B - все цены скрыты
-          originalPrice: null,
-          imageUrl: product.imageUrl,
-          stock: null,
-          categoryId: 46, // Используем категорию "Инструменты"
-          isActive: true,
-          isFeatured: false,
-          tag: supplierId
+        // Импортируем спарсенные товары в базу данных с автоматическими категориями
+        const productsToImport = await Promise.all(result.products.map(async (product) => {
+          const categoryId = await getCategoryByName(product.category || 'Инструменты');
+          
+          return {
+            name: product.name,
+            sku: product.sku,
+            slug: product.name.toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-'),
+            description: product.description || `Профессиональный инструмент ${product.name}`,
+            shortDescription: (product.description || product.name).substring(0, 200),
+            price: product.price && product.price !== 'По запросу' ? product.price : "0",
+            originalPrice: product.originalPrice || null,
+            imageUrl: product.imageUrl,
+            stock: product.stock || null,
+            categoryId,
+            isActive: true,
+            isFeatured: false,
+            tag: supplierId
+          };
         }));
 
         const importResult = await storage.bulkImportProducts(productsToImport);
@@ -728,21 +754,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const scrapeResult = await scrapeSupplierCatalog(supplier.id);
           
           if (scrapeResult.success && scrapeResult.products.length > 0) {
-            // Преобразуем в формат для импорта с полной информацией
-            const productsToImport = scrapeResult.products.map((product: any) => ({
-              name: product.name,
-              sku: product.sku,
-              slug: product.name.toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-'),
-              description: product.description || `Профессиональный инструмент ${product.name}`,
-              shortDescription: product.shortDescription || (product.description || product.name).substring(0, 200),
-              price: product.price && product.price !== 'По запросу' ? product.price : "0",
-              originalPrice: product.originalPrice || null,
-              imageUrl: product.imageUrl || '',
-              stock: product.stock || null,
-              categoryId: 46, // Категория "Инструменты"
-              isActive: true,
-              isFeatured: false,
-              tag: `${supplier.id}|brand:${product.brand || 'unknown'}|model:${product.model || 'unknown'}|warranty:${product.warranty || 'standard'}|availability:${product.availability || 'unknown'}${product.specifications ? '|specs:' + product.specifications.substring(0, 100) : ''}${product.features ? '|features:' + product.features.join(',') : ''}`
+            // Преобразуем в формат для импорта с автоматическими категориями
+            const productsToImport = await Promise.all(scrapeResult.products.map(async (product: any) => {
+              const categoryId = await getCategoryByName(product.category || 'Инструменты');
+              
+              return {
+                name: product.name,
+                sku: product.sku,
+                slug: product.name.toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-'),
+                description: product.description || `Профессиональный инструмент ${product.name}`,
+                shortDescription: product.shortDescription || (product.description || product.name).substring(0, 200),
+                price: product.price && product.price !== 'По запросу' ? product.price : "0",
+                originalPrice: product.originalPrice || null,
+                imageUrl: product.imageUrl || '',
+                stock: product.stock || null,
+                categoryId,
+                isActive: true,
+                isFeatured: false,
+                tag: `${supplier.id}|brand:${product.brand || 'unknown'}|model:${product.model || 'unknown'}|warranty:${product.warranty || 'standard'}|availability:${product.availability || 'unknown'}${product.specifications ? '|specs:' + product.specifications.substring(0, 100) : ''}${product.features ? '|features:' + product.features.join(',') : ''}`
+              };
             }));
             
             // Импортируем продукты
