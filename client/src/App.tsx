@@ -41,6 +41,7 @@ import OrderManagement from "@/pages/admin/order-management";
 import UserManagement from "@/pages/admin/user-management";
 import SettingsManagement from "@/pages/admin/settings-management";
 import SqlDeletePage from "@/pages/admin/sql-delete";
+import SupplierImporter from "@/pages/admin/supplier-importer";
 import CatalogAdapter from "@/pages/admin/catalog-adapter";
 import WebScraper from "@/pages/admin/web-scraper";
 import MassScraper from "@/pages/admin/mass-scraper";
@@ -92,6 +93,7 @@ function Router() {
           <ProtectedRoute path="/admin/users" component={UserManagement} />
           <ProtectedRoute path="/admin/settings" component={SettingsManagement} />
           <ProtectedRoute path="/admin/sql-delete" component={SqlDeletePage} />
+          <ProtectedRoute path="/admin/supplier-importer" component={SupplierImporter} />
           
           {/* Fallback to 404 */}
           <Route component={NotFound} />
