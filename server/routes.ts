@@ -771,7 +771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 categoryId,
                 isActive: true,
                 isFeatured: false,
-                tag: `${supplier.id}|brand:${product.brand || 'unknown'}|model:${product.model || 'unknown'}|warranty:${product.warranty || 'standard'}|availability:${product.availability || 'unknown'}${product.specifications ? '|specs:' + product.specifications.substring(0, 100) : ''}${product.features ? '|features:' + product.features.join(',') : ''}`
+                tag: `${supplier.id}|brand:${product.brand || 'unknown'}|model:${product.model || 'unknown'}|warranty:${product.warranty || 'standard'}|availability:${product.availability || 'unknown'}`
               };
             }));
             
