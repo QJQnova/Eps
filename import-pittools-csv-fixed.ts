@@ -9,8 +9,6 @@ async function importPittoolsCSV() {
     const csvContent = readFileSync('./pittools-import.csv', 'utf-8');
     const lines = csvContent.split('\n').filter(line => line.trim());
     
-    console.log(`Найдено ${lines.length} строк для обработки`);
-    
     // Пропускаем заголовок
     const dataLines = lines.slice(1);
     console.log(`Обрабатываем ${dataLines.length} товаров (пропущен заголовок)`);
@@ -20,32 +18,42 @@ async function importPittoolsCSV() {
     let categoryCount = 0;
     let errorCount = 0;
     
-    for (let i = 0; i < dataLines.length; i++) {
+    for (let i = 0; i < Math.min(dataLines.length, 500); i++) {
       const line = dataLines[i].trim();
       if (!line) continue;
       
       try {
-        // Разбираем CSV строку (разделитель - точка с запятой)
+        // Разбираем CSV строку с правильными индексами
         const parts = line.split(';');
-        if (parts.length < 6) continue;
+        if (parts.length < 11) {
+          console.log(`Пропуск строки ${i + 1}: недостаточно полей (${parts.length})`);
+          continue;
+        }
         
-        const [
-          imageUrl,
-          name,
-          sku,
-          priceStr,
-          currency,
-          inStock,
-          categoryName,
-          subcategoryName,
-          section,
-          productUrl,
-          description
-        ] = parts;
+        const imageUrl = parts[0]?.trim();
+        const name = parts[1]?.trim();
+        const sku = parts[2]?.trim();
+        const priceStr = parts[3]?.trim();
+        const currency = parts[4]?.trim();
+        const inStock = parts[5]?.trim();
+        const categoryName = parts[6]?.trim();
+        const subcategoryName = parts[7]?.trim();
+        const section = parts[8]?.trim();
+        const productUrl = parts[9]?.trim();
+        const description = parts[10]?.trim();
         
         // Валидация обязательных полей
         if (!name || !sku || !categoryName || !priceStr) {
           console.log(`Пропуск строки ${i + 1}: отсутствуют обязательные поля`);
+          errorCount++;
+          continue;
+        }
+        
+        // Парсим цену
+        const price = parseFloat(priceStr);
+        if (isNaN(price) || price <= 0) {
+          console.log(`Пропуск товара ${sku}: некорректная цена "${priceStr}"`);
+          errorCount++;
           continue;
         }
         
@@ -68,29 +76,22 @@ async function importPittoolsCSV() {
             console.log(`Создана категория: ${categoryName}`);
           } catch (error) {
             console.log(`Ошибка создания категории "${categoryName}": ${error.message}`);
+            errorCount++;
             continue;
           }
-        }
-        
-        // Парсим цену
-        const price = parseFloat(priceStr) || 0;
-        if (price <= 0) {
-          console.log(`Пропуск товара ${sku}: некорректная цена "${priceStr}"`);
-          continue;
         }
         
         // Создаем товар
         const insertProduct: InsertProduct = {
           sku,
           name: cleanName(name),
-          slug: generateSlug(name + '-' + sku), // Добавляем SKU для уникальности
+          slug: generateSlug(name + '-' + sku),
           description: cleanDescription(description || ''),
           shortDescription: subcategoryName || null,
           price: price.toString(),
           originalPrice: null,
           imageUrl: imageUrl || null,
           categoryId: categoryId!,
-          supplierId: null,
           isActive: inStock === 'Да',
           stockQuantity: inStock === 'Да' ? 100 : 0,
           weight: null,
@@ -103,15 +104,10 @@ async function importPittoolsCSV() {
           await storage.createProduct(insertProduct);
           productCount++;
           
-          if (productCount % 100 === 0) {
+          if (productCount % 50 === 0) {
             console.log(`Импортировано ${productCount} товаров, ${categoryCount} категорий...`);
           }
           
-          // Ограничиваем количество для тестирования
-          if (productCount >= 1000) {
-            console.log(`Достигнут лимит в 1000 товаров для тестирования`);
-            break;
-          }
         } catch (error) {
           errorCount++;
           if (error.message.includes('duplicate key')) {
@@ -123,6 +119,7 @@ async function importPittoolsCSV() {
         
       } catch (error) {
         console.log(`Ошибка в строке ${i + 1}: ${error.message}`);
+        errorCount++;
         continue;
       }
     }
@@ -162,8 +159,8 @@ function generateSlug(text: string): string {
 
 function cleanName(name: string): string {
   return name
-    .replace(/<[^>]*>/g, '') // Убираем HTML теги
-    .replace(/&[^;]+;/g, '') // Убираем HTML entities
+    .replace(/<[^>]*>/g, '')
+    .replace(/&[^;]+;/g, '')
     .trim();
 }
 
@@ -171,12 +168,12 @@ function cleanDescription(description: string): string {
   if (!description) return '';
   
   return description
-    .replace(/<br\s*\/?>/gi, '\n') // Заменяем <br> на переносы строк
-    .replace(/<[^>]*>/g, '') // Убираем остальные HTML теги
-    .replace(/&[^;]+;/g, '') // Убираем HTML entities
-    .replace(/_{2,}/g, '') // Убираем множественные подчеркивания
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&[^;]+;/g, '')
+    .replace(/_{2,}/g, '')
     .trim()
-    .substring(0, 2000); // Ограничиваем длину
+    .substring(0, 2000);
 }
 
 importPittoolsCSV().catch(console.error);
