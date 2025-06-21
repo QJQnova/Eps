@@ -77,7 +77,7 @@ async function createDemoProducts(supplierName: string, description: string): Pr
         sku: `${supplierName.toUpperCase()}-002`,
         description: `Надежный инструмент от ${supplierName} для ежедневного использования. ${description}`,
         shortDescription: `Стандартная модель ${supplierName}`,
-        price: 8900,
+        price: "8900",
         categoryId: category.id,
         imageUrl: null,
         stockQuantity: 25,
