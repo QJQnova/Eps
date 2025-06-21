@@ -222,6 +222,11 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0 ? result[0] : undefined;
   }
 
+  async getCategoryByName(name: string): Promise<Category | undefined> {
+    const result = await db.select().from(categories).where(eq(categories.name, name));
+    return result.length > 0 ? result[0] : undefined;
+  }
+
   async createCategory(category: InsertCategory): Promise<Category> {
     const result = await db.insert(categories).values(category).returning();
     return result[0];
