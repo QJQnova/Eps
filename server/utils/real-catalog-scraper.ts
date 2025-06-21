@@ -245,13 +245,13 @@ async function createProductsFromSupplierInfo(supplierName: string, description:
     
     if (relevantTypes.length === 0) {
       // Создаем базовые товары даже для нерелевантных категорий
-      for (let i = 1; i <= 8; i++) {
+      for (let i = 1; i <= 25; i++) {
         products.push(createProduct(supplierName, category, i, 'универсальный', description));
       }
     } else {
       // Создаем товары на основе релевантных типов
       for (const type of relevantTypes) {
-        for (let i = 1; i <= 15; i++) {
+        for (let i = 1; i <= 35; i++) {
           products.push(createProduct(supplierName, category, i, type.name, description, type));
         }
       }
