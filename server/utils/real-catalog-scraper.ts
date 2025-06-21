@@ -226,7 +226,7 @@ ${truncatedHtml}
   }
 }
 
-async function createProductsFromSupplierInfo(supplierName: string, description: string): Promise<ImportResult> {
+export async function createProductsFromSupplierInfo(supplierName: string, description: string): Promise<ImportResult> {
   console.log(`Создаю полный каталог товаров для поставщика: ${supplierName}`);
   
   const categories = await storage.getAllCategories();

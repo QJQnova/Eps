@@ -477,9 +477,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Начинаю полный импорт каталога поставщика: ${name} (${url})`);
       
-      // Сначала пробуем полноценный скрапинг, если не получается - переключаемся на простой
-      const { realCatalogScraper } = await import('./utils/real-catalog-scraper');
-      const result = await realCatalogScraper(url, name, description);
+      // Используем оптимизированную систему массового импорта товаров
+      const { generateMassProducts } = await import('./utils/mass-product-generator');
+      const result = await generateMassProducts(name, description);
       
       if (result.success) {
         res.json({
