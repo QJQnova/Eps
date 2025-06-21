@@ -484,16 +484,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (result.success) {
         res.json({
           success: true,
-          message: `Успешно импортирован каталог поставщика ${name}`,
-          categoriesCreated: result.categoriesCreated,
+          message: `Успешно импортирован каталог поставщика ${name}. Импортировано товаров: ${result.productsImported} из ${result.total}`,
           productsImported: result.productsImported,
-          failed: result.failed
+          failed: result.failed,
+          total: result.total,
+          categoriesCreated: 0
         });
       } else {
         res.status(500).json({
           success: false,
-          message: result.error || "Ошибка импорта каталога",
-          error: result.error
+          message: "Ошибка импорта каталога",
+          error: result
         });
       }
     } catch (error: any) {
