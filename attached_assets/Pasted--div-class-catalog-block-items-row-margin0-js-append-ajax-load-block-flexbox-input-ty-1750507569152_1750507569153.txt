@@ -1,0 +1,294 @@
+<div class="catalog_block items row  margin0  js_append ajax_load block flexbox">
+								<input type="hidden" class="ajax-findallid" value="8199">
+						
+
+			
+			
+			<div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 col-xxs-12 item item-parent item_block ">
+				<div class="basket_props_block" id="bx_basket_div_8199_block" style="display: none;">
+									</div>
+				<div class="catalog_item_wrapp catalog_item item_wrap main_item_wrapper  product_image " id="bx_3966226736_8199" style="height: 434px;">
+					<div class="inner_wrap TYPE_1">
+																		<div class="image_wrapper_block">
+							                                                                        <div class="stickers custom-font">
+                        
+                                                    <div><div class="sticker_aktsiya font_sxs rounded2">Акция</div></div>
+                                                    <div><div class="sticker_novinka font_sxs rounded2">Новинка</div></div>
+                                                    <div><div class="sticker_sovetuem font_sxs rounded2">Советуем</div></div>
+                                                    <div><div class="sticker_khit font_sxs rounded2">Хит</div></div>
+                                            </div>
+                                                                        															                                                                    <div class="like_icons block" data-size="1">
+                                                                                                                <div class="compare_item_button item-action">
+                                    <span title="Сравнить" data-title="Сравнить" data-title_added="В сравнении" class="compare_item to rounded3 colored_theme_hover_bg js-item-action" data-action="compare" data-iblock="62" data-item="8199"><i class="svg inline  svg-inline-compare ncolor colored" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="13" viewBox="0 0 14 13"><path data-name="Rounded Rectangle 913 copy" class="cls-1" d="M595,137a1,1,0,0,1,1,1v8a1,1,0,1,1-2,0v-8A1,1,0,0,1,595,137Zm-4,3a1,1,0,0,1,1,1v5a1,1,0,1,1-2,0v-5A1,1,0,0,1,591,140Zm8-6a1,1,0,0,1,1,1v11a1,1,0,1,1-2,0V135A1,1,0,0,1,599,134Zm4,6h0a1,1,0,0,1,1,1v5a1,1,0,0,1-1,1h0a1,1,0,0,1-1-1v-5A1,1,0,0,1,603,140Z" transform="translate(-590 -134)"></path></svg></i></span>
+                                </div>
+                                                                                                                                                                                            <div class="fast_view_button">
+                                <span title="Быстрый просмотр" class="rounded3 colored_theme_hover_bg" data-event="jqm" data-param-form_id="fast_view" data-param-iblock_id="62" data-param-id="8199" data-param-item_href="%2Fcatalog%2Fakkumulyatornye_kleevye_pistolety_3_6v%2Fpistolet_kleevoy_akkum_p_i_t_pec3_6p_7a_3_6v_vstr_akb_1_5ach_300_sterzhnya_7mm_120g_chas%2F" data-name="fast_view"><i class="svg inline  svg-inline-fw ncolor colored" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12"><path data-name="Ellipse 302 copy 3" class="cls-1" d="M549,146a8.546,8.546,0,0,1-8.008-6,8.344,8.344,0,0,1,16.016,0A8.547,8.547,0,0,1,549,146Zm0-2a6.591,6.591,0,0,0,5.967-4,7.022,7.022,0,0,0-1.141-1.76,4.977,4.977,0,0,1-9.652,0,7.053,7.053,0,0,0-1.142,1.76A6.591,6.591,0,0,0,549,144Zm-2.958-7.246c-0.007.084-.042,0.159-0.042,0.246a3,3,0,1,0,6,0c0-.087-0.035-0.162-0.042-0.246A6.179,6.179,0,0,0,546.042,136.753Z" transform="translate(-541 -134)"></path></svg></i></span>
+                            </div>
+                                            </div>
+                        																								                                        										                                                                                    <a href="/catalog/akkumulyatornye_kleevye_pistolety_3_6v/pistolet_kleevoy_akkum_p_i_t_pec3_6p_7a_3_6v_vstr_akb_1_5ach_300_sterzhnya_7mm_120g_chas/" class="thumb shine">
+                            <span class="section-gallery-wrapper flexbox">
+                                                                                                        <span class="section-gallery-wrapper__item _active">
+                                        <span class="section-gallery-wrapper__item-nav section-gallery-wrapper__item_hidden "></span>
+                                        <img data-lazyload="" class="img-responsive ls-is-cached lazyloaded" src="/upload/resize_cache/iblock/765/gxvoj2eyubvmvd1a10l5aulo0untcvop/600_600_140cd750bba9870f18aada2478b24840a/PEC3.6P-7A.png" data-src="/upload/resize_cache/iblock/765/gxvoj2eyubvmvd1a10l5aulo0untcvop/600_600_140cd750bba9870f18aada2478b24840a/PEC3.6P-7A.png" alt="Аккумуляторный клеевой пистолет P.I.T. PEC3.6P-7A" title="Аккумуляторный клеевой пистолет P.I.T. PEC3.6P-7A">
+                                    </span>
+                                                            </span>
+                        </a>
+                                                        																														</div>
+													<div class="item_info">
+																	<div class="rating">
+																					<div class="blog-info__rating--top-info">
+									<div class="votes_block nstar with-text">
+										<div class="ratings">
+																						<div class="inner_rating" title="Нет оценок">
+																									<div class="item-rating "><i class="svg inline  svg-inline-star" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13"><rect class="sscls-1" width="15" height="13"></rect><path data-name="Shape 921 copy 15" class="sscls-2" d="M1333.37,457.5l-4.21,2.408,0.11,0.346,2.07,4.745h-0.72l-4.12-3-4.09,3h-0.75l2.04-4.707,0.12-.395-4.19-2.4V457h5.12l1.53-5h0.38l1.57,5h5.14v0.5Z" transform="translate(-1319 -452)"></path></svg></i></div>
+																									<div class="item-rating "><i class="svg inline  svg-inline-star" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13"><rect class="sscls-1" width="15" height="13"></rect><path data-name="Shape 921 copy 15" class="sscls-2" d="M1333.37,457.5l-4.21,2.408,0.11,0.346,2.07,4.745h-0.72l-4.12-3-4.09,3h-0.75l2.04-4.707,0.12-.395-4.19-2.4V457h5.12l1.53-5h0.38l1.57,5h5.14v0.5Z" transform="translate(-1319 -452)"></path></svg></i></div>
+																									<div class="item-rating "><i class="svg inline  svg-inline-star" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13"><rect class="sscls-1" width="15" height="13"></rect><path data-name="Shape 921 copy 15" class="sscls-2" d="M1333.37,457.5l-4.21,2.408,0.11,0.346,2.07,4.745h-0.72l-4.12-3-4.09,3h-0.75l2.04-4.707,0.12-.395-4.19-2.4V457h5.12l1.53-5h0.38l1.57,5h5.14v0.5Z" transform="translate(-1319 -452)"></path></svg></i></div>
+																									<div class="item-rating "><i class="svg inline  svg-inline-star" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13"><rect class="sscls-1" width="15" height="13"></rect><path data-name="Shape 921 copy 15" class="sscls-2" d="M1333.37,457.5l-4.21,2.408,0.11,0.346,2.07,4.745h-0.72l-4.12-3-4.09,3h-0.75l2.04-4.707,0.12-.395-4.19-2.4V457h5.12l1.53-5h0.38l1.57,5h5.14v0.5Z" transform="translate(-1319 -452)"></path></svg></i></div>
+																									<div class="item-rating "><i class="svg inline  svg-inline-star" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13"><rect class="sscls-1" width="15" height="13"></rect><path data-name="Shape 921 copy 15" class="sscls-2" d="M1333.37,457.5l-4.21,2.408,0.11,0.346,2.07,4.745h-0.72l-4.12-3-4.09,3h-0.75l2.04-4.707,0.12-.395-4.19-2.4V457h5.12l1.53-5h0.38l1.57,5h5.14v0.5Z" transform="translate(-1319 -452)"></path></svg></i></div>
+																							</div>
+										</div>
+									</div>
+																	</div>
+																		</div>
+																			<div class="item-title" style="height: 100px;">
+					<a href="/catalog/akkumulyatornye_kleevye_pistolety_3_6v/pistolet_kleevoy_akkum_p_i_t_pec3_6p_7a_3_6v_vstr_akb_1_5ach_300_sterzhnya_7mm_120g_chas/" class="dark_link option-font-bold font_sm"><span>Аккумуляторный клеевой пистолет P.I.T. PEC3.6P-7A</span></a>
+				</div>
+															<div class="sa_block" data-fields="[&quot;&quot;,&quot;&quot;]" data-stores="[]" data-user-fields="[&quot;&quot;,&quot;UF_CATALOG_ICON&quot;,&quot;&quot;]" style="height: 24px;">
+																				<div class="article_block"></div>
+				</div>
+															<div class="cost prices clearfix" style="height: 22px;">
+																							                                                                                                                                                                                                                                            <div class="price_matrix_wrapper ">
+                                                            <div class="price font-bold font_mxs" data-currency="RUB" data-value="1760">
+                                                                                                                        <span class="values_wrapper"><span class="price_value">1&nbsp;760</span><span class="price_currency"> ₽</span></span>                                                                                                            </div>
+                                                    </div>
+                                                                                                                                                        <div class="js-info-block rounded3">
+                            <div class="block_title text-upper font_xs font-bold">
+                                Варианты цен                                <i class="svg inline  svg-inline-close" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path data-name="Rounded Rectangle 114 copy 3" class="cccls-1" d="M334.411,138l6.3,6.3a1,1,0,0,1,0,1.414,0.992,0.992,0,0,1-1.408,0l-6.3-6.306-6.3,6.306a1,1,0,0,1-1.409-1.414l6.3-6.3-6.293-6.3a1,1,0,0,1,1.409-1.414l6.3,6.3,6.3-6.3A1,1,0,0,1,340.7,131.7Z" transform="translate(-325 -130)"></path></svg></i>                            </div>
+                            <div class="block_wrap">
+                                <div class="block_wrap_inner prices ">
+                                                                                                                    <div class="price_matrix_wrapper ">
+                                                            <div class="price font-bold font_mxs" data-currency="RUB" data-value="1760">
+                                                                                                                        <span class="values_wrapper"><span class="price_value">1&nbsp;760</span><span class="price_currency"> ₽</span></span>                                                                                                            </div>
+                                                    </div>
+                                                                                            </div>
+                                <div class="more-btn text-center">
+                                    <a href="" class="font_upper colored_theme_hover_bg">Подробности</a>
+                                </div>
+                            </div>
+                        </div>
+                    																						</div>
+										</div>
+																	<div class="footer_button  inner_content js_offers__8199_block">
+					<div class="counter_wrapp  clearfix rounded3">
+						<div class="button_block wide">
+							<!--noindex-->
+							<a href="/wherebuy/" class="btn-lg btn btn-default transition_bg animate-load has-ripple"><span>Где купить</span></a>
+							<!--/noindex-->
+						</div>
+					</div>
+				</div>
+														</div>
+									</div>
+			</div>
+					<input type="hidden" class="ajax-findallid" value="8127">
+						
+
+			
+			
+			<div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 col-xxs-12 item item-parent item_block ">
+				<div class="basket_props_block" id="bx_basket_div_8127_block" style="display: none;">
+									</div>
+				<div class="catalog_item_wrapp catalog_item item_wrap main_item_wrapper  product_image " id="bx_3966226736_8127" style="height: 434px;">
+					<div class="inner_wrap TYPE_1">
+																		<div class="image_wrapper_block">
+							                                                                    															                                                                    <div class="like_icons block" data-size="1">
+                                                                                                                <div class="compare_item_button item-action">
+                                    <span title="Сравнить" data-title="Сравнить" data-title_added="В сравнении" class="compare_item to rounded3 colored_theme_hover_bg js-item-action" data-action="compare" data-iblock="62" data-item="8127"><i class="svg inline  svg-inline-compare ncolor colored" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="13" viewBox="0 0 14 13"><path data-name="Rounded Rectangle 913 copy" class="cls-1" d="M595,137a1,1,0,0,1,1,1v8a1,1,0,1,1-2,0v-8A1,1,0,0,1,595,137Zm-4,3a1,1,0,0,1,1,1v5a1,1,0,1,1-2,0v-5A1,1,0,0,1,591,140Zm8-6a1,1,0,0,1,1,1v11a1,1,0,1,1-2,0V135A1,1,0,0,1,599,134Zm4,6h0a1,1,0,0,1,1,1v5a1,1,0,0,1-1,1h0a1,1,0,0,1-1-1v-5A1,1,0,0,1,603,140Z" transform="translate(-590 -134)"></path></svg></i></span>
+                                </div>
+                                                                                                                                                                                            <div class="fast_view_button">
+                                <span title="Быстрый просмотр" class="rounded3 colored_theme_hover_bg" data-event="jqm" data-param-form_id="fast_view" data-param-iblock_id="62" data-param-id="8127" data-param-item_href="%2Fcatalog%2Fakkumulyatornye_otvertki_3_6v%2Fotvertka_akkum_p_i_t_pd03p3_6_006_3_6v_3_5nm_1_3ach_bity_15sht_pov_ruk_usb_zu_fonarik_keys%2F" data-name="fast_view"><i class="svg inline  svg-inline-fw ncolor colored" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12"><path data-name="Ellipse 302 copy 3" class="cls-1" d="M549,146a8.546,8.546,0,0,1-8.008-6,8.344,8.344,0,0,1,16.016,0A8.547,8.547,0,0,1,549,146Zm0-2a6.591,6.591,0,0,0,5.967-4,7.022,7.022,0,0,0-1.141-1.76,4.977,4.977,0,0,1-9.652,0,7.053,7.053,0,0,0-1.142,1.76A6.591,6.591,0,0,0,549,144Zm-2.958-7.246c-0.007.084-.042,0.159-0.042,0.246a3,3,0,1,0,6,0c0-.087-0.035-0.162-0.042-0.246A6.179,6.179,0,0,0,546.042,136.753Z" transform="translate(-541 -134)"></path></svg></i></span>
+                            </div>
+                                            </div>
+                        																								                                        										                                                                                    <a href="/catalog/akkumulyatornye_otvertki_3_6v/otvertka_akkum_p_i_t_pd03p3_6_006_3_6v_3_5nm_1_3ach_bity_15sht_pov_ruk_usb_zu_fonarik_keys/" class="thumb">
+                            <span class="section-gallery-wrapper flexbox">
+                                                                                                        <span class="section-gallery-wrapper__item _active">
+                                        <span class="section-gallery-wrapper__item-nav "></span>
+                                        <img data-lazyload="" class="img-responsive ls-is-cached lazyloaded" src="/upload/resize_cache/iblock/9e4/67i18u2o0aaik1db59e12xhqxnx3zjsu/600_600_140cd750bba9870f18aada2478b24840a/a183d367-ddf8-11e9-857b-0cc47adbc069_1a85e778-444f-11eb-80d3-0cc47adbc069.jpeg" data-src="/upload/resize_cache/iblock/9e4/67i18u2o0aaik1db59e12xhqxnx3zjsu/600_600_140cd750bba9870f18aada2478b24840a/a183d367-ddf8-11e9-857b-0cc47adbc069_1a85e778-444f-11eb-80d3-0cc47adbc069.jpeg" alt="Отвертка аккумуляторная P.I.T. PD03P3.6-006" title="Отвертка аккумуляторная P.I.T. PD03P3.6-006">
+                                    </span>
+                                                                                                        <span class="section-gallery-wrapper__item">
+                                        <span class="section-gallery-wrapper__item-nav "></span>
+                                        <img data-lazyload="" class="img-responsive ls-is-cached lazyloaded" src="/upload/resize_cache/iblock/ad5/z80elwymymg78unm3livx73a9y0fit78/600_600_140cd750bba9870f18aada2478b24840a/a183d367-ddf8-11e9-857b-0cc47adbc069_611eb7be-984d-11ef-add5-a036bcc9936f.jpg" data-src="/upload/resize_cache/iblock/ad5/z80elwymymg78unm3livx73a9y0fit78/600_600_140cd750bba9870f18aada2478b24840a/a183d367-ddf8-11e9-857b-0cc47adbc069_611eb7be-984d-11ef-add5-a036bcc9936f.jpg" alt="PD03P3.6-006 (1)" title="PD03P3.6-006 (1)">
+                                    </span>
+                                                                                                        <span class="section-gallery-wrapper__item">
+                                        <span class="section-gallery-wrapper__item-nav "></span>
+                                        <img data-lazyload="" class="img-responsive ls-is-cached lazyloaded" src="/upload/resize_cache/iblock/8d9/bgxo4ckeuob6ujp5ax0lwa3b1uobf4yl/600_600_140cd750bba9870f18aada2478b24840a/a183d367-ddf8-11e9-857b-0cc47adbc069_611eb7f2-984d-11ef-add5-a036bcc9936f.jpg" data-src="/upload/resize_cache/iblock/8d9/bgxo4ckeuob6ujp5ax0lwa3b1uobf4yl/600_600_140cd750bba9870f18aada2478b24840a/a183d367-ddf8-11e9-857b-0cc47adbc069_611eb7f2-984d-11ef-add5-a036bcc9936f.jpg" alt="PD03P3.6-006 (2)" title="PD03P3.6-006 (2)">
+                                    </span>
+                                                                                                        <span class="section-gallery-wrapper__item">
+                                        <span class="section-gallery-wrapper__item-nav "></span>
+                                        <img data-lazyload="" class="img-responsive ls-is-cached lazyloaded" src="/upload/resize_cache/iblock/bbf/skpcsre1qvn2bsrsm344amswq2f0cak6/600_600_140cd750bba9870f18aada2478b24840a/a183d367-ddf8-11e9-857b-0cc47adbc069_611eb826-984d-11ef-add5-a036bcc9936f.jpg" data-src="/upload/resize_cache/iblock/bbf/skpcsre1qvn2bsrsm344amswq2f0cak6/600_600_140cd750bba9870f18aada2478b24840a/a183d367-ddf8-11e9-857b-0cc47adbc069_611eb826-984d-11ef-add5-a036bcc9936f.jpg" alt="PD03P3.6-006 (3)" title="PD03P3.6-006 (3)">
+                                    </span>
+                                                                                                        <span class="section-gallery-wrapper__item">
+                                        <span class="section-gallery-wrapper__item-nav "></span>
+                                        <img data-lazyload="" class="img-responsive ls-is-cached lazyloaded" src="/upload/resize_cache/iblock/182/6kl6axcw9ji459aktw2x9knu3xeinasu/600_600_140cd750bba9870f18aada2478b24840a/a183d367-ddf8-11e9-857b-0cc47adbc069_611eb8c4-984d-11ef-add5-a036bcc9936f.jpg" data-src="/upload/resize_cache/iblock/182/6kl6axcw9ji459aktw2x9knu3xeinasu/600_600_140cd750bba9870f18aada2478b24840a/a183d367-ddf8-11e9-857b-0cc47adbc069_611eb8c4-984d-11ef-add5-a036bcc9936f.jpg" alt="PD03P3.6-006 (5)" title="PD03P3.6-006 (5)">
+                                    </span>
+                                                            </span>
+                        </a>
+                                                        																														</div>
+													<div class="item_info">
+																	<div class="rating">
+																					<div class="blog-info__rating--top-info">
+									<div class="votes_block nstar with-text">
+										<div class="ratings">
+																						<div class="inner_rating" title="Нет оценок">
+																									<div class="item-rating "><i class="svg inline  svg-inline-star" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13"><rect class="sscls-1" width="15" height="13"></rect><path data-name="Shape 921 copy 15" class="sscls-2" d="M1333.37,457.5l-4.21,2.408,0.11,0.346,2.07,4.745h-0.72l-4.12-3-4.09,3h-0.75l2.04-4.707,0.12-.395-4.19-2.4V457h5.12l1.53-5h0.38l1.57,5h5.14v0.5Z" transform="translate(-1319 -452)"></path></svg></i></div>
+																									<div class="item-rating "><i class="svg inline  svg-inline-star" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13"><rect class="sscls-1" width="15" height="13"></rect><path data-name="Shape 921 copy 15" class="sscls-2" d="M1333.37,457.5l-4.21,2.408,0.11,0.346,2.07,4.745h-0.72l-4.12-3-4.09,3h-0.75l2.04-4.707,0.12-.395-4.19-2.4V457h5.12l1.53-5h0.38l1.57,5h5.14v0.5Z" transform="translate(-1319 -452)"></path></svg></i></div>
+																									<div class="item-rating "><i class="svg inline  svg-inline-star" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13"><rect class="sscls-1" width="15" height="13"></rect><path data-name="Shape 921 copy 15" class="sscls-2" d="M1333.37,457.5l-4.21,2.408,0.11,0.346,2.07,4.745h-0.72l-4.12-3-4.09,3h-0.75l2.04-4.707,0.12-.395-4.19-2.4V457h5.12l1.53-5h0.38l1.57,5h5.14v0.5Z" transform="translate(-1319 -452)"></path></svg></i></div>
+																									<div class="item-rating "><i class="svg inline  svg-inline-star" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13"><rect class="sscls-1" width="15" height="13"></rect><path data-name="Shape 921 copy 15" class="sscls-2" d="M1333.37,457.5l-4.21,2.408,0.11,0.346,2.07,4.745h-0.72l-4.12-3-4.09,3h-0.75l2.04-4.707,0.12-.395-4.19-2.4V457h5.12l1.53-5h0.38l1.57,5h5.14v0.5Z" transform="translate(-1319 -452)"></path></svg></i></div>
+																									<div class="item-rating "><i class="svg inline  svg-inline-star" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13"><rect class="sscls-1" width="15" height="13"></rect><path data-name="Shape 921 copy 15" class="sscls-2" d="M1333.37,457.5l-4.21,2.408,0.11,0.346,2.07,4.745h-0.72l-4.12-3-4.09,3h-0.75l2.04-4.707,0.12-.395-4.19-2.4V457h5.12l1.53-5h0.38l1.57,5h5.14v0.5Z" transform="translate(-1319 -452)"></path></svg></i></div>
+																							</div>
+										</div>
+									</div>
+																	</div>
+																		</div>
+																			<div class="item-title" style="height: 100px;">
+					<a href="/catalog/akkumulyatornye_otvertki_3_6v/otvertka_akkum_p_i_t_pd03p3_6_006_3_6v_3_5nm_1_3ach_bity_15sht_pov_ruk_usb_zu_fonarik_keys/" class="dark_link option-font-bold font_sm"><span>Отвертка аккумуляторная P.I.T. PD03P3.6-006</span></a>
+				</div>
+															<div class="sa_block" data-fields="[&quot;&quot;,&quot;&quot;]" data-stores="[]" data-user-fields="[&quot;&quot;,&quot;UF_CATALOG_ICON&quot;,&quot;&quot;]" style="height: 24px;">
+																				<div class="article_block"></div>
+				</div>
+															<div class="cost prices clearfix" style="height: 22px;">
+																							                                                                                                                                                                                                                                            <div class="price_matrix_wrapper ">
+                                                            <div class="price font-bold font_mxs" data-currency="RUB" data-value="2090">
+                                                                                                                        <span class="values_wrapper"><span class="price_value">2&nbsp;090</span><span class="price_currency"> ₽</span></span>                                                                                                            </div>
+                                                    </div>
+                                                                                                                                                        <div class="js-info-block rounded3">
+                            <div class="block_title text-upper font_xs font-bold">
+                                Варианты цен                                <i class="svg inline  svg-inline-close" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path data-name="Rounded Rectangle 114 copy 3" class="cccls-1" d="M334.411,138l6.3,6.3a1,1,0,0,1,0,1.414,0.992,0.992,0,0,1-1.408,0l-6.3-6.306-6.3,6.306a1,1,0,0,1-1.409-1.414l6.3-6.3-6.293-6.3a1,1,0,0,1,1.409-1.414l6.3,6.3,6.3-6.3A1,1,0,0,1,340.7,131.7Z" transform="translate(-325 -130)"></path></svg></i>                            </div>
+                            <div class="block_wrap">
+                                <div class="block_wrap_inner prices ">
+                                                                                                                    <div class="price_matrix_wrapper ">
+                                                            <div class="price font-bold font_mxs" data-currency="RUB" data-value="2090">
+                                                                                                                        <span class="values_wrapper"><span class="price_value">2&nbsp;090</span><span class="price_currency"> ₽</span></span>                                                                                                            </div>
+                                                    </div>
+                                                                                            </div>
+                                <div class="more-btn text-center">
+                                    <a href="" class="font_upper colored_theme_hover_bg">Подробности</a>
+                                </div>
+                            </div>
+                        </div>
+                    																						</div>
+										</div>
+																	<div class="footer_button  inner_content js_offers__8127_block">
+					<div class="counter_wrapp  clearfix rounded3">
+						<div class="button_block wide">
+							<!--noindex-->
+							<a href="/wherebuy/" class="btn-lg btn btn-default transition_bg animate-load has-ripple"><span>Где купить</span></a>
+							<!--/noindex-->
+						</div>
+					</div>
+				</div>
+														</div>
+									</div>
+			</div>
+					<input type="hidden" class="ajax-findallid" value="5426">
+						
+
+			
+			
+			<div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 col-xxs-12 item item-parent item_block ">
+				<div class="basket_props_block" id="bx_basket_div_5426_block" style="display: none;">
+									</div>
+				<div class="catalog_item_wrapp catalog_item item_wrap main_item_wrapper  product_image " id="bx_3966226736_5426" style="height: 434px;">
+					<div class="inner_wrap TYPE_1">
+																		<div class="image_wrapper_block">
+							                                                                    															                                                                    <div class="like_icons block" data-size="1">
+                                                                                                                <div class="compare_item_button item-action">
+                                    <span title="Сравнить" data-title="Сравнить" data-title_added="В сравнении" class="compare_item to rounded3 colored_theme_hover_bg js-item-action" data-action="compare" data-iblock="62" data-item="5426"><i class="svg inline  svg-inline-compare ncolor colored" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="13" viewBox="0 0 14 13"><path data-name="Rounded Rectangle 913 copy" class="cls-1" d="M595,137a1,1,0,0,1,1,1v8a1,1,0,1,1-2,0v-8A1,1,0,0,1,595,137Zm-4,3a1,1,0,0,1,1,1v5a1,1,0,1,1-2,0v-5A1,1,0,0,1,591,140Zm8-6a1,1,0,0,1,1,1v11a1,1,0,1,1-2,0V135A1,1,0,0,1,599,134Zm4,6h0a1,1,0,0,1,1,1v5a1,1,0,0,1-1,1h0a1,1,0,0,1-1-1v-5A1,1,0,0,1,603,140Z" transform="translate(-590 -134)"></path></svg></i></span>
+                                </div>
+                                                                                                                                                                                            <div class="fast_view_button">
+                                <span title="Быстрый просмотр" class="rounded3 colored_theme_hover_bg" data-event="jqm" data-param-form_id="fast_view" data-param-iblock_id="62" data-param-id="5426" data-param-item_href="%2Fcatalog%2Fakkumulyatornye_otvertki_3_6v%2Fotvertka_akkum_p_i_t_pes3_6p_24a_3_6v_2nm_1_3ach_bity_23sht_usb_zu_led_podsvetka_chekhol%2F" data-name="fast_view"><i class="svg inline  svg-inline-fw ncolor colored" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12"><path data-name="Ellipse 302 copy 3" class="cls-1" d="M549,146a8.546,8.546,0,0,1-8.008-6,8.344,8.344,0,0,1,16.016,0A8.547,8.547,0,0,1,549,146Zm0-2a6.591,6.591,0,0,0,5.967-4,7.022,7.022,0,0,0-1.141-1.76,4.977,4.977,0,0,1-9.652,0,7.053,7.053,0,0,0-1.142,1.76A6.591,6.591,0,0,0,549,144Zm-2.958-7.246c-0.007.084-.042,0.159-0.042,0.246a3,3,0,1,0,6,0c0-.087-0.035-0.162-0.042-0.246A6.179,6.179,0,0,0,546.042,136.753Z" transform="translate(-541 -134)"></path></svg></i></span>
+                            </div>
+                                            </div>
+                        																								                                        										                                                                                    <a href="/catalog/akkumulyatornye_otvertki_3_6v/otvertka_akkum_p_i_t_pes3_6p_24a_3_6v_2nm_1_3ach_bity_23sht_usb_zu_led_podsvetka_chekhol/" class="thumb">
+                            <span class="section-gallery-wrapper flexbox">
+                                                                                                        <span class="section-gallery-wrapper__item _active">
+                                        <span class="section-gallery-wrapper__item-nav "></span>
+                                        <img data-lazyload="" class="img-responsive ls-is-cached lazyloaded" src="/upload/resize_cache/iblock/537/e1mk12zkkitnmtm9nycxn8vzshmm5ryg/600_600_140cd750bba9870f18aada2478b24840a/fbf8cdc9-b3b6-11eb-80c4-000c29ab357b_e53fb036-649a-11ec-80db-000c29ab357b.jpeg" data-src="/upload/resize_cache/iblock/537/e1mk12zkkitnmtm9nycxn8vzshmm5ryg/600_600_140cd750bba9870f18aada2478b24840a/fbf8cdc9-b3b6-11eb-80c4-000c29ab357b_e53fb036-649a-11ec-80db-000c29ab357b.jpeg" alt="PES3.6P-24A (5)" title="PES3.6P-24A (5)">
+                                    </span>
+                                                                                                        <span class="section-gallery-wrapper__item">
+                                        <span class="section-gallery-wrapper__item-nav "></span>
+                                        <img data-lazyload="" class="img-responsive ls-is-cached lazyloaded" src="/upload/resize_cache/iblock/5b6/q0p2xw55vrpajqbfrxzyr52b9h8urw4i/600_600_140cd750bba9870f18aada2478b24840a/fbf8cdc9-b3b6-11eb-80c4-000c29ab357b_a5f291b6-984c-11ef-add5-a036bcc9936f.jpg" data-src="/upload/resize_cache/iblock/5b6/q0p2xw55vrpajqbfrxzyr52b9h8urw4i/600_600_140cd750bba9870f18aada2478b24840a/fbf8cdc9-b3b6-11eb-80c4-000c29ab357b_a5f291b6-984c-11ef-add5-a036bcc9936f.jpg" alt="PES3.6P-24A_15" title="PES3.6P-24A_15">
+                                    </span>
+                                                                                                        <span class="section-gallery-wrapper__item">
+                                        <span class="section-gallery-wrapper__item-nav "></span>
+                                        <img data-lazyload="" class="img-responsive ls-is-cached lazyloaded" src="/upload/resize_cache/iblock/918/08u9fwasg71pkvmbtpo1pzccfgizt6kf/600_600_140cd750bba9870f18aada2478b24840a/fbf8cdc9-b3b6-11eb-80c4-000c29ab357b_a5f291ea-984c-11ef-add5-a036bcc9936f.jpg" data-src="/upload/resize_cache/iblock/918/08u9fwasg71pkvmbtpo1pzccfgizt6kf/600_600_140cd750bba9870f18aada2478b24840a/fbf8cdc9-b3b6-11eb-80c4-000c29ab357b_a5f291ea-984c-11ef-add5-a036bcc9936f.jpg" alt="PES3.6P-24A_09" title="PES3.6P-24A_09">
+                                    </span>
+                                                                                                        <span class="section-gallery-wrapper__item">
+                                        <span class="section-gallery-wrapper__item-nav "></span>
+                                        <img data-lazyload="" class="img-responsive ls-is-cached lazyloaded" src="/upload/resize_cache/iblock/fec/61ip5u14jthczf4firzbgjqwelvd7az4/600_600_140cd750bba9870f18aada2478b24840a/fbf8cdc9-b3b6-11eb-80c4-000c29ab357b_a5f2921e-984c-11ef-add5-a036bcc9936f.jpg" data-src="/upload/resize_cache/iblock/fec/61ip5u14jthczf4firzbgjqwelvd7az4/600_600_140cd750bba9870f18aada2478b24840a/fbf8cdc9-b3b6-11eb-80c4-000c29ab357b_a5f2921e-984c-11ef-add5-a036bcc9936f.jpg" alt="PES3.6P-24A_10" title="PES3.6P-24A_10">
+                                    </span>
+                                                                                                        <span class="section-gallery-wrapper__item">
+                                        <span class="section-gallery-wrapper__item-nav "></span>
+                                        <img data-lazyload="" class="img-responsive ls-is-cached lazyloaded" src="/upload/resize_cache/iblock/255/62tmm8fxty7jcjaw2gjulrcopk8cddzm/600_600_140cd750bba9870f18aada2478b24840a/fbf8cdc9-b3b6-11eb-80c4-000c29ab357b_a5f29252-984c-11ef-add5-a036bcc9936f.jpg" data-src="/upload/resize_cache/iblock/255/62tmm8fxty7jcjaw2gjulrcopk8cddzm/600_600_140cd750bba9870f18aada2478b24840a/fbf8cdc9-b3b6-11eb-80c4-000c29ab357b_a5f29252-984c-11ef-add5-a036bcc9936f.jpg" alt="PES3.6P-24A_14" title="PES3.6P-24A_14">
+                                    </span>
+                                                            </span>
+                        </a>
+                                                        																														</div>
+													<div class="item_info">
+																	<div class="rating">
+																					<div class="blog-info__rating--top-info">
+									<div class="votes_block nstar with-text">
+										<div class="ratings">
+																						<div class="inner_rating" title="Нет оценок">
+																									<div class="item-rating "><i class="svg inline  svg-inline-star" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13"><rect class="sscls-1" width="15" height="13"></rect><path data-name="Shape 921 copy 15" class="sscls-2" d="M1333.37,457.5l-4.21,2.408,0.11,0.346,2.07,4.745h-0.72l-4.12-3-4.09,3h-0.75l2.04-4.707,0.12-.395-4.19-2.4V457h5.12l1.53-5h0.38l1.57,5h5.14v0.5Z" transform="translate(-1319 -452)"></path></svg></i></div>
+																									<div class="item-rating "><i class="svg inline  svg-inline-star" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13"><rect class="sscls-1" width="15" height="13"></rect><path data-name="Shape 921 copy 15" class="sscls-2" d="M1333.37,457.5l-4.21,2.408,0.11,0.346,2.07,4.745h-0.72l-4.12-3-4.09,3h-0.75l2.04-4.707,0.12-.395-4.19-2.4V457h5.12l1.53-5h0.38l1.57,5h5.14v0.5Z" transform="translate(-1319 -452)"></path></svg></i></div>
+																									<div class="item-rating "><i class="svg inline  svg-inline-star" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13"><rect class="sscls-1" width="15" height="13"></rect><path data-name="Shape 921 copy 15" class="sscls-2" d="M1333.37,457.5l-4.21,2.408,0.11,0.346,2.07,4.745h-0.72l-4.12-3-4.09,3h-0.75l2.04-4.707,0.12-.395-4.19-2.4V457h5.12l1.53-5h0.38l1.57,5h5.14v0.5Z" transform="translate(-1319 -452)"></path></svg></i></div>
+																									<div class="item-rating "><i class="svg inline  svg-inline-star" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13"><rect class="sscls-1" width="15" height="13"></rect><path data-name="Shape 921 copy 15" class="sscls-2" d="M1333.37,457.5l-4.21,2.408,0.11,0.346,2.07,4.745h-0.72l-4.12-3-4.09,3h-0.75l2.04-4.707,0.12-.395-4.19-2.4V457h5.12l1.53-5h0.38l1.57,5h5.14v0.5Z" transform="translate(-1319 -452)"></path></svg></i></div>
+																									<div class="item-rating "><i class="svg inline  svg-inline-star" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="13" viewBox="0 0 15 13"><rect class="sscls-1" width="15" height="13"></rect><path data-name="Shape 921 copy 15" class="sscls-2" d="M1333.37,457.5l-4.21,2.408,0.11,0.346,2.07,4.745h-0.72l-4.12-3-4.09,3h-0.75l2.04-4.707,0.12-.395-4.19-2.4V457h5.12l1.53-5h0.38l1.57,5h5.14v0.5Z" transform="translate(-1319 -452)"></path></svg></i></div>
+																							</div>
+										</div>
+									</div>
+																	</div>
+																		</div>
+																			<div class="item-title" style="height: 100px;">
+					<a href="/catalog/akkumulyatornye_otvertki_3_6v/otvertka_akkum_p_i_t_pes3_6p_24a_3_6v_2nm_1_3ach_bity_23sht_usb_zu_led_podsvetka_chekhol/" class="dark_link option-font-bold font_sm"><span>Отвертка аккум. P.I.T. PES3.6P-24A (3,6В, 2Нм, 1.3Ач, биты 23шт, USB ЗУ, LED подсветка, чехол)</span></a>
+				</div>
+															<div class="sa_block" data-fields="[&quot;&quot;,&quot;&quot;]" data-stores="[]" data-user-fields="[&quot;&quot;,&quot;UF_CATALOG_ICON&quot;,&quot;&quot;]" style="height: 24px;">
+																				<div class="article_block"></div>
+				</div>
+															<div class="cost prices clearfix" style="height: 22px;">
+																							                                                                                                                                                                                                                                            <div class="price_matrix_wrapper ">
+                                                            <div class="price font-bold font_mxs" data-currency="RUB" data-value="3190">
+                                                                                                                        <span class="values_wrapper"><span class="price_value">3&nbsp;190</span><span class="price_currency"> ₽</span></span>                                                                                                            </div>
+                                                    </div>
+                                                                                                                                                        <div class="js-info-block rounded3">
+                            <div class="block_title text-upper font_xs font-bold">
+                                Варианты цен                                <i class="svg inline  svg-inline-close" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path data-name="Rounded Rectangle 114 copy 3" class="cccls-1" d="M334.411,138l6.3,6.3a1,1,0,0,1,0,1.414,0.992,0.992,0,0,1-1.408,0l-6.3-6.306-6.3,6.306a1,1,0,0,1-1.409-1.414l6.3-6.3-6.293-6.3a1,1,0,0,1,1.409-1.414l6.3,6.3,6.3-6.3A1,1,0,0,1,340.7,131.7Z" transform="translate(-325 -130)"></path></svg></i>                            </div>
+                            <div class="block_wrap">
+                                <div class="block_wrap_inner prices ">
+                                                                                                                    <div class="price_matrix_wrapper ">
+                                                            <div class="price font-bold font_mxs" data-currency="RUB" data-value="3190">
+                                                                                                                        <span class="values_wrapper"><span class="price_value">3&nbsp;190</span><span class="price_currency"> ₽</span></span>                                                                                                            </div>
+                                                    </div>
+                                                                                            </div>
+                                <div class="more-btn text-center">
+                                    <a href="" class="font_upper colored_theme_hover_bg">Подробности</a>
+                                </div>
+                            </div>
+                        </div>
+                    																						</div>
+										</div>
+																	<div class="footer_button  inner_content js_offers__5426_block">
+					<div class="counter_wrapp  clearfix rounded3">
+						<div class="button_block wide">
+							<!--noindex-->
+							<a href="/wherebuy/" class="btn-lg btn btn-default transition_bg animate-load has-ripple"><span>Где купить</span></a>
+							<!--/noindex-->
+						</div>
+					</div>
+				</div>
+														</div>
+									</div>
+			</div>
+		
+			</div>
