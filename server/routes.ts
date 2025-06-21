@@ -12,7 +12,7 @@ import { eq, sql } from "drizzle-orm";
 import { parseImportFile } from "./utils/file-parser";
 import { adaptCatalogWithClaude } from "./utils/claude-adapter";
 import { scrapeSupplierCatalog, SUPPLIERS } from "./utils/web-scraper";
-import { importFullSupplierCatalog } from "./utils/full-catalog-importer";
+import { realCatalogScraper } from "./utils/real-catalog-scraper";
 import { setupAuth, requireAuth, requireAdmin } from "./auth";
 import bcrypt from "bcrypt";
 import multer from "multer";
