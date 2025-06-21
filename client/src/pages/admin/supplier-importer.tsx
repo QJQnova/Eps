@@ -31,8 +31,8 @@ export default function SupplierImporter() {
 
   const importMutation = useMutation({
     mutationFn: async (data: { url: string; name: string; description?: string }) => {
-      const response = await apiRequest("POST", "/api/suppliers/import-catalog", data);
-      return await response.json() as ImportResult;
+      const result = await apiRequest("POST", "/api/suppliers/import-catalog", data);
+      return result as ImportResult;
     },
     onMutate: () => {
       setIsImporting(true);
