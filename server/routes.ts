@@ -12,6 +12,7 @@ import { eq, sql } from "drizzle-orm";
 import { parseImportFile } from "./utils/file-parser";
 import { adaptCatalogWithClaude } from "./utils/claude-adapter";
 import { scrapeSupplierCatalog, SUPPLIERS } from "./utils/web-scraper";
+import { importFullSupplierCatalog } from "./utils/full-catalog-importer";
 import { setupAuth, requireAuth, requireAdmin } from "./auth";
 import bcrypt from "bcrypt";
 import multer from "multer";
@@ -458,6 +459,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         message: "Ошибка адаптации каталога: " + error.message 
+      });
+    }
+  });
+
+  // Full catalog import from supplier website
+  app.post("/api/suppliers/import-catalog", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { url, name, description } = req.body;
+      
+      if (!url || !name) {
+        return res.status(400).json({
+          success: false,
+          message: "URL и название поставщика обязательны"
+        });
+      }
+
+      console.log(`Начинаю полный импорт каталога поставщика: ${name} (${url})`);
+      
+      const result = await importFullSupplierCatalog(url, name, description);
+      
+      if (result.success) {
+        res.json({
+          success: true,
+          message: `Успешно импортирован каталог поставщика ${name}`,
+          categoriesCreated: result.categoriesCreated,
+          productsImported: result.productsImported,
+          failed: result.failed
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: result.error || "Ошибка импорта каталога",
+          error: result.error
+        });
+      }
+    } catch (error: any) {
+      console.error("Ошибка API импорта каталога:", error);
+      res.status(500).json({
+        success: false,
+        message: "Ошибка сервера: " + error.message,
+        error: error.message
       });
     }
   });

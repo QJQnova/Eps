@@ -83,6 +83,11 @@ export default function AdminSidebar() {
       href: "/admin/mass-scraper",
     },
     {
+      icon: Globe,
+      label: "Импорт поставщика",
+      href: "/admin/supplier-importer",
+    },
+    {
       icon: Tag,
       label: "Категории",
       href: "/admin/categories",
