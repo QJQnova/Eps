@@ -400,49 +400,55 @@ async function analyzeHtmlWithClaude(cleanedHtml: string, url: string, supplier:
   // Используем Buffer для безопасной кодировки русского текста
   const safeHtml = Buffer.from(cleanedHtml, 'utf8').toString('base64');
   
-  const prompt = `Analyze this Russian tool supplier HTML content (base64 encoded) and extract ALL AVAILABLE product information.
+  const prompt = `Ты эксперт по парсингу каталогов российских поставщиков инструментов. Проанализируй HTML код (base64) и извлеки ВСЮ доступную информацию о товарах.
 
-Extract products with MAXIMUM information for each:
+КРИТИЧЕСКИЕ ТРЕБОВАНИЯ:
+1. Извлекай ТОЛЬКО реальные товары (не баннеры, меню, категории)
+2. Каждый товар ОБЯЗАТЕЛЬНО должен иметь название и артикул
+3. Ищи товары в блоках: .product, .item, .catalog-item, .card, article, li с товарами
 
-REQUIRED FIELDS:
-1. name - full product name in Russian
-2. sku - product code/article (mandatory)
-3. price - price in rubles or "По запросу"
-4. category - product category
-5. description - full product description
-6. imageUrl - main product image
+ОБЯЗАТЕЛЬНЫЕ ПОЛЯ (должны быть у каждого товара):
+- name: ПОЛНОЕ название товара на русском языке
+- sku: артикул/код товара (если нет - создай из названия)
+- price: цена в рублях (число) или "0" если не указана
+- category: категория товара
+- description: описание товара (если есть)
+- imageUrl: ссылка на изображение (полный URL)
 
-OPTIONAL FIELDS (extract if available):
-7. originalPrice - old price (if on sale)
-8. shortDescription - brief description
-9. specifications - technical specifications
-10. imageUrls - all product images (array)
-11. brand - manufacturer/brand
-12. model - product model
-13. warranty - warranty period
-14. availability - stock status ("В наличии", "Под заказ", etc)
-15. stock - quantity available (number)
-16. features - product features/benefits (array)
+ДОПОЛНИТЕЛЬНЫЕ ПОЛЯ (извлекай если есть):
+- originalPrice: старая цена для скидок
+- shortDescription: краткое описание
+- specifications: технические характеристики
+- brand: бренд/производитель
+- model: модель
+- warranty: гарантия
+- availability: наличие ("В наличии", "Под заказ", "Нет в наличии")
+- stock: количество (число)
 
-Return ONLY a JSON array with maximum available data:
+ФОРМАТ ОТВЕТА - ТОЛЬКО JSON массив:
 [{
-  "name":"Full Product Name",
-  "sku":"product-code",
-  "price":"15999",
-  "originalPrice":"18999",
-  "category":"Category",
-  "description":"Full description",
-  "shortDescription":"Brief description",
-  "specifications":"Technical specs",
-  "imageUrl":"main-image-url",
-  "imageUrls":["image1","image2"],
-  "brand":"Brand",
-  "model":"Model",
-  "warranty":"2 года",
-  "availability":"В наличии",
-  "stock":15,
-  "features":["feature1","feature2"]
+  "name": "Дрель BOSCH GSB 18-2-LI Professional",
+  "sku": "06019E6100",
+  "price": "15999",
+  "originalPrice": "18500",
+  "category": "Дрели аккумуляторные",
+  "description": "Профессиональная аккумуляторная дрель с Li-Ion аккумулятором",
+  "shortDescription": "Дрель аккумуляторная 18В",
+  "imageUrl": "https://example.com/image.jpg",
+  "brand": "BOSCH",
+  "model": "GSB 18-2-LI",
+  "specifications": "18В, 2 Ач, 13мм патрон",
+  "warranty": "2 года",
+  "availability": "В наличии",
+  "stock": 5
 }]
+
+ВАЖНО:
+- НЕ извлекай дубликаты товаров
+- НЕ добавляй товары без названия или артикула
+- Преобразуй все относительные ссылки в абсолютные
+- Если цена не найдена, ставь "0"
+- Максимум 50 товаров с одной страницы
 
 Base64 HTML: ${safeHtml}`;
 
@@ -471,19 +477,32 @@ Base64 HTML: ${safeHtml}`;
     const products = JSON.parse(jsonMatch[0]);
     console.log(`Успешно извлечено ${products.length} товаров`);
 
-    // Обрабатываем продукты
+    // Обрабатываем продукты с валидацией
     return products.map((product: any) => ({
-      name: product.name || '',
-      sku: product.sku || '',
-      category: product.category || 'Инструменты',
-      description: product.description || '',
+      name: product.name?.trim() || '',
+      sku: product.sku?.trim() || `${supplier.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      category: product.category?.trim() || 'Инструменты',
+      description: product.description?.trim() || `${product.name} от ${supplier.name}`,
+      shortDescription: product.shortDescription?.trim() || product.name?.substring(0, 100) || '',
       imageUrl: normalizeImageUrl(product.imageUrl, supplier.baseUrl),
+      price: product.price && !isNaN(parseFloat(product.price)) ? product.price : '0',
+      originalPrice: product.originalPrice && !isNaN(parseFloat(product.originalPrice)) ? product.originalPrice : null,
+      brand: product.brand?.trim() || '',
+      model: product.model?.trim() || '',
+      specifications: product.specifications?.trim() || '',
+      warranty: product.warranty?.trim() || '',
+      availability: product.availability?.trim() || 'Уточняйте наличие',
+      stock: product.stock && !isNaN(parseInt(product.stock)) ? parseInt(product.stock) : null,
       sourceUrl: url,
-      price: '0' // B2B - цены скрыты
+      supplierName: supplier.name
     })).filter((product: any) => 
-      product.name && product.sku && 
-      product.name.trim().length > 0 && 
-      product.sku.trim().length > 0
+      product.name && 
+      product.name.trim().length > 3 && 
+      product.sku &&
+      product.sku.trim().length > 0 &&
+      !product.name.toLowerCase().includes('категор') &&
+      !product.name.toLowerCase().includes('раздел') &&
+      !product.name.toLowerCase().includes('меню')
     );
 
   } catch (error: any) {
@@ -553,27 +572,50 @@ function cleanHtmlForAnalysis(html: string): string {
 
   // Ограничиваем размер для Claude (максимум ~15000 символов для стабильности JSON)
   if (cleaned.length > 15000) {
-    // Ищем секцию с товарами
+    // Ищем секцию с товарами по расширенному списку селекторов
     const productSections = [
+      // Основные контейнеры каталога
       /<div[^>]*class[^>]*catalog[^>]*>[\s\S]*?<\/div>/gi,
-      /<div[^>]*class[^>]*product[^>]*>[\s\S]*?<\/div>/gi,
+      /<div[^>]*class[^>]*products[^>]*>[\s\S]*?<\/div>/gi,
       /<section[^>]*class[^>]*catalog[^>]*>[\s\S]*?<\/section>/gi,
-      /<ul[^>]*class[^>]*product[^>]*>[\s\S]*?<\/ul>/gi,
+      /<main[^>]*class[^>]*catalog[^>]*>[\s\S]*?<\/main>/gi,
+      
+      // Товарные блоки
+      /<div[^>]*class[^>]*product[^>]*>[\s\S]*?<\/div>/gi,
       /<div[^>]*class[^>]*item[^>]*>[\s\S]*?<\/div>/gi,
-      /<article[^>]*>[\s\S]*?<\/article>/gi
+      /<div[^>]*class[^>]*card[^>]*>[\s\S]*?<\/div>/gi,
+      /<article[^>]*class[^>]*product[^>]*>[\s\S]*?<\/article>/gi,
+      
+      // Списки товаров
+      /<ul[^>]*class[^>]*product[^>]*>[\s\S]*?<\/ul>/gi,
+      /<ul[^>]*class[^>]*catalog[^>]*>[\s\S]*?<\/ul>/gi,
+      /<ol[^>]*class[^>]*items[^>]*>[\s\S]*?<\/ol>/gi,
+      
+      // Сетки товаров
+      /<div[^>]*class[^>]*grid[^>]*>[\s\S]*?<\/div>/gi,
+      /<div[^>]*class[^>]*row[^>]*>[\s\S]*?<\/div>/gi,
+      /<div[^>]*class[^>]*list[^>]*>[\s\S]*?<\/div>/gi,
+      
+      // Общие контейнеры
+      /<article[^>]*>[\s\S]*?<\/article>/gi,
+      /<section[^>]*>[\s\S]*?<\/section>/gi
     ];
 
     for (const regex of productSections) {
       const matches = cleaned.match(regex);
       if (matches && matches.length > 0) {
-        cleaned = matches.slice(0, 5).join(' '); // Берем первые 5 элементов
+        // Берем наиболее релевантные секции (до 8 блоков)
+        cleaned = matches.slice(0, 8).join(' ');
+        console.log(`Найдена секция товаров, размер: ${cleaned.length} символов`);
         break;
       }
     }
 
-    // Если все еще слишком большой, обрезаем
+    // Если все еще слишком большой, обрезаем с сохранением целостности HTML
     if (cleaned.length > 15000) {
-      cleaned = cleaned.substring(0, 15000);
+      // Ищем последний закрывающий тег в пределах лимита
+      const cutPoint = cleaned.lastIndexOf('</', 15000);
+      cleaned = cutPoint > 10000 ? cleaned.substring(0, cutPoint) : cleaned.substring(0, 15000);
     }
   }
 
