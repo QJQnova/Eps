@@ -270,7 +270,7 @@ async function fallbackToSimpleImport(supplierName: string, description: string)
         slug: generateSlug(`${supplierName}-${category.name}-${i}`),
         description: `Качественный товар из категории ${category.name} от поставщика ${supplierName}. ${description}`,
         shortDescription: `${category.name} модель ${i}`,
-        price: Math.floor(Math.random() * 50000) + 1000,
+        price: (Math.floor(Math.random() * 50000) + 1000).toString(),
         originalPrice: null,
         categoryId: category.id,
         imageUrl: null,

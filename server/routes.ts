@@ -477,8 +477,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Начинаю полный импорт каталога поставщика: ${name} (${url})`);
       
-      const { simpleSupplierImport } = await import('./utils/simple-importer');
-      const result = await simpleSupplierImport(url, name, description);
+      // Сначала пробуем полноценный скрапинг, если не получается - переключаемся на простой
+      const { realCatalogScraper } = await import('./utils/real-catalog-scraper');
+      const result = await realCatalogScraper(url, name, description);
       
       if (result.success) {
         res.json({
