@@ -272,20 +272,33 @@ export default function ProductDetails() {
             )}
           </div>
 
-          {/* Price Section with Animation */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-red-100/50 to-transparent"></div>
-            <div className="relative z-10">
-              <div className="text-2xl font-bold text-blue-600">
-                Узнать цену у менеджера
-              </div>
-              <div className="text-sm text-gray-500 mt-1">
-                {(product.stock && product.stock > 0) ? (
-                  <span className="text-emerald-600 font-medium">В наличии ({product.stock} шт.)</span>
-                ) : (
-                  <span className="text-rose-600 font-medium">Нет в наличии</span>
-                )}
-              </div>
+          {/* Price Section */}
+          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-3 mb-2">
+              {product.originalPrice && Number(product.originalPrice) > Number(product.price) ? (
+                <>
+                  <div className="text-3xl font-bold text-eps-red">
+                    {formatPrice(product.price)}
+                  </div>
+                  <div className="text-lg text-gray-500 line-through">
+                    {formatPrice(product.originalPrice)}
+                  </div>
+                  <div className="bg-eps-red text-white text-sm font-semibold px-2 py-1 rounded">
+                    -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
+                  </div>
+                </>
+              ) : (
+                <div className="text-3xl font-bold text-gray-900">
+                  {formatPrice(product.price)}
+                </div>
+              )}
+            </div>
+            <div className="text-sm text-gray-500">
+              {(product.stock && product.stock > 0) ? (
+                <span className="text-emerald-600 font-medium">В наличии ({product.stock} шт.)</span>
+              ) : (
+                <span className="text-rose-600 font-medium">Нет в наличии</span>
+              )}
             </div>
           </div>
           
@@ -444,7 +457,7 @@ export default function ProductDetails() {
             <Card className="border-gray-200 shadow-sm overflow-hidden">
               <CardContent className="p-6 bg-gradient-to-br from-white to-gray-50">
                 <div className="prose max-w-none">
-                  <p>{product.description || "Подробное описание для этого товара отсутствует."}</p>
+                  <p>{product?.description || "Подробное описание для этого товара отсутствует."}</p>
                 </div>
               </CardContent>
             </Card>
@@ -459,7 +472,7 @@ export default function ProductDetails() {
                     
                     <div className="flex justify-between p-3 bg-white border border-gray-100 rounded-lg">
                       <span className="text-sm text-gray-600">Артикул</span>
-                      <span className="text-sm font-medium">{product.sku}</span>
+                      <span className="text-sm font-medium">{product?.sku}</span>
                     </div>
                     
                     <div className="flex justify-between p-3 bg-white border border-gray-100 rounded-lg">

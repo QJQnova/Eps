@@ -117,10 +117,17 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.shortDescription || (product.description ? product.description.substring(0, 80) : "")}
         </p>
         
-        {/* Информация и кнопка связи с менеджером */}
+        {/* Цена и кнопка в корзину */}
         <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
           <div className="flex flex-col">
-            <span className="text-sm font-medium text-gray-600">Узнать цену у менеджера</span>
+            {product.originalPrice && Number(product.originalPrice) > Number(product.price) ? (
+              <>
+                <span className="text-lg font-bold text-eps-red">{formatPrice(product.price)}</span>
+                <span className="text-sm text-gray-500 line-through">{formatPrice(product.originalPrice)}</span>
+              </>
+            ) : (
+              <span className="text-lg font-bold text-gray-900">{formatPrice(product.price)}</span>
+            )}
           </div>
           
           <Button 
