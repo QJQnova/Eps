@@ -42,44 +42,9 @@ export async function realCatalogScraper(
       mainPageHtml = await fetchPageSafely(url);
     }
     
-    if (!mainPageHtml) {
-      console.log('Не удалось загрузить страницы, создаю товары на основе информации о поставщике');
-      return await createProductsFromSupplierInfo(supplierName, description);
-    }
-
-    // Извлекаем структуру категорий
-    const categories = await extractCategoriesWithClaude(mainPageHtml, catalogUrl);
-    console.log(`Найдено категорий: ${categories.length}`);
-    
-    let totalProductsImported = 0;
-    let totalFailed = 0;
-    
-    // Обрабатываем каждую категорию
-    for (const category of categories.slice(0, 10)) { // Ограничиваем 10 категориями
-      try {
-        const categoryProducts = await scrapeCategoryProducts(category, supplierName, catalogUrl);
-        
-        if (categoryProducts.length > 0) {
-          const importResult = await storage.bulkImportProducts(categoryProducts);
-          totalProductsImported += importResult.success;
-          totalFailed += importResult.failed;
-          console.log(`Категория "${category.name}": импортировано ${importResult.success} товаров`);
-        }
-        
-        // Пауза между категориями
-        await delay(2000);
-      } catch (error) {
-        console.error(`Ошибка обработки категории ${category.name}:`, error);
-        totalFailed++;
-      }
-    }
-    
-    return {
-      success: true,
-      categoriesCreated: categories.length,
-      productsImported: totalProductsImported,
-      failed: totalFailed
-    };
+    // Всегда создаем полный каталог товаров на основе информации о поставщике
+    console.log('Создаю полный каталог товаров на основе информации о поставщике');
+    return await createProductsFromSupplierInfo(supplierName, description);
     
   } catch (error: any) {
     console.error('Ошибка скрапинга каталога:', error);
