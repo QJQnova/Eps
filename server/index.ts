@@ -29,7 +29,9 @@ app.use(cors({
     }
     
     // Allow Replit development domains
-    if (origin.includes('replit.dev') || origin.includes('replit.app')) {
+    if (origin.includes('replit.dev') || 
+        origin.includes('replit.app') || 
+        origin.includes('riker.replit.dev')) {
       return callback(null, true);
     }
     

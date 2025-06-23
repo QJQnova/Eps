@@ -27,16 +27,38 @@ const router = express.Router();
 
 // Функция для создания/получения категории по названию
 async function getCategoryByName(categoryName: string): Promise<number> {
+  // Clean and validate category name
+  let cleanName = categoryName?.toString().trim() || '';
+  
+  // Filter out invalid category names
+  if (!cleanName || 
+      cleanName.length < 2 || 
+      cleanName.startsWith('http') ||
+      cleanName.includes('.jpg') ||
+      cleanName.includes('.png') ||
+      cleanName.includes('.jpeg') ||
+      /^[^а-яё\w]+$/i.test(cleanName)) {
+    cleanName = 'Без категории';
+  }
+  
   // Check if category exists by name first
-  const existingCategoryByName = await storage.getCategoryByName(categoryName);
+  const existingCategoryByName = await storage.getCategoryByName(cleanName);
   if (existingCategoryByName) {
     return existingCategoryByName.id;
   }
   
-  // Generate unique slug
-  let baseSlug = categoryName.toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-  if (!baseSlug || baseSlug === '') {
-    baseSlug = 'category';
+  // Generate unique slug with better handling
+  let baseSlug = cleanName
+    .toLowerCase()
+    .replace(/[^a-zа-я0-9\s]/g, '') // Remove special chars
+    .trim()
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens
+    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+  
+  // Ensure we have a valid slug
+  if (!baseSlug || baseSlug.length === 0) {
+    baseSlug = `category-${Date.now()}`;
   }
   
   let slug = baseSlug;
@@ -46,17 +68,38 @@ async function getCategoryByName(categoryName: string): Promise<number> {
   while (await storage.getCategoryBySlug(slug)) {
     slug = `${baseSlug}-${counter}`;
     counter++;
+    
+    // Safety check to prevent infinite loop
+    if (counter > 100) {
+      slug = `${baseSlug}-${Date.now()}`;
+      break;
+    }
   }
   
-  // Create new category with unique slug
-  const newCategory = await storage.createCategory({
-    name: categoryName,
-    slug: slug,
-    description: `Категория ${categoryName}`,
-    icon: 'tool'
-  });
-  
-  return newCategory.id;
+  try {
+    // Create new category with unique slug
+    const newCategory = await storage.createCategory({
+      name: cleanName,
+      slug: slug,
+      description: `Категория ${cleanName}`,
+      icon: 'tool'
+    });
+    
+    return newCategory.id;
+  } catch (error: any) {
+    console.error(`Ошибка создания категории ${cleanName}:`, error);
+    
+    // Try with fallback slug
+    const fallbackSlug = `category-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+    const fallbackCategory = await storage.createCategory({
+      name: cleanName,
+      slug: fallbackSlug,
+      description: `Категория ${cleanName}`,
+      icon: 'tool'
+    });
+    
+    return fallbackCategory.id;
+  }
 }
 
 // Функция валидации данных
@@ -841,11 +884,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Create categories first
-      const uniqueCategories = [...new Set(products.map(p => p.categoryName).filter(Boolean))];
+      const categoryNames = products.map(p => p.categoryName).filter(Boolean) as string[];
+      const uniqueCategories = [...new Set(categoryNames)];
       
       for (const categoryName of uniqueCategories) {
         try {
-          const categoryId = await getCategoryByName(categoryName!);
+          const categoryId = await getCategoryByName(categoryName);
           if (categoryId) results.categoriesCreated++;
         } catch (error: any) {
           results.errors.push(`Ошибка создания категории ${categoryName}: ${error.message}`);

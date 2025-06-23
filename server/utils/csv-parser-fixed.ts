@@ -113,7 +113,7 @@ export async function parseCSVFile(filePath: string): Promise<CSVProduct[]> {
     console.log(`Заголовки:`, headers);
     
     // Map headers to expected fields (case-insensitive)
-    const headerMap: Record<string, string> = {};
+    const headerMap: Record<number, string> = {};
     headers.forEach((header, index) => {
       const cleaned = header.toLowerCase().trim();
       if (cleaned.includes('изображ') || cleaned.includes('картинк') || cleaned === 'imageurl') {
