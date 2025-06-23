@@ -138,32 +138,7 @@ export default function Products() {
           </div>
         </div>
         
-        {/* Информация о ценах и процессе заказа */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-lg font-medium text-blue-900 mb-2">Как работают цены на нашем сайте</h3>
-              <div className="text-blue-800 text-sm leading-relaxed">
-                <p className="mb-3">
-                  Цены могут меняться, так как мы всегда стремимся предложить лучшие условия для наших партнёров. 
-                  Точную стоимость вы узнаете, добавив товары в корзину и открыв заявку для связи с менеджером.
-                </p>
-                <p className="mb-3">
-                  Также можно позвонить для обсуждения деталей, но через сайт это удобнее. Менеджер проанализирует 
-                  вашу корзину, подготовит коммерческое предложение и отправит его вам в чат и личный кабинет.
-                </p>
-                <p>
-                  Как только предложение будет готово, вы получите уведомление на сайте и на почту.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        
         
         {/* Products */}
         <ProductList 
