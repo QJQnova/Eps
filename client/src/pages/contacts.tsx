@@ -68,7 +68,7 @@ export default function ContactsPage() {
                   
                   <div className="pb-3 border-b border-gray-100">
                     <p className="font-medium text-gray-800">г. Волгоград</p>
-                    <p className="text-gray-600 mb-1">Адрес: у. и. Маршала Еременко, д. 44</p>
+                    <p className="text-gray-600 mb-1">Адрес: ул. им. Маршала Еременко, д. 44</p>
                     <p className="text-gray-600">Тел.: +7 929 780-48-46</p>
                   </div>
 
@@ -86,7 +86,7 @@ export default function ContactsPage() {
                   
                   <div className="pb-3 border-b border-gray-100">
                     <p className="font-medium text-gray-800">г. Новороссийск</p>
-                    <p className="text-gray-600 mb-1">Адрес: с. Гайдук, у. Строительная д. 14</p>
+                    <p className="text-gray-600 mb-1">Адрес: с. Гайдук, ул. Строительная д. 14</p>
                     <p className="text-gray-600">Тел.: +7 918 120-85-55</p>
                   </div>
                   

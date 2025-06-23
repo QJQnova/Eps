@@ -5,7 +5,7 @@ export default function AboutPage() {
   const locations = [
     {
       city: "Волгоград",
-      address: "у. и. Маршала Еременко, д. 44",
+      address: "ул. им. Маршала Еременко, д. 44",
       phone: "+7 929 780-48-46",
       tollFree: "8 800 101 38 35"
     },
@@ -23,7 +23,7 @@ export default function AboutPage() {
     },
     {
       city: "Новороссийск",
-      address: "с. Гайдук, у. Строительная д. 14",
+      address: "с. Гайдук, ул. Строительная д. 14",
       phone: "+7 918 120-85-55",
       tollFree: "8 800 101 38 35"
     },
