@@ -69,6 +69,7 @@
     "express-session": "^1.18.1",
     "fast-xml-parser": "^5.2.3",
     "framer-motion": "^11.13.1",
+    "iconv-lite": "^0.6.3",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.453.0",
     "memoizee": "^0.4.17",
