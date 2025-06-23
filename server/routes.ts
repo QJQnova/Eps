@@ -799,6 +799,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CSV Import for pittools.ru files
+  router.post("/admin/import-csv", requireAdmin, upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'Файл не загружен' });
+      }
+
+      const filePath = req.file.path;
+      const fileExt = path.extname(req.file.originalname).toLowerCase();
+      
+      if (fileExt !== '.csv') {
+        await fs.unlink(filePath);
+        return res.status(400).json({ error: 'Поддерживается только формат CSV' });
+      }
+
+      console.log(`Импорт CSV файла: ${req.file.originalname}`);
+
+      // Parse CSV with pittools.ru specific handling
+      const products = await parseImportFile(filePath, fileExt);
+      
+      // Import to database
+      const results = {
+        categoriesCreated: 0,
+        productsImported: 0,
+        productsSkipped: 0,
+        errors: [] as string[]
+      };
+
+      // Create categories first
+      const uniqueCategories = [...new Set(products.map(p => p.categoryName).filter(Boolean))];
+      
+      for (const categoryName of uniqueCategories) {
+        try {
+          const categoryId = await getCategoryByName(categoryName!);
+          if (categoryId) results.categoriesCreated++;
+        } catch (error: any) {
+          results.errors.push(`Ошибка создания категории ${categoryName}: ${error.message}`);
+        }
+      }
+
+      // Import products
+      for (const product of products.slice(0, 500)) { // Limit for testing
+        try {
+          if (!product.categoryName) {
+            results.productsSkipped++;
+            continue;
+          }
+
+          const categoryId = await getCategoryByName(product.categoryName);
+          
+          const productToInsert = {
+            name: product.name || 'Без названия',
+            sku: product.sku || `AUTO-${Date.now()}`,
+            slug: (product.slug || product.name || 'product').toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-'),
+            description: product.description,
+            shortDescription: product.shortDescription,
+            price: product.price || '0',
+            originalPrice: product.originalPrice,
+            imageUrl: product.imageUrl,
+            stock: product.stock,
+            categoryId: categoryId,
+            isActive: product.isActive ?? true,
+            isFeatured: product.isFeatured ?? false,
+            tag: product.tag
+          };
+
+          await storage.createProduct(productToInsert);
+          results.productsImported++;
+        } catch (error: any) {
+          results.productsSkipped++;
+          if (results.errors.length < 10) {
+            results.errors.push(`Ошибка импорта товара ${product.name}: ${error.message}`);
+          }
+        }
+      }
+
+      // Clean up uploaded file
+      await fs.unlink(filePath);
+
+      res.json({
+        success: true,
+        message: `Импорт завершен: ${results.productsImported} товаров импортировано, ${results.productsSkipped} пропущено`,
+        ...results
+      });
+
+    } catch (error: any) {
+      console.error('Ошибка импорта CSV:', error);
+      
+      if (req.file?.path) {
+        try {
+          await fs.unlink(req.file.path);
+        } catch (cleanupError) {
+          console.error('Ошибка удаления файла:', cleanupError);
+        }
+      }
+      
+      res.status(500).json({ 
+        error: 'Ошибка обработки файла', 
+        details: error.message 
+      });
+    }
+  });
+
+  // Get import statistics
+  router.get("/admin/import-stats", requireAdmin, async (req, res) => {
+    try {
+      const totalProducts = await storage.getProductsCount();
+      const totalCategories = await storage.getCategoriesCount();
+
+      res.json({
+        totalProducts,
+        totalCategories,
+        lastImport: null // TODO: Add timestamp tracking
+      });
+
+    } catch (error: any) {
+      console.error('Ошибка получения статистики:', error);
+      res.status(500).json({ error: 'Ошибка получения статистики импорта' });
+    }
+  });
+
   // Массовый парсинг всех поставщиков
   router.post("/admin/mass-scrape-import", requireAdmin, async (req, res) => {
     try {

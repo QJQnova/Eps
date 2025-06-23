@@ -83,6 +83,10 @@ export interface IStorage {
   getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
   markPasswordResetTokenAsUsed(token: string): Promise<boolean>;
   deleteExpiredPasswordResetTokens(): Promise<number>;
+
+  // Statistics operations
+  getProductsCount(): Promise<number>;
+  getCategoriesCount(): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -891,6 +895,17 @@ export class DatabaseStorage implements IStorage {
       .returning();
 
     return result.length;
+  }
+
+  // Statistics operations
+  async getProductsCount(): Promise<number> {
+    const result = await db.select({ count: sql`count(*)` }).from(products);
+    return Number(result[0]?.count || 0);
+  }
+
+  async getCategoriesCount(): Promise<number> {
+    const result = await db.select({ count: sql`count(*)` }).from(categories);
+    return Number(result[0]?.count || 0);
   }
 }
 
