@@ -214,6 +214,9 @@ function parseCSVLine(line: string): string[] {
   let inQuotes = false;
   let i = 0;
   
+  // Detect separator - check for semicolon or comma
+  const separator = line.includes(';') ? ';' : ',';
+  
   while (i < line.length) {
     const char = line[i];
     
@@ -227,7 +230,7 @@ function parseCSVLine(line: string): string[] {
         inQuotes = !inQuotes;
         i++;
       }
-    } else if (char === ',' && !inQuotes) {
+    } else if (char === separator && !inQuotes) {
       // Field separator
       result.push(current);
       current = '';
