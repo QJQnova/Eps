@@ -27,19 +27,31 @@ const router = express.Router();
 
 // Функция для создания/получения категории по названию
 async function getCategoryByName(categoryName: string): Promise<number> {
-  // Проверяем, существует ли категория
-  const existingCategory = await storage.getCategoryBySlug(
-    categoryName.toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-')
-  );
-  
-  if (existingCategory) {
-    return existingCategory.id;
+  // Check if category exists by name first
+  const existingCategoryByName = await storage.getCategoryByName(categoryName);
+  if (existingCategoryByName) {
+    return existingCategoryByName.id;
   }
   
-  // Создаем новую категорию
+  // Generate unique slug
+  let baseSlug = categoryName.toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  if (!baseSlug || baseSlug === '') {
+    baseSlug = 'category';
+  }
+  
+  let slug = baseSlug;
+  let counter = 1;
+  
+  // Check for existing slugs and create unique one
+  while (await storage.getCategoryBySlug(slug)) {
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+  
+  // Create new category with unique slug
   const newCategory = await storage.createCategory({
     name: categoryName,
-    slug: categoryName.toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-'),
+    slug: slug,
     description: `Категория ${categoryName}`,
     icon: 'tool'
   });
@@ -816,8 +828,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Импорт CSV файла: ${req.file.originalname}`);
 
-      // Parse CSV with pittools.ru specific handling
-      const products = await parseImportFile(filePath, fileExt);
+      // Parse CSV with improved encoding detection
+      const { parseCSVFile } = await import('./utils/csv-parser-fixed');
+      const products = await parseCSVFile(filePath);
       
       // Import to database
       const results = {
@@ -853,16 +866,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             name: product.name || 'Без названия',
             sku: product.sku || `AUTO-${Date.now()}`,
             slug: (product.slug || product.name || 'product').toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-'),
-            description: product.description,
-            shortDescription: product.shortDescription,
-            price: product.price || '0',
-            originalPrice: product.originalPrice,
-            imageUrl: product.imageUrl,
-            stock: product.stock,
+            description: product.description || null,
+            shortDescription: product.shortDescription || null,
+            price: parseFloat(product.price || '0'),
+            originalPrice: product.originalPrice ? parseFloat(product.originalPrice) : null,
+            imageUrl: product.imageUrl || null,
+            stock: product.stock ? parseInt(product.stock) : null,
             categoryId: categoryId,
             isActive: product.isActive ?? true,
             isFeatured: product.isFeatured ?? false,
-            tag: product.tag
+            tag: product.tag || null
           };
 
           await storage.createProduct(productToInsert);
