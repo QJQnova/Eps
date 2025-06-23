@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import * as iconv from 'iconv-lite';
+import iconv from 'iconv-lite';
 import { db } from './server/db';
 import { categories, products, type InsertCategory, type InsertProduct } from './shared/schema';
 import { eq } from 'drizzle-orm';
@@ -26,15 +26,26 @@ async function testSimpleImport() {
     const filePath = './attached_assets/3385076--pittools.ru (1)_1750681998818.csv';
     let content: string;
 
-    try {
-      // Пробуем Windows-1251
-      const buffer = readFileSync(filePath);
-      content = iconv.decode(buffer, 'win1251');
+    const buffer = readFileSync(filePath);
+    
+    // Определяем кодировку по содержимому
+    const utf8Test = buffer.toString('utf8');
+    const win1251Test = iconv.decode(buffer, 'win1251');
+    
+    // Проверяем наличие русских символов
+    const hasRussianUTF8 = /[а-яё]/i.test(utf8Test);
+    const hasRussianWin1251 = /[а-яё]/i.test(win1251Test);
+    
+    if (hasRussianWin1251 && !hasRussianUTF8) {
+      content = win1251Test;
       console.log('✅ Файл успешно прочитан в кодировке Windows-1251');
-    } catch (error) {
-      // Fallback на UTF-8
-      content = readFileSync(filePath, 'utf8');
+    } else if (hasRussianUTF8) {
+      content = utf8Test;
       console.log('✅ Файл прочитан в кодировке UTF-8');
+    } else {
+      // Пробуем Windows-1251 по умолчанию для файлов pittools.ru
+      content = iconv.decode(buffer, 'win1251');
+      console.log('✅ Применена кодировка Windows-1251 по умолчанию');
     }
 
     // Разбиваем на строки
@@ -94,8 +105,8 @@ async function testSimpleImport() {
       // Добавляем категорию в множество для создания
       categoriesToCreate.add(categoryName);
 
-      // Создаем товар
-      const product: InsertProduct = {
+      // Создаем товар (временно без categoryId, добавим при импорте)
+      const product: any = {
         name: name,
         sku: sku,
         slug: generateSlug(name + '-' + sku),
@@ -193,17 +204,15 @@ function generateSlug(text: string): string {
     .substring(0, 100);
 }
 
-// Запускаем импорт если файл вызван напрямую
-if (require.main === module) {
-  testSimpleImport()
-    .then(() => {
-      console.log('✅ Тест импорта завершен успешно!');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('❌ Тест импорта завершен с ошибкой:', error);
-      process.exit(1);
-    });
-}
+// Запускаем импорт
+testSimpleImport()
+  .then(() => {
+    console.log('✅ Тест импорта завершен успешно!');
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('❌ Тест импорта завершен с ошибкой:', error);
+    process.exit(1);
+  });
 
 export { testSimpleImport };
