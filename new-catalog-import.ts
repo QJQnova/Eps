@@ -25,7 +25,7 @@ async function importNewCatalog() {
       if (!line) continue;
       
       try {
-        // Парсинг CSV с учетом возможных многострочных полей
+        // Парсинг CSV с учетом дополнительных полей
         const parts = line.split(';');
         if (parts.length < 11) {
           errorCount++;
@@ -43,6 +43,9 @@ async function importNewCatalog() {
         const section = parts[8]?.trim();
         const productUrl = parts[9]?.trim();
         const description = parts[10]?.trim().replace(/^"|"$/g, '');
+        
+        // Дополнительные поля: автоотключение, диаметр, емкость, индикатор зарядки, etc.
+        const additionalSpecs = parts.slice(11).filter(field => field.trim()).join(', ');
         
         // Валидация и пропуск дубликатов
         if (!name || !sku || !categoryName || !priceStr || processedSKUs.has(sku)) {
@@ -86,6 +89,11 @@ async function importNewCatalog() {
             errorCount++;
             continue;
           }
+        }
+        
+        if (!categoryId) {
+          errorCount++;
+          continue;
         }
         
         // Создание товара
