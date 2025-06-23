@@ -2,8 +2,44 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import cors from "cors";
 
 const app = express();
+
+// Configure CORS for multiple domains including www.eps.su
+const allowedOrigins = [
+  'https://www.eps.su',
+  'https://eps.su',
+  'http://localhost:5000',
+  process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS}` : null
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // Allow any subdomain of eps.su
+    if (origin.endsWith('.eps.su')) {
+      return callback(null, true);
+    }
+    
+    // Allow Replit development domains
+    if (origin.includes('replit.dev') || origin.includes('replit.app')) {
+      return callback(null, true);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'Pragma', 'Expires']
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
