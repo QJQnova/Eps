@@ -14,29 +14,9 @@ const allowedOrigins = [
   process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS}` : null
 ].filter(Boolean);
 
+// Temporarily allow all origins for debugging
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, postman, etc.)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    
-    // Allow any subdomain of eps.su
-    if (origin.endsWith('.eps.su')) {
-      return callback(null, true);
-    }
-    
-    // Allow Replit development domains
-    if (origin.includes('replit.dev') || 
-        origin.includes('replit.app') || 
-        origin.includes('riker.replit.dev')) {
-      return callback(null, true);
-    }
-    
-    callback(new Error('Not allowed by CORS'));
-  },
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'Pragma', 'Expires']
