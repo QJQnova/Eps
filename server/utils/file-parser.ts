@@ -106,7 +106,16 @@ function parseCsvFile(content: string): ImportProduct[] {
       // Удаляем лишние пробелы вокруг кавычек
       .replace(/\s*"\s*/g, '"')
       // Исправляем кавычки в конце полей
-      .replace(/"(\s*[,\r\n])/g, '"$1');
+      .replace(/"(\s*[,\r\n])/g, '"$1')
+      // Удаляем множественные пустые строки в конце
+      .replace(/(\r?\n\s*){10,}$/, '\n');
+
+    // Проверяем, что файл не пустой после очистки
+    if (!cleanedContent.trim()) {
+      throw new Error('Файл пуст после предобработки');
+    }
+
+    console.log(`CSV файл: ${cleanedContent.split('\n').length} строк, ${cleanedContent.length} символов`);
 
     // Парсим CSV-файл с заголовками и более мягкой обработкой кавычек
     const records = parse(cleanedContent, {
@@ -121,25 +130,44 @@ function parseCsvFile(content: string): ImportProduct[] {
       max_record_size: 1000000
     });
 
+    let validProducts = 0;
+    let consecutiveEmpty = 0;
+    const maxConsecutiveEmpty = 50; // Останавливаем после 50 пустых строк подряд
+
     return records.map((record: any, index: number) => {
       // Конвертируем строковые значения в соответствующие типы
       const product: ImportProduct = {};
 
-      // Проверяем, что запись не пустая
-      const hasAnyData = Object.values(record).some(value => value && String(value).trim() !== '');
+      // Проверяем, что запись не пустая - более строгая проверка
+      const recordValues = Object.values(record);
+      const hasAnyData = recordValues.some(value => 
+        value && 
+        String(value).trim() !== '' && 
+        String(value).trim() !== '0' &&
+        !String(value).trim().match(/^[\s\n\r]*$/)
+      );
+
       if (!hasAnyData) {
-        console.warn(`Строка ${index + 2} пропущена - пустая строка`);
+        consecutiveEmpty++;
+        if (consecutiveEmpty > maxConsecutiveEmpty) {
+          console.log(`Прекращаем обработку после ${maxConsecutiveEmpty} пустых строк подряд`);
+          return null;
+        }
         return null;
       }
+
+      consecutiveEmpty = 0; // Сбрасываем счетчик пустых строк
 
       // Обязательные поля с поддержкой новой структуры CSV
       const name = record['Название'] || record.name || record['название'] || record.Name || record['Наименование'] || record['наименование'];
       const price = record['Цена'] || record.price || record['цена'] || record.Price || '0';
 
-      if (!name) {
-        console.warn(`Строка ${index + 2} пропущена - отсутствует название товара`);
+      // Более строгая проверка названия
+      if (!name || String(name).trim() === '' || String(name).trim().length < 2) {
         return null;
       }
+
+      validProducts++;
 
       // Маппинг полей с преобразованием типов
       product.name = name;
@@ -226,6 +254,15 @@ function parseCsvFile(content: string): ImportProduct[] {
 
       return product;
     }).filter(Boolean) as ImportProduct[];
+
+    console.log(`✅ CSV обработан: найдено ${validProducts} валидных товаров`);
+    
+    // Проверяем, есть ли вообще товары
+    if (validProducts === 0) {
+      throw new Error('Файл не содержит валидных данных о товарах. Проверьте формат и содержимое файла.');
+    }
+
+    return records.filter(Boolean) as ImportProduct[];
   } catch (error: any) {
     throw new Error(`Некорректный формат CSV: ${error.message}`);
   }
