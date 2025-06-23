@@ -45,6 +45,7 @@ import SupplierImporter from "@/pages/admin/supplier-importer";
 import CatalogAdapter from "@/pages/admin/catalog-adapter";
 import WebScraper from "@/pages/admin/web-scraper";
 import MassScraper from "@/pages/admin/mass-scraper";
+import AdminImportPage from "@/pages/admin-import-page";
 
 function Router() {
   const [location] = useLocation();
@@ -85,6 +86,7 @@ function Router() {
           <ProtectedRoute path="/admin/products/create" component={ProductFormPage} />
           <ProtectedRoute path="/admin/products/edit/:id" component={ProductFormPage} />
           <ProtectedRoute path="/admin/import" component={BulkImport} />
+          <ProtectedRoute path="/admin/csv-import" component={AdminImportPage} />
           <ProtectedRoute path="/admin/catalog-adapter" component={CatalogAdapter} />
           <ProtectedRoute path="/admin/web-scraper" component={WebScraper} />
           <ProtectedRoute path="/admin/mass-scraper" component={MassScraper} />
