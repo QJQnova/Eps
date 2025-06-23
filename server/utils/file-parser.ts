@@ -5,6 +5,7 @@ import { InsertProduct } from "@shared/schema";
 import { parseString } from "xml2js";
 import { promisify } from "util";
 import XLSX from "xlsx";
+import * as iconv from "iconv-lite";
 
 // Расширенный тип для работы с импортом
 interface ImportProduct {
