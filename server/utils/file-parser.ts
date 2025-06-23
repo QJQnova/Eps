@@ -114,46 +114,263 @@ function parseJsonFile(content: string): ImportProduct[] {
  */
 function parseCsvFile(content: string): ImportProduct[] {
   try {
-    // Предобработка контента для исправления проблемных кавычек
-    let cleanedContent = content
-      // Удаляем BOM если есть
-      .replace(/^\uFEFF/, '')
-      // Заменяем нестандартные кавычки на стандартные
-      .replace(/[""'']/g, '"')
-      // Исправляем одиночные кавычки в середине строк
-      .replace(/([^,\r\n])"([^,\r\n])/g, '$1""$2')
-      // Удаляем лишние пробелы вокруг кавычек
-      .replace(/\s*"\s*/g, '"')
-      // Исправляем кавычки в конце полей
-      .replace(/"(\s*[,\r\n])/g, '"$1')
-      // Удаляем множественные пустые строки в конце
-      .replace(/(\r?\n\s*){10,}$/, '\n');
-
-    // Проверяем, что файл не пустой после очистки
-    if (!cleanedContent.trim()) {
-      throw new Error('Файл пуст после предобработки');
+    // Специальная обработка для файлов pittools.ru
+    if (content.includes('pittools.ru') || content.includes('Изображения;Название;Артикул')) {
+      return parsePittoolsCsv(content);
     }
 
-    console.log(`CSV файл: ${cleanedContent.split('\n').length} строк, ${cleanedContent.length} символов`);
+    // Стандартная обработка CSV с упрощенным парсингом
+    const lines = content.split('\n').filter(line => line.trim());
+    if (lines.length < 2) {
+      throw new Error('CSV файл пустой или содержит только заголовки');
+    }
 
-    // Парсим CSV-файл с заголовками и более мягкой обработкой кавычек
-    const records = parse(cleanedContent, {
-      columns: true,
-      skip_empty_lines: true,
-      trim: true,
-      quote: '"',
-      escape: '"',
-      relax_quotes: true,
-      relax_column_count: true,
-      skip_records_with_error: true,
-      max_record_size: 1000000
-    });
+    const headers = lines[0].split(';').map(h => h.trim());
+    const products: ImportProduct[] = [];
 
-    let validProducts = 0;
-    let consecutiveEmpty = 0;
-    const maxConsecutiveEmpty = 50; // Останавливаем после 50 пустых строк подряд
+    for (let i = 1; i < lines.length && products.length < 100; i++) {
+      const fields = lines[i].split(';');
+      if (fields.length >= 3) {
+        const name = fields[1]?.trim();
+        const sku = fields[2]?.trim();
+        const price = fields[3]?.trim();
 
-    return records.map((record: any, index: number) => {
+        if (name && sku && price) {
+          const cleanPrice = price.replace(/[^\d.,]/g, '').replace(',', '.');
+          const priceNum = parseFloat(cleanPrice);
+
+          if (!isNaN(priceNum) && priceNum > 0) {
+            products.push({
+              name: name,
+              sku: sku,
+              slug: generateProductSlug(name + '-' + sku),
+              price: priceNum.toString(),
+              categoryName: fields[6]?.trim() || 'Общая категория',
+              isActive: true
+            });
+          }
+        }
+      }
+    }
+
+    if (products.length === 0) {
+      throw new Error('Не найдено валидных товаров в CSV файле');
+    }
+
+    return products;
+  } catch (error: any) {
+    throw new Error(`Ошибка парсинга CSV: ${error.message}`);
+  }
+}
+
+/**
+ * Специальный парсер для CSV файлов pittools.ru
+ */
+function parsePittoolsCsv(content: string): ImportProduct[] {
+  const lines = content.split('\n');
+  const products: ImportProduct[] = [];
+  
+  if (lines.length < 2) {
+    throw new Error('CSV файл пустой или содержит только заголовки');
+  }
+
+  // Извлекаем заголовки
+  const headers = lines[0].split(';').map(h => h.trim());
+  console.log(`Найдено заголовков: ${headers.length}`);
+  console.log('Заголовки:', headers.slice(0, 10));
+
+  let validProductsCount = 0;
+  let currentRecord = '';
+  let insideQuotes = false;
+  let fieldCount = 0;
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    
+    // Подсчитываем количество кавычек для определения многострочных записей
+    const quoteCount = (line.match(/"/g) || []).length;
+    
+    if (!insideQuotes) {
+      // Начинаем новую запись
+      currentRecord = line;
+      fieldCount = (line.match(/;/g) || []).length + 1;
+      
+      // Проверяем, начинается ли многострочная запись
+      if (quoteCount % 2 === 1) {
+        insideQuotes = true;
+        continue;
+      }
+    } else {
+      // Продолжаем многострочную запись
+      currentRecord += ' ' + line;
+      fieldCount += (line.match(/;/g) || []).length;
+      
+      // Проверяем, заканчивается ли многострочная запись
+      if (quoteCount % 2 === 1) {
+        insideQuotes = false;
+      } else {
+        continue;
+      }
+    }
+
+    // Обрабатываем завершенную запись
+    if (!insideQuotes && currentRecord.trim()) {
+      const fields = currentRecord.split(';');
+      
+      // Пропускаем записи с недостаточным количеством полей
+      if (fields.length < 7) {
+        continue;
+      }
+
+      const imageUrl = fields[0]?.trim().replace(/^"|"$/g, '') || '';
+      const name = fields[1]?.trim().replace(/^"|"$/g, '') || '';
+      const sku = fields[2]?.trim().replace(/^"|"$/g, '') || '';
+      const priceStr = fields[3]?.trim().replace(/^"|"$/g, '') || '';
+      const currency = fields[4]?.trim().replace(/^"|"$/g, '') || '';
+      const availability = fields[5]?.trim().replace(/^"|"$/g, '') || '';
+      const categoryName = fields[6]?.trim().replace(/^"|"$/g, '') || '';
+      const subcategoryName = fields[7]?.trim().replace(/^"|"$/g, '') || '';
+      const section = fields[8]?.trim().replace(/^"|"$/g, '') || '';
+      const url = fields[9]?.trim().replace(/^"|"$/g, '') || '';
+      const description = fields[10]?.trim().replace(/^"|"$/g, '') || '';
+
+      // Валидация обязательных полей
+      if (!name || !sku || !categoryName || name.length < 3) {
+        continue;
+      }
+
+      // Парсинг цены
+      const cleanPrice = priceStr.replace(/[^\d.,]/g, '').replace(',', '.');
+      const price = parseFloat(cleanPrice);
+      
+      if (isNaN(price) || price <= 0) {
+        continue;
+      }
+
+      const product: ImportProduct = {
+        name: name,
+        sku: sku,
+        slug: generateProductSlug(name + '-' + sku),
+        price: price.toString(),
+        categoryName: categoryName,
+        description: cleanHtmlDescription(description),
+        shortDescription: subcategoryName || section || null,
+        imageUrl: imageUrl || null,
+        isActive: availability === 'Да' || availability === 'В наличии',
+        tag: section || null
+      };
+
+      products.push(product);
+      validProductsCount++;
+
+      if (validProductsCount % 100 === 0) {
+        console.log(`Обработано товаров: ${validProductsCount}`);
+      }
+
+      // Ограничиваем количество для тестирования
+      if (validProductsCount >= 1000) {
+        console.log('Достигнут лимит 1000 товаров для тестирования');
+        break;
+      }
+    }
+  }
+
+  console.log(`Успешно обработано товаров: ${validProductsCount}`);
+  
+  if (validProductsCount === 0) {
+    throw new Error('Не найдено валидных товаров в CSV файле');
+  }
+
+  return products;
+}
+
+/**
+ * Генерирует slug для товара
+ */
+function generateProductSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[а-яё]/g, (char) => {
+      const map: { [key: string]: string } = {
+        'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo',
+        'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+        'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+        'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch',
+        'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
+      };
+      return map[char] || char;
+    })
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .substring(0, 100);
+}
+
+/**
+ * Очищает HTML описание товара
+ */
+function cleanHtmlDescription(description: string): string {
+  if (!description) return '';
+  
+  return description
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<h[1-6][^>]*>/gi, '\n\n**')
+    .replace(/<\/h[1-6]>/gi, '**\n\n')
+    .replace(/<b[^>]*>/gi, '**')
+    .replace(/<\/b>/gi, '**')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&[^;]+;/g, '')
+    .replace(/_{2,}/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+    .substring(0, 2000);
+}
+
+/**
+ * Стандартный парсер CSV
+ */
+function parseStandardCsv(content: string): ImportProduct[] {
+  // Предобработка контента для исправления проблемных кавычек
+  let cleanedContent = content
+    // Удаляем BOM если есть
+    .replace(/^\uFEFF/, '')
+    // Заменяем нестандартные кавычки на стандартные
+    .replace(/[""'']/g, '"')
+    // Исправляем одиночные кавычки в середине строк
+    .replace(/([^,\r\n])"([^,\r\n])/g, '$1""$2')
+    // Удаляем лишние пробелы вокруг кавычек
+    .replace(/\s*"\s*/g, '"')
+    // Исправляем кавычки в конце полей
+    .replace(/"(\s*[,\r\n])/g, '"$1')
+    // Удаляем множественные пустые строки в конце
+    .replace(/(\r?\n\s*){10,}$/, '\n');
+
+  // Проверяем, что файл не пустой после очистки
+  if (!cleanedContent.trim()) {
+    throw new Error('Файл пуст после предобработки');
+  }
+
+  console.log(`CSV файл: ${cleanedContent.split('\n').length} строк, ${cleanedContent.length} символов`);
+
+  // Парсим CSV-файл с заголовками и более мягкой обработкой кавычек
+  const records = parse(cleanedContent, {
+    columns: true,
+    skip_empty_lines: true,
+    trim: true,
+    quote: '"',
+    escape: '"',
+    relax_quotes: true,
+    relax_column_count: true,
+    skip_records_with_error: true,
+    max_record_size: 1000000
+  });
+
+  let validProducts = 0;
+  let consecutiveEmpty = 0;
+  const maxConsecutiveEmpty = 50; // Останавливаем после 50 пустых строк подряд
+
+  const products = records.map((record: any, index: number) => {
       // Конвертируем строковые значения в соответствующие типы
       const product: ImportProduct = {};
 
@@ -281,10 +498,7 @@ function parseCsvFile(content: string): ImportProduct[] {
       throw new Error('Файл не содержит валидных данных о товарах. Проверьте формат и содержимое файла.');
     }
 
-    return records.filter(Boolean) as ImportProduct[];
-  } catch (error: any) {
-    throw new Error(`Некорректный формат CSV: ${error.message}`);
-  }
+    return products;
 }
 
 /**
