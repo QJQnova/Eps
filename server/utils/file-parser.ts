@@ -35,8 +35,26 @@ export async function parseImportFile(filePath: string, fileExtension: string): 
       return parseXlsxFile(filePath);
     }
 
-    // For text-based files, read as UTF-8
-    const fileContent = await fs.readFile(filePath, 'utf8');
+    // For text-based files, try UTF-8 first, then Windows-1251
+    let fileContent: string;
+    try {
+      fileContent = await fs.readFile(filePath, 'utf8');
+      // Check if content looks like Windows-1251 by detecting specific bytes
+      if (fileContent.includes('�') || fileContent.includes('\ufffd')) {
+        throw new Error('UTF-8 decoding failed, trying Windows-1251');
+      }
+    } catch (utfError) {
+      // Try Windows-1251 encoding
+      console.log('UTF-8 failed, trying Windows-1251 encoding...');
+      const buffer = await fs.readFile(filePath);
+      try {
+        fileContent = iconv.decode(buffer, 'win1251');
+        console.log(`File decoded from Windows-1251, content length: ${fileContent.length}`);
+      } catch (iconvError) {
+        // Fallback to UTF-8 with error replacement
+        fileContent = await fs.readFile(filePath, 'utf8');
+      }
+    }
 
     if (fileExtension === '.json') {
       return parseJsonFile(fileContent);
