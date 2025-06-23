@@ -392,16 +392,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
             categoryId = existingCategory;
             console.log(`Товар "${product.name}" назначен в существующую категорию: ${categoryName} (ID: ${categoryId})`);
           } else {
-            // Create new category with proper slug generation
-            let categorySlug = categoryName
+            // Create new category with unique slug generation
+            let baseSlug = categoryName
               .toLowerCase()
-              .replace(/[^a-zа-я0-9\s]/gi, '')
+              .replace(/[^a-zа-я0-9\s]/gi, ' ')
               .replace(/\s+/g, '-')
-              .substring(0, 50);
+              .substring(0, 40);
 
-            // Ensure slug is not empty
-            if (!categorySlug || categorySlug === '') {
-              categorySlug = `category-${Date.now()}`;
+            // Ensure slug is not empty or invalid
+            if (!baseSlug || baseSlug === '' || baseSlug === '-') {
+              baseSlug = `category-${Date.now()}`;
+            }
+
+            // Find unique slug
+            let categorySlug = baseSlug;
+            let counter = 1;
+            
+            while (await storage.getCategoryBySlug(categorySlug)) {
+              categorySlug = `${baseSlug}-${counter}`;
+              counter++;
+              if (counter > 100) {
+                categorySlug = `category-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+                break;
+              }
             }
 
             const newCategory = await storage.createCategory({
@@ -871,9 +884,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Импорт CSV файла: ${req.file.originalname}`);
 
-      // Parse CSV with improved encoding detection
-      const { parseCSVFile } = await import('./utils/csv-parser-fixed');
-      const products = await parseCSVFile(filePath);
+      // Use specialized pittools parser for these files
+      const { parsePittoolsCSV } = await import('./utils/pittools-csv-parser');
+      const products = await parsePittoolsCSV(filePath);
       
       // Import to database
       const results = {
@@ -909,17 +922,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const productToInsert = {
             name: product.name || 'Без названия',
             sku: product.sku || `AUTO-${Date.now()}`,
-            slug: (product.slug || product.name || 'product').toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-'),
+            slug: (product.name || 'product').toLowerCase().replace(/[^a-zа-я0-9]/g, '-').replace(/-+/g, '-'),
             description: product.description || null,
-            shortDescription: product.shortDescription || null,
+            shortDescription: product.description || null,
             price: parseFloat(product.price || '0'),
-            originalPrice: product.originalPrice ? parseFloat(product.originalPrice) : null,
+            originalPrice: null,
             imageUrl: product.imageUrl || null,
-            stock: product.stock ? parseInt(product.stock) : null,
+            stock: null,
             categoryId: categoryId,
-            isActive: product.isActive ?? true,
-            isFeatured: product.isFeatured ?? false,
-            tag: product.tag || null
+            isActive: true,
+            isFeatured: false,
+            tag: null
           };
 
           await storage.createProduct(productToInsert);
