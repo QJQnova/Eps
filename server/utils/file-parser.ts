@@ -95,15 +95,30 @@ function parseJsonFile(content: string): ImportProduct[] {
  */
 function parseCsvFile(content: string): ImportProduct[] {
   try {
-    // Парсим CSV-файл с заголовками и правильной обработкой кавычек
-    const records = parse(content, {
+    // Предобработка контента для исправления проблемных кавычек
+    let cleanedContent = content
+      // Удаляем BOM если есть
+      .replace(/^\uFEFF/, '')
+      // Заменяем нестандартные кавычки на стандартные
+      .replace(/[""'']/g, '"')
+      // Исправляем одиночные кавычки в середине строк
+      .replace(/([^,\r\n])"([^,\r\n])/g, '$1""$2')
+      // Удаляем лишние пробелы вокруг кавычек
+      .replace(/\s*"\s*/g, '"')
+      // Исправляем кавычки в конце полей
+      .replace(/"(\s*[,\r\n])/g, '"$1');
+
+    // Парсим CSV-файл с заголовками и более мягкой обработкой кавычек
+    const records = parse(cleanedContent, {
       columns: true,
       skip_empty_lines: true,
       trim: true,
       quote: '"',
       escape: '"',
       relax_quotes: true,
-      relax_column_count: true
+      relax_column_count: true,
+      skip_records_with_error: true,
+      max_record_size: 1000000
     });
 
     return records.map((record: any, index: number) => {
@@ -117,9 +132,9 @@ function parseCsvFile(content: string): ImportProduct[] {
         return null;
       }
 
-      // Обязательные поля с более гибкой проверкой названий колонок
-      const name = record.name || record['название'] || record.Name || record['Название'] || record['Наименование'] || record['наименование'];
-      const price = record.price || record['цена'] || record.Price || record['Цена'] || '0';
+      // Обязательные поля с поддержкой новой структуры CSV
+      const name = record['Название'] || record.name || record['название'] || record.Name || record['Наименование'] || record['наименование'];
+      const price = record['Цена'] || record.price || record['цена'] || record.Price || '0';
 
       if (!name) {
         console.warn(`Строка ${index + 2} пропущена - отсутствует название товара`);
@@ -128,16 +143,24 @@ function parseCsvFile(content: string): ImportProduct[] {
 
       // Маппинг полей с преобразованием типов
       product.name = name;
-      product.price = (parseFloat(price) || 0).toString();
+      
+      // Обработка цены - убираем валютные символы и лишние символы
+      let cleanPrice = price.toString().replace(/[^\d.,]/g, '').replace(',', '.');
+      product.price = (parseFloat(cleanPrice) || 0).toString();
 
-      // Опциональные поля с поддержкой русских заголовков
-      const sku = record.sku || record['артикул'] || record.SKU || record['Артикул'];
-      const description = record.description || record['описание'] || record.Description || record['Описание'];
+      // Опциональные поля с поддержкой новой структуры CSV
+      const sku = record['Артикул'] || record.sku || record['артикул'] || record.SKU;
+      const description = record['Описание'] || record.description || record['описание'] || record.Description;
       const shortDescription = record.shortDescription || record['короткое описание'] || record['краткое описание'];
-      const imageUrl = record.imageUrl || record['изображение'] || record['картинка'] || record['Изображение'];
-      const categoryName = record.categoryName || record['категория'] || record.category || record['Категория'];
+      const imageUrl = record['Изображения'] || record.imageUrl || record['изображение'] || record['картинка'] || record['Изображение'];
+      const categoryName = record['Категория'] || record.categoryName || record['категория'] || record.category;
+      const subCategoryName = record['Подкатегория'] || record['подкатегория'];
+      const sectionName = record['Раздел'] || record['раздел'];
+      const currency = record['Валюта'] || record['валюта'];
+      const availability = record['Наличие'] || record['наличие'] || record['остаток'] || record['количество'];
+      const url = record['URL'] || record.url || record['ссылка'];
+      const files = record['Файлы'] || record['файлы'];
       const originalPrice = record.originalPrice || record['старая цена'] || record['originalPrice'];
-      const stock = record.stock || record['остаток'] || record['количество'] || record.Stock || record['Остаток'];
       const isActive = record.isActive || record['активен'] || record['доступен'];
       const isFeatured = record.isFeatured || record['рекомендуемый'];
 
@@ -145,12 +168,52 @@ function parseCsvFile(content: string): ImportProduct[] {
       if (description) product.description = description;
       if (shortDescription) product.shortDescription = shortDescription;
       if (imageUrl) product.imageUrl = imageUrl;
-      if (categoryName) product.categoryName = categoryName;
+      
+      // Построение полного имени категории из иерархии
+      let fullCategoryName = '';
+      if (sectionName) fullCategoryName += sectionName;
+      if (categoryName) {
+        if (fullCategoryName) fullCategoryName += ' > ';
+        fullCategoryName += categoryName;
+      }
+      if (subCategoryName) {
+        if (fullCategoryName) fullCategoryName += ' > ';
+        fullCategoryName += subCategoryName;
+      }
+      
+      if (fullCategoryName) {
+        product.categoryName = fullCategoryName;
+      } else if (categoryName) {
+        product.categoryName = categoryName;
+      }
+      
       if (record.categoryId) product.categoryId = parseInt(record.categoryId, 10);
-      if (originalPrice) product.originalPrice = (parseFloat(originalPrice) || 0).toString();
-      if (stock) product.stock = parseInt(stock, 10);
-      if (isActive) product.isActive = isActive.toLowerCase() === 'true';
-      if (isFeatured) product.isFeatured = isFeatured.toLowerCase() === 'true';
+      if (originalPrice) {
+        const cleanOriginalPrice = originalPrice.toString().replace(/[^\d.,]/g, '').replace(',', '.');
+        product.originalPrice = (parseFloat(cleanOriginalPrice) || 0).toString();
+      }
+      
+      // Обработка наличия товара
+      if (availability) {
+        const availabilityLower = availability.toString().toLowerCase();
+        // Считаем товар в наличии если есть положительное число или "да", "в наличии", "есть"
+        const isInStock = /\d+/.test(availability) || 
+                         ['да', 'в наличии', 'есть', 'доступен', 'yes', 'available'].includes(availabilityLower);
+        product.isActive = isInStock;
+        
+        // Попытаемся извлечь количество из строки наличия
+        const stockMatch = availability.toString().match(/\d+/);
+        if (stockMatch) {
+          product.stock = parseInt(stockMatch[0], 10);
+        }
+      } else if (isActive) {
+        product.isActive = isActive.toString().toLowerCase() === 'true';
+      } else {
+        product.isActive = true; // По умолчанию активен
+      }
+      
+      if (isFeatured) product.isFeatured = isFeatured.toString().toLowerCase() === 'true';
+      
       if (record.slug) product.slug = record.slug;
       else if (product.name) {
         // Генерация slug из названия
