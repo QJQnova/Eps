@@ -18,6 +18,7 @@ import bcrypt from "bcrypt";
 import multer from "multer";
 import fs from "fs/promises";
 import path from "path";
+import * as XLSX from "xlsx";
 import { randomUUID } from "crypto";
 import { storage } from "./storage";
 import { sendPasswordResetEmail } from "./services/email";
@@ -1154,9 +1155,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Импорт Excel файла: ${req.file.originalname}`);
 
-      // Динамически импортируем xlsx
-      const XLSX = await import('xlsx');
-      
       // Читаем Excel файл
       const workbook = XLSX.readFile(filePath);
       const sheetName = workbook.SheetNames[0];
