@@ -18,7 +18,7 @@ import bcrypt from "bcrypt";
 import multer from "multer";
 import fs from "fs/promises";
 import path from "path";
-import * as XLSX from "xlsx";
+
 import { randomUUID } from "crypto";
 import { storage } from "./storage";
 import { sendPasswordResetEmail } from "./services/email";
