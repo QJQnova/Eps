@@ -1319,6 +1319,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get product by slug
+  app.get("/api/products/slug/:slug", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      
+      // Декодируем URL-encoded slug
+      const decodedSlug = decodeURIComponent(slug);
+      console.log(`Поиск товара по slug: "${decodedSlug}"`);
+      
+      const product = await storage.getProductBySlug(decodedSlug);
+      
+      if (!product) {
+        console.log(`Товар с slug "${decodedSlug}" не найден`);
+        return res.status(404).json({ 
+          message: "Товар не найден",
+          slug: decodedSlug
+        });
+      }
+      
+      console.log(`Найден товар: ${product.name} (ID: ${product.id})`);
+      res.json(product);
+    } catch (error: any) {
+      console.error('Ошибка при поиске товара по slug:', error);
+      res.status(500).json({ 
+        message: "Ошибка сервера при поиске товара",
+        error: error.message 
+      });
+    }
+  });
+
   app.use("/api", router);
 
   const httpServer = createServer(app);
