@@ -1319,8 +1319,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get product by slug
-  app.get("/api/products/slug/:slug", async (req, res) => {
+  // Get product by slug - добавляем в router вместо app
+  router.get("/products/slug/:slug", async (req, res) => {
     try {
       const { slug } = req.params;
       

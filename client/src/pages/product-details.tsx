@@ -37,9 +37,10 @@ export default function ProductDetails() {
   const { toast } = useToast();
 
   // Fetch product details с улучшенным кешированием
-  const { data: product, isLoading: isLoadingProduct } = useQuery<Product>({
+  const { data: product, isLoading: isLoadingProduct, error } = useQuery<Product>({
     queryKey: [`/api/products/slug/${slug}`],
     staleTime: 120000, // 2 минуты кеширования для деталей товара
+    enabled: !!slug, // Загружаем только если slug существует
   });
 
   // Fetch categories for breadcrumbs с минимальными обновлениями (категории меняются редко)
@@ -108,11 +109,16 @@ export default function ProductDetails() {
     );
   }
 
-  if (!product) {
+  if (!product && !isLoadingProduct) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Товар не найден</h2>
         <p className="text-gray-500 mb-6">Товар, который вы ищете, не существует или был удален.</p>
+        {error && (
+          <p className="text-sm text-red-600 mb-4">
+            Ошибка загрузки: {error instanceof Error ? error.message : 'Неизвестная ошибка'}
+          </p>
+        )}
         <Button asChild>
           <Link href="/">Вернуться на главную</Link>
         </Button>
