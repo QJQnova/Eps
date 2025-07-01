@@ -66,21 +66,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         
         {/* Бейджи для тегов и скидок */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {product.tag && (
-            <div className="inline-block">
-              <span className={`text-white text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-sm ${
-                product.tag === 'Best Seller' || product.tag === 'Хит продаж' ? 'bg-eps-yellow' : 
-                product.tag === 'New' || product.tag === 'Новинка' ? 'bg-eps-red' : 
-                product.tag === 'Sale' || product.tag === 'Скидка' ? 'bg-eps-red' : 
-                'bg-eps-yellow'
-              }`}>
-                {product.tag === 'Best Seller' ? 'Хит продаж' : 
-                 product.tag === 'New' ? 'Новинка' : 
-                 product.tag === 'Sale' ? 'Скидка' : 
-                 product.tag}
-              </span>
-            </div>
-          )}
+
           
           {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
             <div className="inline-block">
