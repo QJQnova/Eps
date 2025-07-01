@@ -41,6 +41,7 @@ export interface IStorage {
   createCategory(category: InsertCategory): Promise<Category>;
   updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category | undefined>;
   deleteCategory(id: number): Promise<boolean>;
+  deleteAllCategories(): Promise<boolean>;
 
   // Product operations
   getAllProducts(): Promise<Product[]>;
@@ -53,6 +54,7 @@ export interface IStorage {
   updateProduct(id: number, product: Partial<ProductInput>): Promise<Product | undefined>;
   deleteProduct(id: number): Promise<boolean>;
   deleteProductsByCategory(categoryId: number): Promise<boolean>;
+  deleteAllProducts(): Promise<boolean>;
   bulkImportProducts(products: InsertProduct[]): Promise<{ success: number, failed: number }>;
 
   // Cart operations
@@ -258,6 +260,20 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
 
+  async deleteAllCategories(): Promise<boolean> {
+    try {
+      // Сначала удаляем все товары
+      await db.delete(cartItems);
+      await db.delete(products);
+      // Затем удаляем все категории
+      await db.delete(categories);
+      return true;
+    } catch (error) {
+      console.error('Ошибка при удалении всех категорий:', error);
+      return false;
+    }
+  }
+
   // Product operations
   async getAllProducts(): Promise<Product[]> {
     return await db.select().from(products);
@@ -407,6 +423,19 @@ export class DatabaseStorage implements IStorage {
   async deleteProductsByCategory(categoryId: number): Promise<boolean> {
     const result = await db.delete(products).where(eq(products.categoryId, categoryId)).returning();
     return true;
+  }
+
+  async deleteAllProducts(): Promise<boolean> {
+    try {
+      // Сначала удаляем все товары из корзин
+      await db.delete(cartItems);
+      // Затем удаляем все товары
+      await db.delete(products);
+      return true;
+    } catch (error) {
+      console.error('Ошибка при удалении всех товаров:', error);
+      return false;
+    }
   }
 
   async bulkImportProducts(productsToImport: InsertProduct[]): Promise<{ success: number, failed: number }> {

@@ -1086,6 +1086,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete all products and categories
+  router.delete("/admin/products/delete-all", requireAdmin, async (req, res) => {
+    try {
+      console.log('Начинаем удаление всех товаров...');
+      const success = await storage.deleteAllProducts();
+      
+      if (success) {
+        res.json({ 
+          success: true,
+          message: "Все товары успешно удалены" 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false,
+          message: "Ошибка при удалении товаров" 
+        });
+      }
+    } catch (error: any) {
+      console.error('Ошибка удаления всех товаров:', error);
+      res.status(500).json({ 
+        success: false,
+        message: error.message 
+      });
+    }
+  });
+
+  router.delete("/admin/categories/delete-all", requireAdmin, async (req, res) => {
+    try {
+      console.log('Начинаем удаление всех категорий и товаров...');
+      const success = await storage.deleteAllCategories();
+      
+      if (success) {
+        res.json({ 
+          success: true,
+          message: "Все категории и товары успешно удалены" 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false,
+          message: "Ошибка при удалении категорий" 
+        });
+      }
+    } catch (error: any) {
+      console.error('Ошибка удаления всех категорий:', error);
+      res.status(500).json({ 
+        success: false,
+        message: error.message 
+      });
+    }
+  });
+
   app.use("/api", router);
 
   const httpServer = createServer(app);
