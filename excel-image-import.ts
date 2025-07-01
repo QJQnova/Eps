@@ -118,7 +118,7 @@ async function importExcelWithImages() {
     const storage = new DatabaseStorage();
     
     // Читаем Excel файл
-    const filePath = path.join(__dirname, 'attached_assets', 'Prai_774_s_list_DCK_19_06_25_1751384899983.xlsx');
+    const filePath = path.join(process.cwd(), 'attached_assets', 'Prai_774_s_list_DCK_19_06_25_1751384899983.xlsx');
     const workbook = XLSX.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
