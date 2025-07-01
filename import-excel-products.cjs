@@ -1,14 +1,9 @@
-import * as XLSX from 'xlsx';
-import { db } from './server/db';
-import { categories, products } from './shared/schema';
-import { eq } from 'drizzle-orm';
-import type { InsertCategory, InsertProduct } from './shared/schema';
+const XLSX = require('xlsx');
+const { db } = require('./server/db.js');
+const { categories, products } = require('./shared/schema.js');
+const { eq } = require('drizzle-orm');
 
-interface ExcelProduct {
-  [key: string]: any;
-}
-
-function generateSlug(text: string): string {
+function generateSlug(text) {
   return text
     .toLowerCase()
     .replace(/[^a-zа-я0-9\s]/g, '')
@@ -18,18 +13,18 @@ function generateSlug(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-function cleanText(text: any): string {
+function cleanText(text) {
   if (!text) return '';
   return String(text).trim().replace(/\s+/g, ' ');
 }
 
-function extractPrice(priceText: any): string {
+function extractPrice(priceText) {
   if (!priceText) return '0';
   const cleanPrice = String(priceText).replace(/[^\d.,]/g, '');
   return cleanPrice || '0';
 }
 
-async function createCategoryIfNotExists(categoryName: string): Promise<number> {
+async function createCategoryIfNotExists(categoryName) {
   if (!categoryName || categoryName.trim().length < 2) {
     categoryName = 'Общие товары';
   }
@@ -64,7 +59,7 @@ async function createCategoryIfNotExists(categoryName: string): Promise<number> 
     counter++;
   }
 
-  const newCategory: InsertCategory = {
+  const newCategory = {
     name: cleanName,
     slug: finalSlug,
     description: `Категория ${cleanName}`,
@@ -85,7 +80,7 @@ async function importExcelProducts() {
     const worksheet = workbook.Sheets[sheetName];
     
     // Конвертируем в JSON
-    const jsonData: ExcelProduct[] = XLSX.utils.sheet_to_json(worksheet);
+    const jsonData = XLSX.utils.sheet_to_json(worksheet);
     
     console.log(`Найдено ${jsonData.length} строк в файле`);
     console.log('Пример первой строки:', jsonData[0]);
@@ -131,7 +126,7 @@ async function importExcelProducts() {
 
     let imported = 0;
     let skipped = 0;
-    let categoryCache = new Map<string, number>();
+    let categoryCache = new Map();
 
     for (let i = 0; i < jsonData.length; i++) {
       const row = jsonData[i];
@@ -151,9 +146,9 @@ async function importExcelProducts() {
         }
 
         // Получаем ID категории (используем кэш для оптимизации)
-        let categoryId: number;
+        let categoryId;
         if (categoryCache.has(categoryName)) {
-          categoryId = categoryCache.get(categoryName)!;
+          categoryId = categoryCache.get(categoryName);
         } else {
           categoryId = await createCategoryIfNotExists(categoryName);
           categoryCache.set(categoryName, categoryId);
@@ -180,7 +175,7 @@ async function importExcelProducts() {
         }
 
         // Создаем товар
-        const productData: InsertProduct = {
+        const productData = {
           sku: sku,
           name: name,
           slug: finalSlug,

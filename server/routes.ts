@@ -1137,6 +1137,190 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Excel import route
+  router.post("/admin/import-excel", requireAdmin, upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'Файл не загружен' });
+      }
+
+      const filePath = req.file.path;
+      const fileExt = path.extname(req.file.originalname).toLowerCase();
+      
+      if (!['.xlsx', '.xls'].includes(fileExt)) {
+        await fs.unlink(filePath);
+        return res.status(400).json({ error: 'Поддерживается только формат Excel (.xlsx, .xls)' });
+      }
+
+      console.log(`Импорт Excel файла: ${req.file.originalname}`);
+
+      // Динамически импортируем xlsx
+      const XLSX = await import('xlsx');
+      
+      // Читаем Excel файл
+      const workbook = XLSX.readFile(filePath);
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      
+      // Конвертируем в JSON
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      
+      console.log(`Найдено ${jsonData.length} строк в файле`);
+
+      if (jsonData.length === 0) {
+        await fs.unlink(filePath);
+        return res.status(400).json({ error: 'Файл пуст или не содержит данных' });
+      }
+
+      // Определяем колонки автоматически
+      const firstRow = jsonData[0] as any;
+      const columnNames = Object.keys(firstRow);
+      
+      console.log('Доступные колонки:', columnNames);
+
+      let nameColumn = '';
+      let priceColumn = '';
+      let categoryColumn = '';
+      let descriptionColumn = '';
+      let skuColumn = '';
+
+      for (const col of columnNames) {
+        const lowerCol = col.toLowerCase();
+        
+        if (!nameColumn && (lowerCol.includes('наименование') || lowerCol.includes('название') || lowerCol.includes('товар') || lowerCol.includes('продукт') || lowerCol.includes('name'))) {
+          nameColumn = col;
+        }
+        if (!priceColumn && (lowerCol.includes('цена') || lowerCol.includes('стоимость') || lowerCol.includes('price') || lowerCol.includes('руб'))) {
+          priceColumn = col;
+        }
+        if (!categoryColumn && (lowerCol.includes('категория') || lowerCol.includes('группа') || lowerCol.includes('раздел') || lowerCol.includes('category'))) {
+          categoryColumn = col;
+        }
+        if (!descriptionColumn && (lowerCol.includes('описание') || lowerCol.includes('характеристики') || lowerCol.includes('description'))) {
+          descriptionColumn = col;
+        }
+        if (!skuColumn && (lowerCol.includes('артикул') || lowerCol.includes('код') || lowerCol.includes('sku') || lowerCol.includes('арт'))) {
+          skuColumn = col;
+        }
+      }
+
+      console.log('Определенные колонки:', { nameColumn, priceColumn, categoryColumn, descriptionColumn, skuColumn });
+
+      // Импорт данных
+      const results = {
+        categoriesCreated: 0,
+        productsImported: 0,
+        productsSkipped: 0,
+        errors: [] as string[]
+      };
+
+      const categoryCache = new Map<string, number>();
+
+      for (let i = 0; i < jsonData.length; i++) {
+        const row = jsonData[i] as any;
+        
+        try {
+          // Извлекаем данные из строки
+          const name = String(row[nameColumn] || row['Наименование'] || row['Название'] || `Товар ${i + 1}`).trim();
+          const rawPrice = row[priceColumn] || row['Цена'] || row['Стоимость'] || '0';
+          const price = String(rawPrice).replace(/[^\d.,]/g, '') || '0';
+          const categoryName = String(row[categoryColumn] || row['Категория'] || row['Группа'] || 'Общие товары').trim();
+          const description = String(row[descriptionColumn] || row['Описание'] || '').trim();
+          const sku = String(row[skuColumn] || row['Артикул'] || row['Код'] || `SKU-${Date.now()}-${i}`).trim();
+
+          // Пропускаем пустые строки
+          if (!name || name.length < 2) {
+            results.productsSkipped++;
+            continue;
+          }
+
+          // Получаем ID категории
+          let categoryId: number;
+          if (categoryCache.has(categoryName)) {
+            categoryId = categoryCache.get(categoryName)!;
+          } else {
+            categoryId = await getCategoryByName(categoryName);
+            categoryCache.set(categoryName, categoryId);
+            results.categoriesCreated++;
+          }
+
+          // Создаем уникальный slug для продукта
+          const baseSlug = name
+            .toLowerCase()
+            .replace(/[^a-zа-я0-9\s]/g, '')
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-+|-+$/g, '') || `product-${Date.now()}-${i}`;
+
+          let finalSlug = baseSlug;
+          let slugCounter = 1;
+
+          // Проверяем уникальность slug продукта
+          while (true) {
+            const existingProduct = await storage.getProductBySlug(finalSlug);
+            if (!existingProduct) break;
+            
+            finalSlug = `${baseSlug}-${slugCounter}`;
+            slugCounter++;
+          }
+
+          // Создаем товар
+          const productData = {
+            sku: sku,
+            name: name,
+            slug: finalSlug,
+            description: description || `Товар ${name}`,
+            shortDescription: description ? description.substring(0, 200) : `Товар ${name}`,
+            price: price,
+            originalPrice: null,
+            imageUrl: null,
+            stock: null,
+            categoryId: categoryId,
+            isActive: true,
+            isFeatured: false,
+            tag: 'imported-excel'
+          };
+
+          await storage.createProduct(productData);
+          results.productsImported++;
+
+        } catch (error: any) {
+          console.error(`Ошибка при обработке строки ${i + 1}:`, error);
+          results.productsSkipped++;
+          if (results.errors.length < 10) {
+            results.errors.push(`Строка ${i + 1}: ${error.message}`);
+          }
+        }
+      }
+
+      // Очистка загруженного файла
+      await fs.unlink(filePath);
+
+      res.json({
+        success: true,
+        message: `Импорт завершен: ${results.productsImported} товаров импортировано, ${results.productsSkipped} пропущено`,
+        ...results
+      });
+
+    } catch (error: any) {
+      console.error('Ошибка импорта Excel:', error);
+      
+      if (req.file?.path) {
+        try {
+          await fs.unlink(req.file.path);
+        } catch (cleanupError) {
+          console.error('Ошибка удаления файла:', cleanupError);
+        }
+      }
+      
+      res.status(500).json({ 
+        error: 'Ошибка обработки файла', 
+        details: error.message 
+      });
+    }
+  });
+
   app.use("/api", router);
 
   const httpServer = createServer(app);
