@@ -34,13 +34,11 @@ export default function ProductCard({ product }: ProductCardProps) {
     <Card className="product-card group h-full flex flex-col bg-white border-0">
       <div className="relative overflow-hidden">
         <Link href={`/product/${product.slug}`}>
-          <div className="bg-gray-50 pt-6 px-6 pb-4 flex items-center justify-center">
-            <img 
-              src={imageError || !product.imageUrl ? "/placeholder-product.svg" : product.imageUrl} 
-              alt={product.name}
-              className="w-full h-48 object-contain product-image"
-              onError={() => setImageError(true)}
-            />
+          <div className="bg-gray-50 pt-6 px-6 pb-4 flex items-center justify-center min-h-[200px]">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{product.name}</h3>
+              <p className="text-sm text-gray-500">SKU: {product.sku}</p>
+            </div>
           </div>
         </Link>
         
@@ -91,12 +89,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.reviewCount && <span className="text-xs text-gray-500">({product.reviewCount})</span>}
         </div>
         
-        {/* Название товара */}
-        <Link href={`/product/${product.slug}`} className="group">
-          <h3 className="font-medium text-base sm:text-lg mb-1.5 line-clamp-2 group-hover:text-eps-red transition-colors duration-300">
-            {product.name}
-          </h3>
-        </Link>
+
         
         {/* Короткое описание */}
         <p className="text-sm text-gray-600 mb-3 line-clamp-2 flex-grow">

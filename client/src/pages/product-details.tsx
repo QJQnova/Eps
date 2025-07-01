@@ -163,23 +163,18 @@ export default function ProductDetails() {
 
       {/* Product Details */}
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-12">
-        {/* Product Images Section */}
+        {/* Product Info Section */}
         <div className="flex flex-col space-y-5">
-          {/* Main Product Image with Shadow and Border */}
-          <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 p-4 md:p-6 transition-all duration-300 hover:shadow-lg">
-            <div className="relative aspect-square bg-gray-50 rounded-md flex items-center justify-center overflow-hidden product-image-container">
-              <img
-                src={product.imageUrl || "https://placehold.co/600x400?text=Нет+изображения"}
-                alt={product.name}
-                className="max-w-full max-h-full object-contain transition-transform duration-700 product-image"
-              />
-              
-              {/* Badge for sale or discount if available */}
+          {/* Product Title and Info */}
+          <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 p-4 md:p-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
+            <div className="flex items-center space-x-4">
               {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
-                <div className="absolute top-3 left-3 bg-eps-red text-white text-xs font-bold px-2.5 py-1.5 rounded-md shadow-sm">
+                <div className="bg-eps-red text-white text-sm font-bold px-3 py-1.5 rounded-md">
                   -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
                 </div>
               )}
+              <span className="text-sm text-gray-500">SKU: {product.sku}</span>
             </div>
           </div>
 
