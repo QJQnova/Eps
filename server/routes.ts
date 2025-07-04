@@ -991,6 +991,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Full database cleanup - delete all products and categories
+  router.delete("/admin/database/cleanup", requireAdmin, async (req, res) => {
+    try {
+      console.log('Начинаем полную очистку базы данных...');
+      
+      // Delete all products first (due to foreign key constraints)
+      const productsDeleted = await storage.deleteAllProducts();
+      console.log('Товары удалены:', productsDeleted);
+      
+      // Then delete all categories
+      const categoriesDeleted = await storage.deleteAllCategories();
+      console.log('Категории удалены:', categoriesDeleted);
+      
+      if (productsDeleted && categoriesDeleted) {
+        res.json({ 
+          success: true,
+          message: "База данных полностью очищена. Все товары и категории удалены.",
+          productsDeleted: true,
+          categoriesDeleted: true
+        });
+      } else {
+        res.status(500).json({ 
+          success: false,
+          message: "Ошибка при очистке базы данных",
+          productsDeleted,
+          categoriesDeleted
+        });
+      }
+    } catch (error: any) {
+      console.error('Ошибка полной очистки базы данных:', error);
+      res.status(500).json({ 
+        success: false,
+        message: "Ошибка очистки базы данных: " + error.message 
+      });
+    }
+  });
+
   // Массовый парсинг всех поставщиков
   router.post("/admin/mass-scrape-import", requireAdmin, async (req, res) => {
     try {
