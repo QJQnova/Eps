@@ -68,12 +68,6 @@ export default function Footer() {
           {/* Company Info */}
           <div className="lg:col-span-1 space-y-6">
             <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-eps-gradient rounded-lg flex items-center justify-center">
-                  <Wrench className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold bg-eps-gradient bg-clip-text text-transparent">ЭПС</h3>
-              </div>
               <p className="text-gray-300 leading-relaxed">
                 Надежный поставщик профессиональных инструментов и оборудования для строительства и производства.
               </p>
