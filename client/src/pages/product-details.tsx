@@ -261,7 +261,7 @@ export default function ProductDetails() {
               <div className="flex items-center space-x-2">
                 <div className={`w-2 h-2 rounded-full ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`} />
                 <span className={`text-sm font-medium ${product.stock > 0 ? 'text-green-700' : 'text-red-700'}`}>
-                  {product.stock > 0 ? `In Stock (${product.stock} available)` : 'Out of Stock'}
+                  {product.stock > 0 ? `В наличии (${product.stock} шт.)` : 'Нет в наличии'}
                 </span>
               </div>
 
@@ -270,7 +270,7 @@ export default function ProductDetails() {
               {/* Description */}
               {product.shortDescription && (
                 <div className="space-y-2">
-                  <h3 className="font-semibold text-gray-900">Description</h3>
+                  <h3 className="font-semibold text-gray-900">Описание</h3>
                   <p className="text-gray-600 leading-relaxed">
                     {product.shortDescription}
                   </p>
@@ -286,13 +286,13 @@ export default function ProductDetails() {
                     className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 text-base"
                   >
                     <ShoppingCart className="h-5 w-5 mr-2" />
-                    Add to Cart
+                    Добавить в корзину
                   </Button>
                   <Button
                     variant="outline"
                     className="px-6 py-3"
                   >
-                    Buy Now
+                    Купить сейчас
                   </Button>
                 </div>
 
