@@ -38,12 +38,23 @@ export default function ProductCard({ product }: ProductCardProps) {
             {/* Декоративные элементы */}
             <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-            {/* Иконка инструмента */}
+            {/* Изображение товара */}
             <div className="relative z-10 text-center">
-              <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-eps-red/10 to-eps-yellow/10 rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-eps-red" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              <div className="w-full h-32 mx-auto mb-4 flex items-center justify-center">
+                {product.imageUrl && !imageError ? (
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="max-w-full max-h-full object-contain"
+                    onError={() => setImageError(true)}
+                  />
+                ) : (
+                  <div className="w-20 h-20 bg-gradient-to-br from-eps-red/10 to-eps-yellow/10 rounded-full flex items-center justify-center">
+                    <svg className="w-10 h-10 text-eps-red" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                )}
               </div>
               <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">{product.name}</h3>
               <p className="text-sm text-gray-500">Артикул: {product.sku}</p>

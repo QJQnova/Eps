@@ -297,7 +297,7 @@ export default function ProductDetails() {
                 </div>
 
                 <p className="text-xs text-gray-500 text-center">
-                  Free shipping on orders over 5000₽
+                  Бесплатная доставка при заказе от 5000₽
                 </p>
               </div>
             </div>
@@ -306,7 +306,7 @@ export default function ProductDetails() {
           {/* Additional Details */}
           {product.description && (
             <div className="border-t border-gray-100 p-6 md:p-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Product Details</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Описание товара</h3>
               <div className="prose max-w-none text-gray-600">
                 <p>{product.description}</p>
               </div>
