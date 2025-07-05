@@ -26,74 +26,42 @@ export default function Home() {
         <title>ЭПС</title>
         <meta name="description" content="Профессиональные инструменты и оборудование от компании ЭПС. Широкий ассортимент по выгодным ценам." />
       </Helmet>
-      {/* Hero Section - Красивый градиентный дизайн как в примере */}
-      <section className="relative bg-gradient-to-r from-eps-red via-red-500 to-eps-yellow text-white overflow-hidden min-h-[70vh]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 xl:gap-20 items-center h-full">
-            {/* Левая колонка с текстом */}
-            <div className="text-left hero-slide-up lg:pr-8">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-tight">
-                <span className="block text-white">Коллекция</span>
-                <span className="block text-white">профессиональных</span>
-                <span className="block text-white">инструментов</span>
-              </h1>
-              <p className="text-lg md:text-xl lg:text-2xl mb-8 text-white/95 max-w-lg lg:max-w-none">
-                Высококачественные инструменты для профессионалов и любителей. Создавайте с лучшим оборудованием.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Button 
-                  size="lg"
-                  className="bg-white text-eps-red hover:bg-gray-50 transition-all font-semibold px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transform hover:scale-105"
-                  asChild
-                >
-                  <Link href="#products">Купить сейчас</Link>
-                </Button>
-                <Button 
-                  variant="outline"
-                  size="lg"
-                  className="bg-transparent hover:bg-white/20 border-2 border-white text-white font-semibold px-8 py-4 text-lg rounded-full hover:scale-105 transition-all"
-                  asChild
-                >
-                  <Link href="#categories">Посмотреть категории</Link>
-                </Button>
-              </div>
-            </div>
-            
-            {/* Правая колонка с карточкой инструментов */}
-            <div className="hidden lg:block hero-slide-left lg:pl-4">
-              <div className="bg-gradient-to-br from-red-900/80 to-amber-800/80 backdrop-blur-sm rounded-3xl p-8 lg:p-10 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500 max-w-lg xl:max-w-xl mx-auto">
-                {/* Сетка с иконками инструментов */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-eps-yellow to-amber-500 p-5 rounded-xl flex flex-col items-center text-center">
-                    <svg className="w-8 h-8 text-white mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a1 1 0 01-1-1V9a1 1 0 011-1h1a2 2 0 100-4H4a1 1 0 01-1-1V4a1 1 0 011-1h3a1 1 0 001-1z" />
-                    </svg>
-                    <span className="text-white text-sm font-medium">Инструменты</span>
-                  </div>
-                  <div className="bg-gradient-to-br from-eps-red to-red-600 p-5 rounded-xl flex flex-col items-center text-center">
-                    <svg className="w-8 h-8 text-white mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    <span className="text-white text-sm font-medium">Оборудование</span>
-                  </div>
-                  <div className="bg-gradient-to-br from-amber-600 to-yellow-600 p-5 rounded-xl flex flex-col items-center text-center">
-                    <svg className="w-8 h-8 text-white mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span className="text-white text-sm font-medium">Запчасти</span>
-                  </div>
-                  <div className="bg-gradient-to-br from-orange-600 to-red-500 p-5 rounded-xl flex flex-col items-center text-center">
-                    <svg className="w-8 h-8 text-white mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    <span className="text-white text-sm font-medium">Сервис</span>
-                  </div>
-                </div>
-              </div>
+      {/* Hero Section - Центрированный дизайн */}
+      <section className="relative bg-gradient-to-r from-eps-red via-red-500 to-eps-yellow text-white overflow-hidden min-h-[80vh]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-10">
+          <div className="text-center hero-slide-up">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-8 leading-tight">
+              <span className="block text-white">Коллекция</span>
+              <span className="block text-white">профессиональных</span>
+              <span className="block text-white">инструментов</span>
+            </h1>
+            <p className="text-lg md:text-xl lg:text-2xl mb-12 text-white/95 max-w-4xl mx-auto">
+              Высококачественные инструменты для профессионалов и любителей. Создавайте с лучшим оборудованием.
+            </p>
+            <div className="flex flex-wrap gap-6 justify-center">
+              <Button 
+                size="lg"
+                className="bg-white text-eps-red hover:bg-gray-50 transition-all font-semibold px-10 py-5 text-lg rounded-full shadow-lg hover:shadow-xl transform hover:scale-105"
+                asChild
+              >
+                <Link href="#products">Купить сейчас</Link>
+              </Button>
+              <Button 
+                variant="outline"
+                size="lg"
+                className="bg-transparent hover:bg-white/20 border-2 border-white text-white font-semibold px-10 py-5 text-lg rounded-full hover:scale-105 transition-all"
+                asChild
+              >
+                <Link href="#categories">Посмотреть категории</Link>
+              </Button>
             </div>
           </div>
         </div>
+        
+        {/* Декоративные элементы */}
+        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-yellow-300/20 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 right-1/3 w-16 h-16 bg-white/5 rounded-full blur-xl animate-pulse delay-500"></div>
       </section>
       
       {/* Features Section - Красивые карточки как в примере */}
