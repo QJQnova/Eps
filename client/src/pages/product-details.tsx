@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'wouter';
 import { Heart, ShoppingCart, Star, Truck, Shield, RotateCcw } from 'lucide-react';
@@ -47,7 +46,7 @@ export default function ProductDetails() {
   useEffect(() => {
     const fetchProduct = async () => {
       if (!slug) return;
-      
+
       try {
         setLoading(true);
         const response = await fetch(`/api/products/${slug}`);
@@ -174,20 +173,20 @@ export default function ProductDetails() {
                   }}
                 />
               </div>
-              
+
               {/* Product Features */}
               <div className="grid grid-cols-3 gap-3 pt-4">
                 <div className="flex flex-col items-center p-3 bg-blue-50 rounded-lg">
                   <Truck className="h-5 w-5 text-blue-600 mb-1" />
-                  <span className="text-xs text-blue-800 font-medium">Fast Delivery</span>
+                  <span className="text-xs text-blue-800 font-medium">Быстрая доставка</span>
                 </div>
                 <div className="flex flex-col items-center p-3 bg-green-50 rounded-lg">
                   <Shield className="h-5 w-5 text-green-600 mb-1" />
-                  <span className="text-xs text-green-800 font-medium">Warranty</span>
+                  <span className="text-xs text-green-800 font-medium">Гарантия</span>
                 </div>
                 <div className="flex flex-col items-center p-3 bg-orange-50 rounded-lg">
                   <RotateCcw className="h-5 w-5 text-orange-600 mb-1" />
-                  <span className="text-xs text-orange-800 font-medium">Returns</span>
+                  <span className="text-xs text-orange-800 font-medium">Возврат</span>
                 </div>
               </div>
             </div>
@@ -296,7 +295,7 @@ export default function ProductDetails() {
                     Buy Now
                   </Button>
                 </div>
-                
+
                 <p className="text-xs text-gray-500 text-center">
                   Free shipping on orders over 5000₽
                 </p>
