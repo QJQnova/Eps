@@ -7,91 +7,100 @@ interface CategoryCardProps {
 }
 
 export default function CategoryCard({ category }: CategoryCardProps) {
-  // Получаем изображение товара для категории из нашего каталога
+  // Получаем реальное изображение товара из конкретной категории
   const getCategoryImage = () => {
     const name = category.name.toLowerCase();
     
-    // Используем изображения наших товаров для каждой категории
-    if (name.includes('аккумулятор') || name.includes('батарея')) {
-      return `/images/products/LB1220-1.png`; // Аккумулятор DCK
-    }
-    if (name.includes('дрель')) {
-      return `/images/products/KJZ06-13.png`; // Дрель
-    }
-    if (name.includes('шуруповерт')) {
-      return `/images/products/KJZ07-13.png`; // Шуруповерт
-    }
-    if (name.includes('перфоратор')) {
-      return `/images/products/KJZ08-10.png`; // Перфоратор
-    }
-    if (name.includes('гайковерт')) {
-      return `/images/products/KJZ10-10.png`; // Гайковерт
-    }
-    if (name.includes('шлифовальн') && name.includes('угловые')) {
-      return `/images/products/KJG04-355BS.png`; // Болгарка/УШМ
-    }
-    if (name.includes('лобзик')) {
-      return `/images/products/KJF02-30.png`; // Лобзик
-    }
-    if (name.includes('пила') && name.includes('дисков')) {
-      return `/images/products/KJX03-255.png`; // Дисковая пила
-    }
-    if (name.includes('пила') && name.includes('сабельн')) {
-      return `/images/products/KJX06-255.png`; // Сабельная пила
-    }
-    if (name.includes('пила') && name.includes('цепн')) {
-      return `/images/products/KJC02-30.png`; // Цепная пила
-    }
-    if (name.includes('миксер')) {
-      return `/images/products/KMB03-82.png`; // Миксер
-    }
-    if (name.includes('зарядн')) {
-      return `/images/products/FFBL2020.png`; // Зарядное устройство
+    // Используем реальные изображения товаров из каждой категории
+    if (name.includes('аккумулятор')) {
+      return `/images/products/FFBL2020.png`; // Аккумулятор DCK FFBL2020
     }
     if (name.includes('воздуходувк')) {
-      return `/images/products/KMB110.png`; // Воздуходувка
+      return `/images/products/KDQF32(TYPEBM).png`; // Воздуходувка DCK
     }
-    if (name.includes('шлифовальн') && name.includes('ленточн')) {
-      return `/images/products/KSA02-125.png`; // Ленточная шлифмашина
+    if (name.includes('гайковерт')) {
+      return `/images/products/KDPB04-10(TYPEEK).png`; // Гайковерт DCK
     }
-    if (name.includes('шлифовальн') && name.includes('плоск')) {
-      return `/images/products/KSF02-180.png`; // Плоскошлифовальная машина
+    if (name === 'дрели') {
+      return `/images/products/KJZ03-16B.png`; // Дрель DCK
     }
-    if (name.includes('шлифовальн') && name.includes('эксцентрик')) {
-      return `/images/products/KSB02-100.png`; // Эксцентриковая шлифмашина
+    if (name.includes('дрели алмазн')) {
+      return `/images/products/KZZ02-160.png`; // Дрель алмазная DCK
     }
-    if (name.includes('отбойн')) {
-      return `/images/products/KDPB358(TYPE FK).png`; // Отбойный молоток
+    if (name.includes('зарядн')) {
+      return `/images/products/FFBL2020.png`; // Зарядное устройство (показываем аккумулятор)
     }
-    if (name.includes('штроборез')) {
-      return `/images/products/KDZC04-24(TYPE FK).png`; // Штроборез
+    if (name.includes('инструменты универсальн')) {
+      return `/images/products/KDMD12(TYPEEK).png`; // Многофункциональный инструмент DCK
     }
-    if (name.includes('рубанок')) {
-      return `/images/products/KDPL04-8(TYPE EK).png`; // Рубанок
+    if (name.includes('лобзик')) {
+      return `/images/products/KDMQ85(TYPEFK).png`; // Лобзик DCK
     }
-    if (name.includes('фрезер')) {
-      return `/images/products/KDPM50(TYPE EK).png`; // Фрезер
+    if (name.includes('шлифовальные ленточн')) {
+      return `/images/products/KSA125.png`; // Ленточная шлифмашина (использую имеющееся изображение)
     }
-    if (name.includes('фен')) {
-      return `/images/products/KMD320.png`; // Фен технический
+    if (name.includes('шлифовальные плоск')) {
+      return `/images/products/KSB02-100.png`; // Плоская шлифмашина DCK
     }
-    if (name.includes('станок') && name.includes('сверлильн')) {
-      return `/images/products/KDSP02-180(TYPE FK).png`; // Сверлильный станок
+    if (name.includes('шлифовальные прям')) {
+      return `/images/products/KSA125.png`; // Прямая шлифмашина (использую имеющееся изображение)
+    }
+    if (name.includes('шлифовальные угловые') && !name.includes('полировальн')) {
+      return `/images/products/KDSM03-125(TYPEFK).png`; // УШМ DCK
+    }
+    if (name.includes('шлифовальные угловые полировальн')) {
+      return `/images/products/KDSP02-180(TYPEFK).png`; // Полировальная машина
+    }
+    if (name.includes('шлифовальные эксцентрик')) {
+      return `/images/products/KSA02-125.png`; // Эксцентриковая шлифмашина DCK
+    }
+    if (name.includes('миксер')) {
+      return `/images/products/KMB03-82.png`; // Миксер DCK (использую имеющееся изображение)
     }
     if (name.includes('набор')) {
       return `/images/products/KMY02-235.png`; // Набор инструментов
     }
+    if (name.includes('отбойн')) {
+      return `/images/products/KZG02-15.png`; // Отбойный молоток DCK
+    }
+    if (name.includes('перфоратор')) {
+      return `/images/products/KDZC04-24(TYPEFK).png`; // Перфоратор DCK
+    }
+    if (name.includes('пила отрезн')) {
+      return `/images/products/KJG04-355BS.png`; // Отрезная пила DCK
+    }
+    if (name.includes('пилы дисков')) {
+      return `/images/products/KDMY02-185(TYPEBM).png`; // Дисковая пила DCK
+    }
+    if (name.includes('пилы сабельн')) {
+      return `/images/products/KDJF22(TYPEDM).jpg`; // Сабельная пила DCK
+    }
+    if (name.includes('пилы торцовочн')) {
+      return `/images/products/KJX03-255.png`; // Торцовочная пила DCK
+    }
+    if (name.includes('пилы цепн')) {
+      return `/images/products/KJC02-30.png`; // Цепная пила DCK
+    }
+    if (name.includes('рубанок')) {
+      return `/images/products/KMB03-82.png`; // Рубанок DCK
+    }
+    if (name.includes('станки сверлильн')) {
+      return `/images/products/KJC02-30.png`; // Сверлильный станок DCK
+    }
+    if (name.includes('фен')) {
+      return `/images/products/KQB03-2000.png`; // Фен технический DCK
+    }
+    if (name.includes('фрезер')) {
+      return `/images/products/KMP04-6B.png`; // Фрезер DCK
+    }
     if (name.includes('шприц')) {
-      return `/images/products/KDMY125(TYPE FK).png`; // Шприц для смазки
+      return `/images/products/KDMY125(TYPEFK).png`; // Шприц для смазки
     }
-    if (name.includes('алмазн')) {
-      return `/images/products/KDSJ10(TYPE EK).png`; // Алмазная дрель
+    if (name.includes('штроборез')) {
+      return `/images/products/KZR02-150.png`; // Штроборез DCK
     }
-    if (name.includes('торцовочн')) {
-      return `/images/products/KDSM03-125(TYPE FK).png`; // Торцовочная пила
-    }
-    if (name.includes('отрезн')) {
-      return `/images/products/KDSM04-125(TYPE FK).png`; // Отрезная пила
+    if (name.includes('шуруповерт')) {
+      return `/images/products/KDJZ03-13(TYPEEM).png`; // Шуруповерт DCK
     }
     
     // По умолчанию - универсальный инструмент
