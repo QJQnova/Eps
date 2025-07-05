@@ -309,8 +309,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   router.get("/products/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const product = await storage.getProductById(id);
+      // Try to parse as integer first (ID)
+      const idNumber = parseInt(req.params.id);
+      
+      // If it's a valid number, search by ID
+      if (!isNaN(idNumber)) {
+        const product = await storage.getProductById(idNumber);
+        if (product) {
+          return res.json(product);
+        }
+      }
+      
+      // Otherwise, search by slug
+      const product = await storage.getProductBySlug(req.params.id);
       if (!product) {
         return res.status(404).json({ message: "Товар не найден" });
       }

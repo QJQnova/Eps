@@ -31,7 +31,7 @@ interface Product {
 }
 
 export default function ProductDetails() {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,11 +46,11 @@ export default function ProductDetails() {
 
   useEffect(() => {
     const fetchProduct = async () => {
-      if (!id) return;
+      if (!slug) return;
       
       try {
         setLoading(true);
-        const response = await fetch(`/api/products/${id}`);
+        const response = await fetch(`/api/products/${slug}`);
         if (!response.ok) {
           throw new Error('Product not found');
         }
@@ -64,11 +64,11 @@ export default function ProductDetails() {
     };
 
     fetchProduct();
-  }, [id]);
+  }, [slug]);
 
   const handleAddToCart = () => {
     if (product) {
-      addToCart(product);
+      addToCart(product.id);
     }
   };
 
