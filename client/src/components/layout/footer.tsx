@@ -1,13 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  Facebook, 
-  Twitter, 
-  Instagram, 
-  Youtube, 
   Phone, 
   MapPin, 
   Clock, 
@@ -21,10 +17,33 @@ import {
   Leaf
 } from "lucide-react";
 
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 export default function Footer() {
   const [email, setEmail] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]);
   const { toast } = useToast();
   
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data.slice(0, 5)); // Показываем только первые 5 категорий
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки категорий:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -92,25 +111,6 @@ export default function Footer() {
                 </div>
               </div>
             </div>
-            
-            {/* Social links */}
-            <div className="pt-4">
-              <p className="text-gray-300 text-sm font-medium mb-3">Мы в соцсетях:</p>
-              <div className="flex space-x-3">
-                <a href="#" className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-700 transition">
-                  <Facebook className="w-5 h-5" />
-                </a>
-                <a href="#" className="w-10 h-10 bg-sky-500 rounded-lg flex items-center justify-center hover:bg-sky-600 transition">
-                  <Twitter className="w-5 h-5" />
-                </a>
-                <a href="#" className="w-10 h-10 bg-pink-600 rounded-lg flex items-center justify-center hover:bg-pink-700 transition">
-                  <Instagram className="w-5 h-5" />
-                </a>
-                <a href="#" className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center hover:bg-red-700 transition">
-                  <Youtube className="w-5 h-5" />
-                </a>
-              </div>
-            </div>
           </div>
           
           {/* Catalog */}
@@ -120,30 +120,14 @@ export default function Footer() {
               <h4 className="text-lg font-semibold text-eps-orange">Каталог товаров</h4>
             </div>
             <ul className="space-y-3">
-              <li>
-                <Link href="/category/power-tools" className="flex items-center space-x-2 text-gray-400 hover:text-eps-orange transition duration-200 group">
-                  <span className="w-2 h-2 bg-eps-orange rounded-full opacity-0 group-hover:opacity-100 transition"></span>
-                  <span>Электроинструмент</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/category/diesel-power-stations" className="flex items-center space-x-2 text-gray-400 hover:text-eps-orange transition duration-200 group">
-                  <span className="w-2 h-2 bg-eps-orange rounded-full opacity-0 group-hover:opacity-100 transition"></span>
-                  <span>Электростанции дизельные</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/category/petrol-power-stations" className="flex items-center space-x-2 text-gray-400 hover:text-eps-orange transition duration-200 group">
-                  <span className="w-2 h-2 bg-eps-orange rounded-full opacity-0 group-hover:opacity-100 transition"></span>
-                  <span>Электростанции бензиновые</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/category/garden-equipment" className="flex items-center space-x-2 text-gray-400 hover:text-eps-orange transition duration-200 group">
-                  <span className="w-2 h-2 bg-eps-orange rounded-full opacity-0 group-hover:opacity-100 transition"></span>
-                  <span>Садовая техника</span>
-                </Link>
-              </li>
+              {categories.map((category) => (
+                <li key={category.id}>
+                  <Link href={`/category/${category.slug}`} className="flex items-center space-x-2 text-gray-400 hover:text-eps-orange transition duration-200 group">
+                    <span className="w-2 h-2 bg-eps-orange rounded-full opacity-0 group-hover:opacity-100 transition"></span>
+                    <span>{category.name}</span>
+                  </Link>
+                </li>
+              ))}
               <li>
                 <Link href="/products" className="flex items-center space-x-2 text-gray-400 hover:text-eps-orange transition duration-200 group">
                   <span className="w-2 h-2 bg-eps-orange rounded-full opacity-0 group-hover:opacity-100 transition"></span>
