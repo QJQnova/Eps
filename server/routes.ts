@@ -280,7 +280,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const result = await storage.searchProducts(params);
-      res.json(result);
+      
+      // Добавляем информацию о пагинации
+      const totalPages = Math.ceil(result.total / params.limit);
+      
+      res.json({
+        products: result.products,
+        total: result.total,
+        page: params.page,
+        limit: params.limit,
+        totalPages: totalPages,
+        hasNextPage: params.page < totalPages,
+        hasPrevPage: params.page > 1
+      });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

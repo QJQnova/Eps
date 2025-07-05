@@ -3,9 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, List } from "lucide-react";
+import { LayoutGrid, List, ChevronLeft, ChevronRight } from "lucide-react";
 import ProductCard from "@/components/product/product-card";
-import Pagination from "@/components/ui/pagination";
 import { Product } from "@shared/schema";
 
 interface ProductListProps {
@@ -33,7 +32,11 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
   // Fetch products с оптимизированным кешированием
   const { data, isLoading } = useQuery<{
     products: Product[],
-    total: number
+    total: number,
+    page: number,
+    totalPages: number,
+    hasNextPage: boolean,
+    hasPrevPage: boolean
   }>({ 
     queryKey: [`/api/products?${queryParams.toString()}`],
     staleTime: 60000, // 1 минута - разумное время для кеширования списка товаров
@@ -137,7 +140,84 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
             ))}
           </div>
           
-          {/* Remove pagination for now since API returns simple array */}
+          {/* Пагинация */}
+          {data.totalPages > 1 && (
+            <div className="mt-8 flex justify-center">
+              <nav className="flex items-center space-x-2">
+                {/* Предыдущая страница */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(page - 1)}
+                  disabled={!data.hasPrevPage}
+                  className="flex items-center gap-1"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Назад
+                </Button>
+                
+                {/* Номера страниц */}
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: Math.min(data.totalPages, 7) }, (_, i) => {
+                    let pageNum: number;
+                    
+                    if (data.totalPages <= 7) {
+                      // Если страниц мало, показываем все
+                      pageNum = i + 1;
+                    } else {
+                      // Логика для большого количества страниц
+                      if (page <= 4) {
+                        pageNum = i + 1;
+                      } else if (page >= data.totalPages - 3) {
+                        pageNum = data.totalPages - 6 + i;
+                      } else {
+                        pageNum = page - 3 + i;
+                      }
+                    }
+                    
+                    // Показываем многоточие
+                    if (data.totalPages > 7 && 
+                        ((i === 6 && page < data.totalPages - 3) || 
+                         (i === 0 && page > 4))) {
+                      return (
+                        <span key={`ellipsis-${i}`} className="px-2 text-gray-500">
+                          ...
+                        </span>
+                      );
+                    }
+                    
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={pageNum === page ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`min-w-[40px] ${
+                          pageNum === page 
+                            ? "bg-eps-red text-white hover:bg-eps-red/90" 
+                            : "hover:bg-gray-50"
+                        }`}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
+                
+                {/* Следующая страница */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(page + 1)}
+                  disabled={!data.hasNextPage}
+                  className="flex items-center gap-1"
+                >
+                  Вперед
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </nav>
+            </div>
+          )}
         </>
       ) : (
         <div className="flex flex-col items-center justify-center py-12 text-center">
