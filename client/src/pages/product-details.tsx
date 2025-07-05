@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link } from 'wouter';
 import { Heart, ShoppingCart, Star, Truck, Shield, RotateCcw } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
