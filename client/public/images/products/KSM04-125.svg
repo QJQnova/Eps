@@ -1,0 +1,27 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grinderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#047857;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Корпус -->
+  <rect x="40" y="80" width="120" height="40" rx="8" fill="url(#grinderGrad)" stroke="#065f46" stroke-width="2"/>
+  
+  <!-- Рукоятка -->
+  <rect x="30" y="100" width="80" height="50" rx="12" fill="url(#grinderGrad)" stroke="#065f46" stroke-width="2"/>
+  
+  <!-- Диск -->
+  <circle cx="170" cy="100" r="25" fill="#6b7280" stroke="#4b5563" stroke-width="2"/>
+  <circle cx="170" cy="100" r="18" fill="none" stroke="#374151" stroke-width="3"/>
+  
+  <!-- Защитный кожух -->
+  <path d="M 145 100 A 25 25 0 0 1 170 75 A 25 25 0 0 1 195 100" fill="none" stroke="#374151" stroke-width="3"/>
+  
+  <!-- Логотип DCK -->
+  <text x="100" y="135" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">DCK</text>
+  
+  <!-- Артикул -->
+  <text x="100" y="185" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="10">KSM04-125</text>
+</svg>

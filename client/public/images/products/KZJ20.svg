@@ -1,0 +1,26 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="drillGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Основа дрели -->
+  <rect x="40" y="80" width="120" height="40" rx="8" fill="url(#drillGrad)" stroke="#1e40af" stroke-width="2"/>
+  
+  <!-- Рукоятка -->
+  <rect x="30" y="100" width="80" height="60" rx="12" fill="url(#drillGrad)" stroke="#1e40af" stroke-width="2"/>
+  
+  <!-- Патрон -->
+  <circle cx="170" cy="100" r="12" fill="#64748b" stroke="#475569" stroke-width="2"/>
+  
+  <!-- Сверло -->
+  <rect x="175" y="98" width="20" height="4" fill="#94a3b8"/>
+  
+  <!-- Логотип DCK -->
+  <text x="100" y="140" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">DCK</text>
+  
+  <!-- Артикул -->
+  <text x="100" y="185" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="10">KZJ20</text>
+</svg>

@@ -1,0 +1,29 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hammerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ea580c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c2410c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Корпус перфоратора -->
+  <rect x="40" y="80" width="120" height="40" rx="8" fill="url(#hammerGrad)" stroke="#9a3412" stroke-width="2"/>
+  
+  <!-- Рукоятка -->
+  <rect x="30" y="100" width="80" height="60" rx="12" fill="url(#hammerGrad)" stroke="#9a3412" stroke-width="2"/>
+  
+  <!-- Патрон -->
+  <rect x="160" y="95" width="25" height="10" rx="2" fill="#6b7280" stroke="#4b5563" stroke-width="1"/>
+  
+  <!-- Бур -->
+  <rect x="180" y="98" width="15" height="4" fill="#94a3b8"/>
+  
+  <!-- Индикатор режима -->
+  <circle cx="60" cy="90" r="4" fill="#fbbf24"/>
+  
+  <!-- Логотип DCK -->
+  <text x="100" y="140" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">DCK</text>
+  
+  <!-- Артикул -->
+  <text x="100" y="185" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="10">KZC05-26(TYPE XC)</text>
+</svg>

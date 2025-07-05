@@ -1,0 +1,26 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="toolGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4b5563;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#374151;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Корпус инструмента -->
+  <rect x="50" y="80" width="100" height="40" rx="8" fill="url(#toolGrad)" stroke="#1f2937" stroke-width="2"/>
+  
+  <!-- Рукоятка -->
+  <rect x="40" y="100" width="80" height="60" rx="12" fill="url(#toolGrad)" stroke="#1f2937" stroke-width="2"/>
+  
+  <!-- Рабочая часть -->
+  <rect x="150" y="95" width="30" height="10" rx="2" fill="#6b7280" stroke="#4b5563" stroke-width="1"/>
+  
+  <!-- Индикатор -->
+  <circle cx="70" cy="90" r="3" fill="#22c55e"/>
+  
+  <!-- Логотип DCK -->
+  <text x="90" y="135" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">DCK</text>
+  
+  <!-- Артикул -->
+  <text x="100" y="185" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="10">KDPB358(TYPE Z)</text>
+</svg>
