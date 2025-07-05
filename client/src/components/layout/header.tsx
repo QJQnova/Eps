@@ -9,6 +9,7 @@ import { Search, User, ShoppingCart, Menu, X, ChevronDown, Package, LogIn, LogOu
 import { Category } from "@shared/schema";
 import {
   DropdownMenu,
+  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator
