@@ -50,8 +50,14 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
   
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
-    // Scroll to top of product list
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    // Scroll to products section
+    const productsSection = document.getElementById('products') || document.querySelector('[data-component-name="section"]');
+    if (productsSection) {
+      productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      // Fallback to top if section not found
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
   
   return (
