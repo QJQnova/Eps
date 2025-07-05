@@ -5,92 +5,112 @@ import { DatabaseStorage } from './server/storage';
 const storage = new DatabaseStorage();
 
 async function addNewImages() {
-    console.log('🚀 Добавляем новые изображения DCK...\n');
-    
-    // Список новых изображений с временными метками
-    const newImages = [
-        'FFBL2020_1751720246243.png',
-        'FFBL2040_1751720246243.png', 
-        'FFBL2060_1751720246244.png',
-        'KDJF22(TYPE DM)_1751720246244.png',
-        'KDJZ03-13(TYPE EM)_1751720246244.png',
-        'KDJZ03-13(TYPE Z)_1751720246244.png',
-        'KDJZ04-13(TYPE EM)_1751720246244.png',
-        'KDJZ04-13(TYPE Z)_1751720246245.png',
-        'KDJZ05-13(TYPE EM)_1751720246245.png',
-        'KDJZ05-13(TYPE Z)_1751720246245.png',
-        'KDJZ06-13(TYPE EM)_1751720246245.png',
-        'KDJZ06-13(TYPE Z)_1751720246245.png'
-    ];
+    console.log('🔄 Обновление товаров на реальные фотографии...\n');
     
     try {
+        // Получаем все файлы из attached_assets
+        const attachedFiles = fs.readdirSync('attached_assets/');
+        const imageFiles = attachedFiles.filter(file => 
+            file.toLowerCase().endsWith('.png') || 
+            file.toLowerCase().endsWith('.jpg') || 
+            file.toLowerCase().endsWith('.jpeg')
+        );
+        
+        console.log(`📁 Найдено изображений в attached_assets: ${imageFiles.length}`);
+        
         // Получаем все товары
         const allProducts = await storage.getAllProducts();
-        console.log(`📦 Найдено товаров в базе: ${allProducts.length}`);
-        
-        // Создаем папку для изображений если её нет
         const publicImagesDir = 'client/public/images/products/';
-        if (!fs.existsSync(publicImagesDir)) {
-            fs.mkdirSync(publicImagesDir, { recursive: true });
-        }
         
         let addedCount = 0;
+        let replacedCount = 0;
         let skippedCount = 0;
         
-        for (const imageFile of newImages) {
+        // Обрабатываем каждое изображение
+        for (const imageFile of imageFiles) {
             try {
-                // Извлекаем SKU из имени файла - оставляем TYPE как часть артикула
-                let sku = imageFile.replace(/_\d+\.png$/, '').replace(/\.png$/i, '');
+                // Извлекаем SKU из имени файла
+                const fileName = imageFile.replace(/\.(png|jpg|jpeg)$/i, '');
                 
-                console.log(`🔍 Обработка: ${imageFile} -> SKU: ${sku}`);
+                // Ищем соответствующий товар
+                let matchedProduct = null;
                 
-                // Ищем товар по SKU (точное соответствие)
-                const product = allProducts.find(p => 
-                    p.sku.toLowerCase() === sku.toLowerCase()
-                );
+                // Точное соответствие SKU
+                matchedProduct = allProducts.find(p => {
+                    const cleanSku = p.sku.replace(/[^a-zA-Z0-9\-()]/g, '');
+                    const cleanFileName = fileName.replace(/[^a-zA-Z0-9\-()]/g, '');
+                    return cleanSku.toLowerCase() === cleanFileName.toLowerCase();
+                });
                 
-                if (!product) {
-                    console.log(`❓ Товар не найден для SKU: ${sku}`);
-                    skippedCount++;
-                    continue;
+                // Поиск по частичному соответствию
+                if (!matchedProduct) {
+                    const baseFileName = fileName.split('_')[0]; // Убираем timestamp
+                    matchedProduct = allProducts.find(p => 
+                        baseFileName.toLowerCase().includes(p.sku.toLowerCase()) ||
+                        p.sku.toLowerCase().includes(baseFileName.toLowerCase())
+                    );
                 }
                 
-                if (product.imageUrl) {
-                    console.log(`⏭️ У товара ${sku} уже есть изображение`);
-                    skippedCount++;
-                    continue;
-                }
-                
-                // Копируем изображение
-                const sourcePath = path.join('attached_assets', imageFile);
-                const cleanSku = sku.replace(/[^a-zA-Z0-9\-()]/g, '');
-                const targetPath = path.join(publicImagesDir, `${cleanSku}.png`);
-                
-                if (fs.existsSync(sourcePath)) {
-                    fs.copyFileSync(sourcePath, targetPath);
+                if (matchedProduct) {
+                    const { id, sku } = matchedProduct;
                     
-                    // Обновляем товар в базе данных
-                    const webImagePath = `/images/products/${cleanSku}.png`;
-                    await storage.updateProduct(product.id, {
-                        imageUrl: webImagePath
-                    });
+                    // Копируем файл в папку изображений
+                    const sourcePath = path.join('attached_assets', imageFile);
+                    const cleanSku = sku.replace(/[^a-zA-Z0-9\-()]/g, '');
+                    const targetFileName = `${cleanSku}.${imageFile.split('.').pop()}`;
+                    const targetPath = path.join(publicImagesDir, targetFileName);
                     
-                    console.log(`✅ Добавлено изображение для: ${sku} (${product.name})`);
-                    addedCount++;
+                    // Проверяем, есть ли уже изображение
+                    const currentImageUrl = matchedProduct.imageUrl;
+                    const isCurrentlySvg = currentImageUrl && currentImageUrl.endsWith('.svg');
+                    
+                    if (!fs.existsSync(targetPath) || isCurrentlySvg) {
+                        fs.copyFileSync(sourcePath, targetPath);
+                        
+                        // Обновляем путь в базе данных
+                        const newImageUrl = `/images/products/${targetFileName}`;
+                        await storage.updateProduct(id, { imageUrl: newImageUrl });
+                        
+                        if (isCurrentlySvg) {
+                            console.log(`🔄 Заменена SVG иконка на фото для ${sku}: ${imageFile}`);
+                            replacedCount++;
+                        } else {
+                            console.log(`✅ Добавлено новое изображение для ${sku}: ${imageFile}`);
+                            addedCount++;
+                        }
+                    } else {
+                        console.log(`⏭️ Изображение уже есть для ${sku}`);
+                        skippedCount++;
+                    }
                 } else {
-                    console.log(`❌ Файл не найден: ${sourcePath}`);
-                    skippedCount++;
+                    console.log(`❓ Товар не найден для изображения: ${imageFile}`);
+                }
+                
+                // Пауза между операциями
+                if ((addedCount + replacedCount) % 10 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 50));
                 }
                 
             } catch (error) {
                 console.error(`❌ Ошибка обработки ${imageFile}:`, error);
-                skippedCount++;
             }
         }
         
-        console.log('\n🎉 Обработка завершена!');
-        console.log(`✅ Добавлено изображений: ${addedCount}`);
+        console.log('\n🎉 Обновление завершено!');
+        console.log(`✅ Добавлено новых: ${addedCount}`);
+        console.log(`🔄 Заменено SVG на фото: ${replacedCount}`);
         console.log(`⏭️ Пропущено: ${skippedCount}`);
+        
+        // Финальная статистика
+        const finalImageCount = fs.readdirSync(publicImagesDir).length;
+        const realPhotoCount = fs.readdirSync(publicImagesDir).filter(f => 
+            f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.jpeg')
+        ).length;
+        const svgCount = fs.readdirSync(publicImagesDir).filter(f => f.endsWith('.svg')).length;
+        
+        console.log(`📁 Итого файлов: ${finalImageCount}`);
+        console.log(`📸 Реальных фотографий: ${realPhotoCount}`);
+        console.log(`🎨 SVG иконок: ${svgCount}`);
         
     } catch (error) {
         console.error('💥 Критическая ошибка:', error);
