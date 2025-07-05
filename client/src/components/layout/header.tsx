@@ -11,7 +11,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 
@@ -19,20 +18,20 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [location, navigate] = useLocation();
-  
+
   const { itemCount } = useCart();
   const { user, logoutMutation } = useAuth();
-  
+
   // Fetch categories
   const { data: categories = [] } = useQuery<Category[]>({ 
     queryKey: ["/api/categories"]
   });
-  
+
   // Close mobile menu when navigating
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location]);
-  
+
   // Handle search form submission
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,12 +39,12 @@ export default function Header() {
       navigate(`/?query=${encodeURIComponent(searchQuery)}`);
     }
   };
-  
+
   // Toggle mobile menu
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
-  
+
   // Handle logout
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
@@ -54,7 +53,7 @@ export default function Header() {
       }
     });
   };
-  
+
   return (
     <header className="bg-white z-30 shadow-sm border-b border-red-100">
       {/* Top bar с контактами */}
@@ -75,7 +74,7 @@ export default function Header() {
           </div>
         </div>
       </div>
-      
+
       {/* Основная часть шапки с логотипом и поиском */}
       <div className="relative bg-white md:static">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -92,10 +91,10 @@ export default function Header() {
                 {/* Убираем "Инструменты", оставляем только ЭПС */}
               </Link>
             </div>
-            
+
             <div className="hidden md:flex md:flex-1 md:justify-end">
               <div className="flex items-center space-x-6">
-              
+
                 {/* Форма поиска с эффектами */}
                 <form onSubmit={handleSearch} className="hidden lg:block w-96">
                   <div className="relative">
@@ -116,7 +115,7 @@ export default function Header() {
                     </Button>
                   </div>
                 </form>
-                
+
                 {/* Кнопки корзины, профиля и авторизации с улучшенным дизайном */}
                 <div className="flex items-center space-x-6">
                   {/* Корзина (для всех пользователей) */}
@@ -135,7 +134,7 @@ export default function Header() {
                       <span className="ml-2 font-medium text-sm hidden sm:block">Корзина</span>
                     </div>
                   </Link>
-                  
+
                   {user ? (
                     // Для авторизованных пользователей - Профиль и выход
                     <>
@@ -147,7 +146,7 @@ export default function Header() {
                           <span className="ml-2 font-medium text-sm hidden sm:block">Профиль</span>
                         </div>
                       </Link>
-                      
+
                       <button 
                         onClick={handleLogout}
                         className="flex items-center text-gray-700 hover:text-orange-600 group"
@@ -177,7 +176,7 @@ export default function Header() {
                 </div>
               </div>
             </div>
-            
+
             {/* Мобильные элементы интерфейса */}
             <div className="flex items-center space-x-4 md:hidden">
               {/* Мобильная корзина */}
@@ -189,7 +188,7 @@ export default function Header() {
                   </span>
                 )}
               </Link>
-              
+
               {/* Мобильная кнопка меню */}
               <Button
                 variant="ghost" 
@@ -203,13 +202,13 @@ export default function Header() {
           </div>
         </div>
       </div>
-      
+
       {/* Навигационное меню с современным дизайном */}
       <nav className="bg-gradient-to-r from-eps-red via-red-600 to-red-700 text-white shadow-lg border-b border-red-800/20 hidden md:block relative overflow-hidden">
         {/* Декоративные элементы */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="flex h-14 items-center">
             <div className="flex items-center justify-between w-full">
@@ -219,13 +218,13 @@ export default function Header() {
                   <span className="relative z-10">Главная</span>
                   <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
                 </Link>
-                
+
                 {/* Услуги */}
                 <Link href="/services" className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105">
                   <span className="relative z-10">Услуги</span>
                   <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
                 </Link>
-                
+
                 {/* Акции */}
                 <Link href="/promotions" className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105">
                   <span className="relative z-10">Акции</span>
@@ -233,13 +232,13 @@ export default function Header() {
                   {/* Индикатор "горячих" акций */}
                   <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse shadow-lg"></div>
                 </Link>
-                
+
                 {/* Новости */}
                 <Link href="/publications" className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105">
                   <span className="relative z-10">Новости</span>
                   <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
                 </Link>
-                
+
                 {/* Выпадающий список категорий с улучшенным дизайном */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -271,20 +270,20 @@ export default function Header() {
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                
+
                 {/* Контакты */}
                 <Link href="/contacts" className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105">
                   <span className="relative z-10">Контакты</span>
                   <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
                 </Link>
-                
+
                 {/* О компании */}
                 <Link href="/about" className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105">
                   <span className="relative z-10">О компании</span>
                   <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
                 </Link>
               </div>
-              
+
               {/* Админ-панель с особым стилем */}
               {user?.role === 'admin' && (
                 <Link href="/admin" className="group relative flex items-center px-4 py-3 text-yellow-200 font-medium text-sm tracking-wide transition-all duration-300 hover:bg-yellow-400/20 rounded-lg hover:shadow-lg hover:scale-105 border border-yellow-400/30">
@@ -296,11 +295,11 @@ export default function Header() {
             </div>
           </div>
         </div>
-        
+
         {/* Нижняя декоративная линия */}
         <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
       </nav>
-      
+
       {/* Мобильное меню с обновленным дизайном */}
       <div 
         className={`md:hidden ${mobileMenuOpen ? 'block' : 'hidden'} bg-white fixed top-0 w-full shadow-lg z-40 border-t border-orange-100 max-h-screen overflow-y-auto pb-20`}
@@ -326,7 +325,7 @@ export default function Header() {
               </Button>
             </div>
           </form>
-          
+
           {/* Профиль в мобильном меню */}
           {user ? (
             <div className="flex items-center justify-between mb-4 px-3 py-3 bg-gray-50 rounded-lg">
@@ -356,13 +355,13 @@ export default function Header() {
               </Link>
             </div>
           )}
-          
+
           {/* Навигационные ссылки в мобильном меню */}
           <div className="space-y-0.5">
             <Link href="/" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors">
               Главная
             </Link>
-            
+
             {/* Категории в мобильном меню */}
             <div className="px-3 py-2.5">
               <p className="text-base font-medium text-gray-700">Товары:</p>
@@ -384,34 +383,34 @@ export default function Header() {
                 </Link>
               </div>
             </div>
-            
+
             <Link href="/services" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-red-50 hover:text-eps-red rounded-lg transition-colors">
               Услуги
             </Link>
-            
+
             <Link href="/promotions" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-red-50 hover:text-eps-red rounded-lg transition-colors">
               Акции
             </Link>
-            
+
             <Link href="/publications" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-red-50 hover:text-eps-red rounded-lg transition-colors">
               Новости
             </Link>
-            
+
             <Link href="/contacts" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-red-50 hover:text-eps-red rounded-lg transition-colors">
               Контакты
             </Link>
-            
+
             <Link href="/about" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-red-50 hover:text-eps-red rounded-lg transition-colors">
               О компании
             </Link>
-            
+
             {user?.role === 'admin' && (
               <Link href="/admin" className="block px-3 py-2.5 text-base font-medium text-orange-600 hover:bg-orange-50 rounded-lg transition-colors">
                 Админ-панель
               </Link>
             )}
           </div>
-          
+
           {/* Контактная информация в мобильном меню */}
           <div className="mt-6 px-3 pt-4 border-t border-gray-200">
             <p className="text-sm font-medium text-gray-600 mb-2">Контактная информация:</p>
@@ -423,7 +422,7 @@ export default function Header() {
           </div>
         </div>
       </div>
-      
+
       {/* Фиксированное мобильное меню внизу */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg md:hidden z-30">
         <div className="flex justify-around py-2">
@@ -435,14 +434,14 @@ export default function Header() {
             </div>
             <span className="text-xs mt-1">Главная</span>
           </Link>
-          
+
           <Link href="/products" className="flex flex-col items-center p-2 text-gray-600 hover:text-eps-red transition-colors">
             <div className="p-1.5 rounded-full bg-gray-50">
               <Package className="w-5 h-5" />
             </div>
             <span className="text-xs mt-1">Товары</span>
           </Link>
-          
+
           <Link href="/cart" className="flex flex-col items-center p-2 text-gray-600 hover:text-eps-red transition-colors">
             <div className="p-1.5 rounded-full bg-gray-50 relative">
               <ShoppingCart className="w-5 h-5" />
@@ -454,7 +453,7 @@ export default function Header() {
             </div>
             <span className="text-xs mt-1">Корзина</span>
           </Link>
-          
+
           {user ? (
             <Link href="/profile" className="flex flex-col items-center p-2 text-gray-600 hover:text-eps-red transition-colors">
               <div className="p-1.5 rounded-full bg-gray-50">
@@ -470,7 +469,7 @@ export default function Header() {
               <span className="text-xs mt-1">Войти</span>
             </Link>
           )}
-          
+
           <Link href="/publications" className="flex flex-col items-center p-2 text-gray-600 hover:text-eps-red transition-colors">
             <div className="p-1.5 rounded-full bg-gray-50">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
