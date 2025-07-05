@@ -61,7 +61,7 @@ export default function Home() {
             
             {/* Правая колонка с карточкой инструментов */}
             <div className="hidden lg:block hero-slide-left lg:pl-4">
-              <div className="bg-gradient-to-br from-red-900/80 to-amber-800/80 backdrop-blur-sm rounded-3xl p-8 lg:p-10 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500 max-w-lg xl:max-w-xl mx-auto"></div>
+              <div className="bg-gradient-to-br from-red-900/80 to-amber-800/80 backdrop-blur-sm rounded-3xl p-8 lg:p-10 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500 max-w-lg xl:max-w-xl mx-auto">
                 {/* Сетка с иконками инструментов */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gradient-to-br from-eps-yellow to-amber-500 p-5 rounded-xl flex flex-col items-center text-center">
