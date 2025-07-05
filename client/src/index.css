@@ -32,7 +32,12 @@
   
   /* Карточка продукта с эффектами */
   .product-card {
-    @apply transition-all duration-300 bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg;
+    @apply transition-all duration-300 bg-white rounded-xl overflow-hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .product-card:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
   
   .product-card .product-image {
@@ -41,6 +46,45 @@
   
   .product-card:hover .product-image {
     @apply scale-105;
+  }
+  
+  /* Анимация появления карточек */
+  .product-card {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Эффект наведения на кнопки */
+  .action-button {
+    @apply transition-all duration-200 transform hover:scale-105;
+  }
+  
+  /* Градиентная граница для карточек */
+  .product-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    background: linear-gradient(45deg, transparent, rgba(239, 68, 68, 0.1), transparent);
+    border-radius: inherit;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .product-card:hover::before {
+    opacity: 1;
   }
   
   /* Страница продукта - эффекты изображения */
@@ -76,7 +120,76 @@
     width: 200%;
   }
   
-  /* Пульсирующие иконки на странице продукта */
+  /* Пульсирующая анимация для важных элементов */
+  .pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite alternate;
+  }
+  
+  @keyframes pulseGlow {
+    from {
+      box-shadow: 0 0 5px rgba(239, 68, 68, 0.3);
+    }
+    to {
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.6), 0 0 30px rgba(239, 68, 68, 0.4);
+    }
+  }
+  
+  /* Анимация для иконок инструментов */
+  .tool-icon {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+  /* Улучшенные переходы для текста */
+  .text-gradient-animate {
+    background: linear-gradient(-45deg, #ef4444, #f59e0b, #ef4444, #f59e0b);
+    background-size: 400% 400%;
+    animation: gradientShift 4s ease infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  /* Эффект для кнопок с градиентом */
+  .btn-gradient-hover {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-gradient-hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+  
+  .btn-gradient-hover:hover::before {
+    left: 100%;
+  }е иконки на странице продукта */
   @keyframes pulse-ring {
     0% {
       transform: scale(0.95);

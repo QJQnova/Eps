@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
 import { Helmet } from "react-helmet";
@@ -35,6 +35,11 @@ export default function ProductDetails() {
   const [option, setOption] = useState("default");
   const { addToCart, isLoading: isAddingToCart } = useCart();
   const { toast } = useToast();
+
+  // Прокрутка к началу страницы при загрузке
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [slug]);
 
   // Fetch product details с улучшенным кешированием
   const { data: product, isLoading: isLoadingProduct, error } = useQuery<Product>({

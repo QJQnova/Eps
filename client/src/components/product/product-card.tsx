@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Heart, ShoppingCart, Star } from "lucide-react";
+import { Heart, ShoppingCart, Star, Eye } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { Product } from "@shared/schema";
 
@@ -31,25 +31,35 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
   
   return (
-    <Card className="product-card group h-full flex flex-col bg-white border-0">
-      <div className="relative overflow-hidden">
+    <Card className="product-card group h-full flex flex-col bg-white border-0 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+      <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
         <Link href={`/product/${product.slug}`}>
-          <div className="bg-gray-50 pt-6 px-6 pb-4 flex items-center justify-center min-h-[200px]">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">{product.name}</h3>
-              <p className="text-sm text-gray-500">SKU: {product.sku}</p>
+          <div className="relative min-h-[220px] flex items-center justify-center p-6 group-hover:scale-105 transition-transform duration-300">
+            {/* Декоративные элементы */}
+            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            {/* Иконка инструмента */}
+            <div className="relative z-10 text-center">
+              <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-eps-red/10 to-eps-yellow/10 rounded-full flex items-center justify-center">
+                <svg className="w-10 h-10 text-eps-red" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">{product.name}</h3>
+              <p className="text-sm text-gray-500">Артикул: {product.sku}</p>
             </div>
           </div>
         </Link>
         
-        <div className="absolute top-3 right-3 z-10">
+        {/* Действия в правом верхнем углу */}
+        <div className="absolute top-3 right-3 z-20 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="bg-white/90 shadow-sm text-gray-500 hover:text-eps-red h-8 w-8 rounded-full action-button"
+                  className="bg-white/90 backdrop-blur-sm shadow-lg text-gray-600 hover:text-eps-red h-10 w-10 rounded-full border border-white/20"
                   onClick={toggleWishlist}
                 >
                   <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-eps-red text-eps-red' : ''}`} />
@@ -60,15 +70,33 @@ export default function ProductCard({ product }: ProductCardProps) {
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="bg-white/90 backdrop-blur-sm shadow-lg text-gray-600 hover:text-eps-red h-10 w-10 rounded-full border border-white/20"
+                  asChild
+                >
+                  <Link href={`/product/${product.slug}`}>
+                    <Eye className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Быстрый просмотр</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         
-        {/* Бейджи для тегов и скидок */}
+        {/* Бейджи для скидок */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
-
-          
           {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
             <div className="inline-block">
-              <span className="bg-eps-red text-white text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-sm">
+              <span className="bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
                 -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
               </span>
             </div>
@@ -76,45 +104,49 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       </div>
       
-      <CardContent className="p-5 flex flex-col flex-grow">
+      <CardContent className="p-6 flex flex-col flex-grow bg-white">
         {/* Отзывы и рейтинг */}
-        <div className="mb-2 flex items-center space-x-1">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star 
-              key={i} 
-              className={`h-4 w-4 ${i < (Number(product.rating) || 0) ? 'fill-eps-yellow text-eps-yellow' : 'text-gray-200'}`} 
-            />
-          ))}
-          <span className="text-xs text-gray-500 ml-1.5">{product.rating || 0}</span>
-          {product.reviewCount && <span className="text-xs text-gray-500">({product.reviewCount})</span>}
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center space-x-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star 
+                key={i} 
+                className={`h-4 w-4 ${i < (Number(product.rating) || 0) ? 'fill-eps-yellow text-eps-yellow' : 'text-gray-200'}`} 
+              />
+            ))}
+            <span className="text-xs text-gray-500 ml-2">{product.rating || 0}</span>
+          </div>
+          {product.reviewCount && (
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+              {product.reviewCount} отзывов
+            </span>
+          )}
         </div>
         
-
-        
         {/* Короткое описание */}
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2 flex-grow">
-          {product.shortDescription || (product.description ? product.description.substring(0, 80) : "")}
+        <p className="text-sm text-gray-600 mb-4 line-clamp-2 flex-grow leading-relaxed">
+          {product.shortDescription || (product.description ? product.description.substring(0, 120) + "..." : "Профессиональный инструмент высокого качества")}
         </p>
         
         {/* Цена и кнопка в корзину */}
-        <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
+        <div className="flex items-end justify-between mt-auto pt-4 border-t border-gray-100">
           <div className="flex flex-col">
             {product.originalPrice && Number(product.originalPrice) > Number(product.price) ? (
               <>
-                <span className="text-lg font-bold text-eps-red">{formatPrice(product.price)}</span>
+                <span className="text-xl font-bold text-eps-red">{formatPrice(product.price)}</span>
                 <span className="text-sm text-gray-500 line-through">{formatPrice(product.originalPrice)}</span>
               </>
             ) : (
-              <span className="text-lg font-bold text-gray-900">{formatPrice(product.price)}</span>
+              <span className="text-xl font-bold text-gray-900">{formatPrice(product.price)}</span>
             )}
           </div>
           
           <Button 
-            className="bg-eps-gradient hover:from-eps-red hover:to-eps-yellow text-white action-button shadow-sm"
+            className="bg-gradient-to-r from-eps-red to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-2 rounded-lg font-medium"
             onClick={handleAddToCart}
             disabled={isLoading}
           >
-            <ShoppingCart className="h-4 w-4 mr-1.5" />
+            <ShoppingCart className="h-4 w-4 mr-2" />
             В корзину
           </Button>
         </div>
