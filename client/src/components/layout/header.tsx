@@ -212,8 +212,8 @@ export default function Header() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="flex h-14 items-center">
-            <div className="flex items-center space-x-1 w-full justify-between">
-              <div className="flex items-center space-x-1">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center space-x-1 flex-1 justify-evenly">
                 {/* Главная */}
                 <Link href="/" className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105">
                   <span className="relative z-10">Главная</span>
