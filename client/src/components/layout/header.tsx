@@ -204,76 +204,107 @@ export default function Header() {
         </div>
       </div>
       
-      {/* Навигационное меню с градиентным фоном */}
-      <nav className="bg-gradient-to-r from-eps-red to-red-700 text-white shadow-md hidden md:block">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-12 items-center justify-between">
-            <div className="flex space-x-3">
-              {/* Домашняя страница */}
-              <Link href="/" className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-                Главная
+      {/* Навигационное меню с современным дизайном */}
+      <nav className="bg-gradient-to-r from-eps-red via-red-600 to-red-700 text-white shadow-lg border-b border-red-800/20 hidden md:block relative overflow-hidden">
+        {/* Декоративные элементы */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="flex h-14 items-center justify-between">
+            <div className="flex items-center space-x-1">
+              {/* Главная */}
+              <Link href="/" className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105">
+                <span className="relative z-10">Главная</span>
+                <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
               </Link>
               
               {/* Услуги */}
-              <Link href="/services" className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-                Услуги
+              <Link href="/services" className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105">
+                <span className="relative z-10">Услуги</span>
+                <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
               </Link>
               
               {/* Акции */}
-              <Link href="/promotions" className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-                Акции
+              <Link href="/promotions" className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105">
+                <span className="relative z-10">Акции</span>
+                <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
+                {/* Индикатор "горячих" акций */}
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse shadow-lg"></div>
               </Link>
               
               {/* Публикации */}
-              <Link href="/publications" className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-                Публикации
+              <Link href="/publications" className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105">
+                <span className="relative z-10">Публикации</span>
+                <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
               </Link>
               
-              {/* Выпадающий список категорий */}
+              {/* Выпадающий список категорий с улучшенным дизайном */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-                    Товары <ChevronDown className="h-4 w-4 ml-1 opacity-75" />
+                  <button className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/30">
+                    <span className="relative z-10">Товары</span>
+                    <ChevronDown className="h-4 w-4 ml-2 opacity-75 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                    <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-white p-2 shadow-xl rounded-md border-orange-200 min-w-[200px]">
-                  {categories.map((category) => (
-                    <DropdownMenuItem key={category.id} asChild className="rounded-sm hover:bg-orange-50 focus:bg-orange-50">
-                      <Link href={`/category/${category.slug}`} className="w-full p-2 text-gray-700 hover:text-orange-600">
-                        {category.name}
+                <DropdownMenuContent className="bg-white/95 backdrop-blur-md p-3 shadow-2xl rounded-xl border border-red-100/50 min-w-[220px] mt-2">
+                  <div className="space-y-1">
+                    {categories.map((category) => (
+                      <DropdownMenuItem key={category.id} asChild className="rounded-lg hover:bg-red-50 focus:bg-red-50 transition-colors duration-200">
+                        <Link href={`/category/${category.slug}`} className="flex items-center w-full p-3 text-gray-700 hover:text-red-600 font-medium transition-colors duration-200">
+                          <Package className="h-4 w-4 mr-3 opacity-60" />
+                          {category.name}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator className="bg-red-100 my-2" />
+                    <DropdownMenuItem asChild className="rounded-lg hover:bg-red-50 focus:bg-red-50 transition-colors duration-200">
+                      <Link href="/products" className="flex items-center w-full p-3 text-gray-700 hover:text-red-600 font-bold transition-colors duration-200">
+                        <svg className="h-4 w-4 mr-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        Все товары
                       </Link>
                     </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator className="bg-orange-100" />
-                  <DropdownMenuItem asChild className="rounded-sm hover:bg-orange-50 focus:bg-orange-50">
-                    <Link href="/products" className="w-full p-2 text-gray-700 hover:text-orange-600 font-medium">
-                      Все товары
-                    </Link>
-                  </DropdownMenuItem>
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
               
-              {/* Ссылка на страницу контактов */}
-              <Link href="/contacts" className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-                Контакты
+              {/* Контакты */}
+              <Link href="/contacts" className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105">
+                <span className="relative z-10">Контакты</span>
+                <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
               </Link>
               
-              {/* Ссылка на страницу о компании */}
-              <Link href="/about" className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-                О компании
+              {/* О компании */}
+              <Link href="/about" className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105">
+                <span className="relative z-10">О компании</span>
+                <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
               </Link>
               
-              {/* Ссылка на admin-панель для администраторов */}
+              {/* Админ-панель с особым стилем */}
               {user?.role === 'admin' && (
-                <Link href="/admin" className="nav-link flex items-center px-3 py-3 text-white hover:text-white hover:bg-white/10 transition-colors duration-200">
-                  Админ-панель
+                <Link href="/admin" className="group relative flex items-center px-4 py-3 text-yellow-200 font-medium text-sm tracking-wide transition-all duration-300 hover:bg-yellow-400/20 rounded-lg hover:shadow-lg hover:scale-105 border border-yellow-400/30">
+                  <span className="relative z-10">Админ-панель</span>
+                  <div className="absolute inset-0 bg-yellow-400/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full shadow-lg"></div>
                 </Link>
               )}
             </div>
             
-            {/* Поиск для десктопной версии удален по запросу */}
+            {/* Дополнительная информация справа */}
+            <div className="flex items-center space-x-4">
+              <div className="hidden lg:flex items-center text-white/80 text-xs">
+                <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                Онлайн поддержка
+              </div>
+            </div>
           </div>
         </div>
+        
+        {/* Нижняя декоративная линия */}
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
       </nav>
       
       {/* Мобильное меню с обновленным дизайном */}

@@ -24,24 +24,24 @@
   .bg-eps-gradient {
     @apply bg-gradient-to-r from-eps-red via-eps-red to-eps-yellow;
   }
-  
+
   /* Фирменный градиент для текста */
   .text-eps-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-eps-red to-eps-yellow;
   }
-  
+
   /* Карточка продукта с эффектами */
   .product-card {
     @apply transition-all duration-300 bg-white rounded-2xl overflow-hidden relative;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     transform: translateY(0);
   }
-  
+
   .product-card:hover {
     box-shadow: 0 25px 35px -5px rgba(0, 0, 0, 0.15), 0 15px 15px -5px rgba(0, 0, 0, 0.08);
     transform: translateY(-8px);
   }
-  
+
   /* Эффект свечения для карточек */
   .product-card::after {
     content: '';
@@ -53,24 +53,24 @@
     border-radius: inherit;
     pointer-events: none;
   }
-  
+
   .product-card:hover::after {
     opacity: 1;
   }
-  
+
   .product-card .product-image {
     @apply transition-transform duration-500;
   }
-  
+
   .product-card:hover .product-image {
     @apply scale-105;
   }
-  
+
   /* Анимация появления карточек */
   .product-card {
     animation: fadeInUp 0.6s ease-out forwards;
   }
-  
+
   @keyframes fadeInUp {
     from {
       opacity: 0;
@@ -81,22 +81,22 @@
       transform: translateY(0);
     }
   }
-  
+
   /* Эффект наведения на кнопки */
   .action-button {
     @apply transition-all duration-200 transform hover:scale-105;
   }
-  
+
   /* Анимация для hero секции */
   .hero-slide-up {
     animation: slideUpFade 0.8s ease-out forwards;
   }
-  
+
   .hero-slide-left {
     animation: slideLeftFade 1s ease-out 0.2s forwards;
     opacity: 0;
   }
-  
+
   @keyframes slideUpFade {
     from {
       opacity: 0;
@@ -107,7 +107,7 @@
       transform: translateY(0);
     }
   }
-  
+
   @keyframes slideLeftFade {
     from {
       opacity: 0;
@@ -118,12 +118,12 @@
       transform: translateX(0);
     }
   }
-  
+
   /* Пульсирующий эффект для иконок */
   .pulse-icon {
     animation: gentlePulse 2s ease-in-out infinite;
   }
-  
+
   @keyframes gentlePulse {
     0%, 100% {
       transform: scale(1);
@@ -134,7 +134,7 @@
       opacity: 0.8;
     }
   }
-  
+
   /* Градиентная граница для карточек */
   .product-card::before {
     content: '';
@@ -148,29 +148,29 @@
     opacity: 0;
     transition: opacity 0.3s ease;
   }
-  
+
   .product-card:hover::before {
     opacity: 1;
   }
-  
+
   /* Страница продукта - эффекты изображения */
   .product-image-container {
     @apply relative transition-all duration-500 ease-in-out;
   }
-  
+
   .product-image-container:hover .product-image {
     @apply scale-110;
   }
-  
+
   .product-image-container::after {
     content: '';
     @apply absolute inset-0 opacity-0 transition-opacity duration-500 bg-gradient-to-tr from-eps-red/10 to-transparent pointer-events-none;
   }
-  
+
   .product-image-container:hover::after {
     @apply opacity-100;
   }
-  
+
   /* Анимация слайдера с инструментами */
   @keyframes slider {
     0% {
@@ -180,17 +180,17 @@
       transform: translateX(-50%);
     }
   }
-  
+
   .animate-slider {
     animation: slider 20s linear infinite;
     width: 200%;
   }
-  
+
   /* Пульсирующая анимация для важных элементов */
   .pulse-glow {
     animation: pulseGlow 2s ease-in-out infinite alternate;
   }
-  
+
   @keyframes pulseGlow {
     from {
       box-shadow: 0 0 5px rgba(239, 68, 68, 0.3);
@@ -199,12 +199,12 @@
       box-shadow: 0 0 20px rgba(239, 68, 68, 0.6), 0 0 30px rgba(239, 68, 68, 0.4);
     }
   }
-  
+
   /* Анимация для иконок инструментов */
   .tool-icon {
     animation: float 3s ease-in-out infinite;
   }
-  
+
   @keyframes float {
     0%, 100% {
       transform: translateY(0px);
@@ -213,7 +213,7 @@
       transform: translateY(-10px);
     }
   }
-  
+
   /* Улучшенные переходы для текста */
   .text-gradient-animate {
     background: linear-gradient(-45deg, #ef4444, #f59e0b, #ef4444, #f59e0b);
@@ -223,7 +223,7 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
+
   @keyframes gradientShift {
     0% {
       background-position: 0% 50%;
@@ -235,13 +235,13 @@
       background-position: 0% 50%;
     }
   }
-  
+
   /* Эффект для кнопок с градиентом */
   .btn-gradient-hover {
     position: relative;
     overflow: hidden;
   }
-  
+
   .btn-gradient-hover::before {
     content: '';
     position: absolute;
@@ -252,11 +252,11 @@
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
     transition: left 0.5s;
   }
-  
+
   .btn-gradient-hover:hover::before {
     left: 100%;
   }
-  
+
   /* Анимация для иконки на странице продукта */
   @keyframes pulse-ring {
     0% {
@@ -272,71 +272,127 @@
       box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
     }
   }
-  
+
   .feature-icon {
     @apply relative overflow-hidden;
     animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
   }
-  
+
   /* Стилизация кнопок действий */
   .action-button {
     @apply transition-all duration-200 transform hover:scale-105;
   }
-  
+
   /* Навигационные ссылки с подчеркиванием */
   .nav-link {
-    @apply relative inline-block;
+    position: relative;
+    overflow: hidden;
   }
-  
-  .nav-link::after {
+
+  .nav-link::before {
     content: '';
-    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-eps-red transition-all duration-300;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: currentColor;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
   }
-  
-  .nav-link:hover::after {
-    @apply w-full;
+
+  .nav-link:hover::before {
+    width: 80%;
   }
+
+/* Дополнительные анимации для меню */
+@keyframes menuGlow {
+  0%, 100% { 
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.2); 
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 0 30px rgba(255, 255, 255, 0.2); 
+  }
+}
+
+.menu-item-glow:hover {
+  animation: menuGlow 2s infinite;
+}
+
+/* Эффект "волны" при наведении */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  transform: scale(0);
+  transition: transform 0.6s ease-out;
+}
+
+.ripple-effect:hover::after {
+  animation: ripple 0.6s ease-out;
+}
 }
 
 @layer utilities {
   .bg-eps-gradient {
     background: linear-gradient(to right, hsl(var(--color-eps-red)), hsl(var(--color-eps-yellow)));
   }
-  
+
   .text-eps-gradient {
     background: linear-gradient(to right, hsl(var(--color-eps-red)), hsl(var(--color-eps-yellow)));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
+
   .border-eps-gradient {
     border-image: linear-gradient(to right, hsl(var(--color-eps-red)), hsl(var(--color-eps-yellow))) 1;
   }
-  
+
   .bg-eps-red {
     background-color: hsl(var(--color-eps-red));
   }
-  
+
   .bg-eps-yellow {
     background-color: hsl(var(--color-eps-yellow));
   }
-  
+
   .bg-eps-white {
     background-color: hsl(var(--color-eps-white));
   }
-  
+
   .text-eps-red {
     color: hsl(var(--color-eps-red));
   }
-  
+
   .text-eps-yellow {
     color: hsl(var(--color-eps-yellow));
   }
-  
+
   .text-eps-white {
     color: hsl(var(--color-eps-white));
   }
-  
+
   /* Дополнительные стили */
 }
