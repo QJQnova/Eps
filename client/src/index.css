@@ -87,6 +87,54 @@
     @apply transition-all duration-200 transform hover:scale-105;
   }
   
+  /* Анимация для hero секции */
+  .hero-slide-up {
+    animation: slideUpFade 0.8s ease-out forwards;
+  }
+  
+  .hero-slide-left {
+    animation: slideLeftFade 1s ease-out 0.2s forwards;
+    opacity: 0;
+  }
+  
+  @keyframes slideUpFade {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes slideLeftFade {
+    from {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  /* Пульсирующий эффект для иконок */
+  .pulse-icon {
+    animation: gentlePulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes gentlePulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 0.8;
+    }
+  }
+  
   /* Градиентная граница для карточек */
   .product-card::before {
     content: '';

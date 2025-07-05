@@ -26,25 +26,24 @@ export default function Home() {
         <title>ЭПС</title>
         <meta name="description" content="Профессиональные инструменты и оборудование от компании ЭПС. Широкий ассортимент по выгодным ценам." />
       </Helmet>
-      {/* Hero Section - Обновленный современный дизайн */}
-      <section className="relative bg-gradient-to-r from-eps-red via-red-600 to-eps-yellow text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-15">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC40Ij48cGF0aCBkPSJNMzYgMzRoLTJWMmgtMnYzMmgtMlYwaC0ydjM0aC0yVjhoLTJ2MjZoLTJWMTNoLTJ2MjFoLTJWMThoLTJ2MTZILjk0bC0uMTQgMkgwdjJoMnYtMS45NHptMCAwIi8+PC9nPjwvZz48L3N2Zz4=')] bg-center"></div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative z-10">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                <span className="inline-block text-white drop-shadow-md">Коллекция</span>
-                <span className="block mt-2 bg-clip-text text-transparent bg-gradient-to-r from-white to-yellow-200">профессиональных инструментов</span>
+      {/* Hero Section - Красивый градиентный дизайн как в примере */}
+      <section className="relative bg-gradient-to-r from-eps-red via-red-500 to-eps-yellow text-white overflow-hidden min-h-[70vh]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center h-full">
+            {/* Левая колонка с текстом */}
+            <div className="text-left hero-slide-up">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+                <span className="block text-white">Коллекция</span>
+                <span className="block text-white">профессиональных</span>
+                <span className="block text-white">инструментов</span>
               </h1>
-              <p className="text-lg md:text-xl mb-8 text-white/90 max-w-lg mx-auto md:mx-0">
+              <p className="text-xl md:text-2xl mb-8 text-white/95 max-w-lg">
                 Высококачественные инструменты для профессионалов и любителей. Создавайте с лучшим оборудованием.
               </p>
-              <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+              <div className="flex flex-wrap gap-4">
                 <Button 
                   size="lg"
-                  className="bg-white text-eps-red hover:bg-gray-50 transition-all font-semibold transform hover:scale-105 duration-200 shadow-lg"
+                  className="bg-white text-eps-red hover:bg-gray-50 transition-all font-semibold px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transform hover:scale-105"
                   asChild
                 >
                   <Link href="#products">Купить сейчас</Link>
@@ -52,98 +51,60 @@ export default function Home() {
                 <Button 
                   variant="outline"
                   size="lg"
-                  className="bg-transparent hover:bg-white/20 border-2 border-white text-white font-semibold transition-all transform hover:scale-105 duration-200"
+                  className="bg-transparent hover:bg-white/20 border-2 border-white text-white font-semibold px-8 py-4 text-lg rounded-full hover:scale-105 transition-all"
                   asChild
                 >
                   <Link href="#categories">Посмотреть категории</Link>
                 </Button>
               </div>
             </div>
-            <div className="hidden md:block relative overflow-hidden rounded-lg shadow-xl bg-gray-800 h-[400px]">
-              <div className="absolute inset-0 bg-[rgba(0,0,0,0.4)] z-10 flex items-center justify-center">
-                <div className="text-white text-center p-6">
-                  <h2 className="text-2xl font-bold mb-2">Коллекция профессиональных инструментов</h2>
-                  <p className="text-gray-200">ЭПС - надежный поставщик инструментов с 2005 года</p>
-                </div>
-              </div>
-              
-              {/* Слайдер изображений */}
-              <div className="absolute inset-0 z-0">
-                <div className="flex animate-slider w-[200%] h-full">
-                  {/* Первая группа изображений */}
-                  <div className="grid grid-cols-2 w-full h-full">
-                    <div className="bg-eps-red p-4 flex items-center justify-center">
-                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5 15V9C5 7.89543 5.89543 7 7 7H15C16.1046 7 17 7.89543 17 9V15C17 16.1046 16.1046 17 15 17H7C5.89543 17 5 16.1046 5 15Z" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M17 12H20C20.5523 12 21 11.5523 21 11V10C21 9.44772 20.5523 9 20 9H17V12Z" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M9 21V17M13 21V17" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M8 7V5C8 4.44772 8.44772 4 9 4H13C13.5523 4 14 4.44772 14 5V7" stroke="currentColor" strokeWidth="1.5"/>
+            
+            {/* Правая колонка с карточкой инструментов */}
+            <div className="hidden lg:block hero-slide-left">
+              <div className="bg-gradient-to-br from-red-900/80 to-amber-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500">
+                <div className="text-center mb-8">
+                  <div className="flex items-center justify-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center pulse-icon">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                     </div>
-                    <div className="bg-red-700 p-4 flex items-center justify-center">
-                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3 8L3 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        <path d="M7 9V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        <path d="M11 6V18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        <path d="M15 3V21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        <path d="M19 9V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        <path d="M3 12H19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                      </svg>
-                    </div>
-                    <div className="bg-eps-yellow p-4 flex items-center justify-center">
-                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 6V10" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M12 10L19 17" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M9 7H15" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M7 4H17V7C17 8.65685 15.6569 10 14 10H10C8.34315 10 7 8.65685 7 7V4Z" stroke="currentColor" strokeWidth="1.5"/>
-                      </svg>
-                    </div>
-                    <div className="bg-amber-500 p-4 flex items-center justify-center">
-                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M17 3L21 7" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M15 5L19 9" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M14 10L6 18C5.44772 18.5523 4.55228 18.5523 4 18L6 20C5.44772 19.4477 5.44772 18.5523 6 18L14 10" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M17 7L7 17C6.44772 17.5523 5.55228 17.5523 5 17C4.44772 16.4477 4.44772 15.5523 5 15L15 5" stroke="currentColor" strokeWidth="1.5"/>
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center pulse-icon">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                       </svg>
                     </div>
                   </div>
-
-                  {/* Вторая группа изображений (для непрерывной анимации) */}
-                  <div className="grid grid-cols-2 w-full h-full">
-                    <div className="bg-eps-red p-4 flex items-center justify-center">
-                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5 15V9C5 7.89543 5.89543 7 7 7H15C16.1046 7 17 7.89543 17 9V15C17 16.1046 16.1046 17 15 17H7C5.89543 17 5 16.1046 5 15Z" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M17 12H20C20.5523 12 21 11.5523 21 11V10C21 9.44772 20.5523 9 20 9H17V12Z" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M9 21V17M13 21V17" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M8 7V5C8 4.44772 8.44772 4 9 4H13C13.5523 4 14 4.44772 14 5V7" stroke="currentColor" strokeWidth="1.5"/>
-                      </svg>
-                    </div>
-                    <div className="bg-red-700 p-4 flex items-center justify-center">
-                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3 8L3 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        <path d="M7 9V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        <path d="M11 6V18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        <path d="M15 3V21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        <path d="M19 9V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        <path d="M3 12H19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                      </svg>
-                    </div>
-                    <div className="bg-eps-yellow p-4 flex items-center justify-center">
-                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 6V10" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M12 10L19 17" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M9 7H15" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M7 4H17V7C17 8.65685 15.6569 10 14 10H10C8.34315 10 7 8.65685 7 7V4Z" stroke="currentColor" strokeWidth="1.5"/>
-                      </svg>
-                    </div>
-                    <div className="bg-amber-500 p-4 flex items-center justify-center">
-                      <svg className="w-28 h-28 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M17 3L21 7" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M15 5L19 9" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M14 10L6 18C5.44772 18.5523 4.55228 18.5523 4 18L6 20C5.44772 19.4477 5.44772 18.5523 6 18L14 10" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M17 7L7 17C6.44772 17.5523 5.55228 17.5523 5 17C4.44772 16.4477 4.44772 15.5523 5 15L15 5" stroke="currentColor" strokeWidth="1.5"/>
-                      </svg>
-                    </div>
+                  <h2 className="text-2xl font-bold text-white mb-2">Коллекция профессиональных инструментов</h2>
+                  <p className="text-white/80">ЭПС - надежный поставщик инструментов с 2005 года</p>
+                </div>
+                
+                {/* Сетка с иконками инструментов */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gradient-to-br from-eps-yellow to-amber-500 p-6 rounded-2xl flex flex-col items-center text-center">
+                    <svg className="w-8 h-8 text-white mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a1 1 0 01-1-1V9a1 1 0 011-1h1a2 2 0 100-4H4a1 1 0 01-1-1V4a1 1 0 011-1h3a1 1 0 001-1z" />
+                    </svg>
+                    <span className="text-white text-sm font-medium">Инструменты</span>
+                  </div>
+                  <div className="bg-gradient-to-br from-eps-red to-red-600 p-6 rounded-2xl flex flex-col items-center text-center">
+                    <svg className="w-8 h-8 text-white mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span className="text-white text-sm font-medium">Оборудование</span>
+                  </div>
+                  <div className="bg-gradient-to-br from-amber-600 to-yellow-600 p-6 rounded-2xl flex flex-col items-center text-center">
+                    <svg className="w-8 h-8 text-white mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span className="text-white text-sm font-medium">Запчасти</span>
+                  </div>
+                  <div className="bg-gradient-to-br from-orange-600 to-red-500 p-6 rounded-2xl flex flex-col items-center text-center">
+                    <svg className="w-8 h-8 text-white mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                    <span className="text-white text-sm font-medium">Сервис</span>
                   </div>
                 </div>
               </div>
@@ -152,37 +113,48 @@ export default function Home() {
         </div>
       </section>
       
-      {/* Features Section */}
-      <section className="py-10 bg-white">
+      {/* Features Section - Красивые карточки как в примере */}
+      <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="flex flex-col items-center text-center p-4">
-              <div className="w-12 h-12 rounded-full bg-eps-red/10 flex items-center justify-center mb-3">
-                <Wrench className="h-6 w-6 text-eps-red" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-eps-red to-red-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
-              <h3 className="font-medium">Высокое качество</h3>
-              <p className="text-sm text-gray-500 mt-1">Профессиональные инструменты</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Высокое качество</h3>
+              <p className="text-gray-600 leading-relaxed">Профессиональные инструменты</p>
             </div>
-            <div className="flex flex-col items-center text-center p-4">
-              <div className="w-12 h-12 rounded-full bg-red-700/10 flex items-center justify-center mb-3">
-                <Drill className="h-6 w-6 text-red-700" />
+            
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-red-600 to-red-700 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
               </div>
-              <h3 className="font-medium">Гарантия</h3>
-              <p className="text-sm text-gray-500 mt-1">На все инструменты</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Гарантия</h3>
+              <p className="text-gray-600 leading-relaxed">На все инструменты</p>
             </div>
-            <div className="flex flex-col items-center text-center p-4">
-              <div className="w-12 h-12 rounded-full bg-eps-yellow/10 flex items-center justify-center mb-3">
-                <Ruler className="h-6 w-6 text-eps-yellow" />
+            
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-eps-yellow to-amber-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
               </div>
-              <h3 className="font-medium">Доставка</h3>
-              <p className="text-sm text-gray-500 mt-1">По всей России</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Доставка</h3>
+              <p className="text-gray-600 leading-relaxed">По всей России</p>
             </div>
-            <div className="flex flex-col items-center text-center p-4">
-              <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mb-3">
-                <HardHat className="h-6 w-6 text-amber-500" />
+            
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
               </div>
-              <h3 className="font-medium">Консультации</h3>
-              <p className="text-sm text-gray-500 mt-1">Профессиональная помощь</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Консультации</h3>
+              <p className="text-gray-600 leading-relaxed">Профессиональная помощь</p>
             </div>
           </div>
         </div>
