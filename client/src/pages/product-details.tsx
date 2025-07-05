@@ -122,7 +122,7 @@ export default function ProductDetails() {
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
                 <Link to="/" className="transition-colors hover:text-foreground/80">
-                  Home
+                  Главная
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -130,7 +130,7 @@ export default function ProductDetails() {
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
                 <Link to="/products" className="transition-colors hover:text-foreground/80">
-                  Products
+                  Товары
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
