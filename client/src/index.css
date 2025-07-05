@@ -32,12 +32,30 @@
   
   /* Карточка продукта с эффектами */
   .product-card {
-    @apply transition-all duration-300 bg-white rounded-xl overflow-hidden;
+    @apply transition-all duration-300 bg-white rounded-2xl overflow-hidden relative;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(0);
   }
   
   .product-card:hover {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 25px 35px -5px rgba(0, 0, 0, 0.15), 0 15px 15px -5px rgba(0, 0, 0, 0.08);
+    transform: translateY(-8px);
+  }
+  
+  /* Эффект свечения для карточек */
+  .product-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(245, 158, 11, 0.1));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  
+  .product-card:hover::after {
+    opacity: 1;
   }
   
   .product-card .product-image {
@@ -189,7 +207,9 @@
   
   .btn-gradient-hover:hover::before {
     left: 100%;
-  }е иконки на странице продукта */
+  }
+  
+  /* Анимация для иконки на странице продукта */
   @keyframes pulse-ring {
     0% {
       transform: scale(0.95);

@@ -15,21 +15,21 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [imageError, setImageError] = useState(false);
   const { addToCart, isLoading } = useCart();
-  
+
   const handleAddToCart = () => {
     addToCart(product.id);
   };
-  
+
   const toggleWishlist = () => {
     setIsWishlisted(!isWishlisted);
   };
-  
+
   // Безопасное форматирование цены с проверкой на null/undefined
   const formatPrice = (price: string | number | null | undefined) => {
     if (price == null) return "0 ₽";
     return Number(price).toLocaleString('ru-RU') + " ₽";
   };
-  
+
   return (
     <Card className="product-card group h-full flex flex-col bg-white border-0 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
       <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
@@ -37,7 +37,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="relative min-h-[220px] flex items-center justify-center p-6 group-hover:scale-105 transition-transform duration-300">
             {/* Декоративные элементы */}
             <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            
+
             {/* Иконка инструмента */}
             <div className="relative z-10 text-center">
               <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-eps-red/10 to-eps-yellow/10 rounded-full flex items-center justify-center">
@@ -50,7 +50,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
           </div>
         </Link>
-        
+
         {/* Действия в правом верхнем углу */}
         <div className="absolute top-3 right-3 z-20 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <TooltipProvider>
@@ -70,7 +70,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          
+
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -91,7 +91,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             </Tooltip>
           </TooltipProvider>
         </div>
-        
+
         {/* Бейджи для скидок */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
@@ -103,7 +103,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
       </div>
-      
+
       <CardContent className="p-6 flex flex-col flex-grow bg-white">
         {/* Отзывы и рейтинг */}
         <div className="mb-3 flex items-center justify-between">
@@ -122,12 +122,12 @@ export default function ProductCard({ product }: ProductCardProps) {
             </span>
           )}
         </div>
-        
+
         {/* Короткое описание */}
         <p className="text-sm text-gray-600 mb-4 line-clamp-2 flex-grow leading-relaxed">
           {product.shortDescription || (product.description ? product.description.substring(0, 120) + "..." : "Профессиональный инструмент высокого качества")}
         </p>
-        
+
         {/* Цена и кнопка в корзину */}
         <div className="flex items-end justify-between mt-auto pt-4 border-t border-gray-100">
           <div className="flex flex-col">
@@ -140,7 +140,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               <span className="text-xl font-bold text-gray-900">{formatPrice(product.price)}</span>
             )}
           </div>
-          
+
           <Button 
             className="bg-gradient-to-r from-eps-red to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-2 rounded-lg font-medium"
             onClick={handleAddToCart}
