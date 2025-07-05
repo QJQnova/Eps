@@ -190,8 +190,14 @@ export default function Home() {
       
       {/* Categories Section */}
       {!searchQuery && (
-        <section id="categories" className="py-16 bg-gradient-to-br from-gray-50 via-blue-50 to-red-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="categories" className="py-20 bg-gradient-to-br from-slate-50 via-blue-50/30 to-red-50/30 relative overflow-hidden">
+          {/* Decorative Background Elements */}
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-br from-eps-orange/5 to-transparent rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-eps-red/5 to-transparent rounded-full blur-3xl"></div>
+          </div>
+          
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Beautiful Header with Icon */}
             <div className="text-center mb-12">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-eps-red to-red-600 rounded-full mb-4 shadow-lg">
@@ -207,7 +213,7 @@ export default function Home() {
               </p>
             </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {categories.map((category) => (
                 <CategoryCard key={category.id} category={category} />
               ))}
