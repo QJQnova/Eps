@@ -11,15 +11,15 @@ import {
   Cable,
   Wrench,
   Battery,
-  FileText,
-  Shuffle,
+  Disc,
+  RotateCcw,
   Settings,
   Flashlight,
   HardHat,
   Cog,
   Scissors,
   Lock,
-  ShoppingCart
+  ShoppingCart,
 } from "lucide-react";
 
 interface CategoryCardProps {
@@ -39,8 +39,8 @@ export default function CategoryCard({ category }: CategoryCardProps) {
     if (name.includes('манометр') || name.includes('датчик')) return <Gauge className="h-8 w-8" />;
     if (name.includes('кабель') || name.includes('провод')) return <Cable className="h-8 w-8" />;
     if (name.includes('ключ') || name.includes('гаечный')) return <Wrench className="h-8 w-8" />;
-    if (name.includes('пила') || name.includes('ножовка')) return <FileText className="h-8 w-8" />;
-    if (name.includes('отверт') || name.includes('шуруповерт')) return <Shuffle className="h-8 w-8" />;
+    if (name.includes('пила') || name.includes('ножовка') || name.includes('отрезн')) return <Disc className="h-8 w-8" />;
+    if (name.includes('отверт') || name.includes('шуруповерт')) return <RotateCcw className="h-8 w-8" />;
     if (name.includes('настройк') || name.includes('регулировк')) return <Settings className="h-8 w-8" />;
     if (name.includes('фонар') || name.includes('свет')) return <Flashlight className="h-8 w-8" />;
     if (name.includes('каска') || name.includes('защит')) return <HardHat className="h-8 w-8" />;
@@ -63,24 +63,28 @@ export default function CategoryCard({ category }: CategoryCardProps) {
 
   return (
     <Link href={`/category/${category.slug}`}>
-      <Card className="group relative bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0">
+      <Card className="group relative bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 h-64">
         {/* Gradient Background */}
         <div className={`absolute inset-0 bg-gradient-to-br from-${colorClass}/5 via-transparent to-${colorClass}/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
         
         {/* Top Border Line */}
         <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-${colorClass} to-${colorClass}/70 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left`}></div>
         
-        <CardContent className="relative p-8 text-center">
-          {/* Animated Icon Container */}
-          <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br from-${colorClass}/10 to-${colorClass}/20 flex items-center justify-center mx-auto mb-6 text-${colorClass} group-hover:from-${colorClass} group-hover:to-${colorClass}/80 group-hover:text-white transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-lg group-hover:shadow-xl`}>
-            {getIcon()}
+        <CardContent className="relative p-6 text-center h-full flex flex-col justify-between">
+          <div className="flex flex-col items-center flex-1">
+            {/* Animated Icon Container */}
+            <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br from-${colorClass}/10 to-${colorClass}/20 flex items-center justify-center mx-auto mb-4 text-${colorClass} group-hover:from-${colorClass} group-hover:to-${colorClass}/80 group-hover:text-white transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-lg group-hover:shadow-xl`}>
+              {getIcon()}
+            </div>
+            
+            {/* Category Name */}
+            <h3 className="font-bold text-lg text-gray-900 group-hover:text-gray-800 transition-colors duration-200 mb-3 min-h-[3.5rem] flex items-center justify-center text-center leading-tight">
+              {category.name.length > 20 ? category.name.substring(0, 17) + '...' : category.name}
+            </h3>
           </div>
           
-          {/* Category Name */}
-          <h3 className="font-bold text-xl text-gray-900 group-hover:text-gray-800 transition-colors duration-200 mb-2">{category.name}</h3>
-          
           {/* Product Count with Badge Style */}
-          <div className={`inline-flex items-center px-3 py-1.5 rounded-full bg-gray-100 group-hover:bg-${colorClass}/10 transition-colors duration-200`}>
+          <div className={`inline-flex items-center px-3 py-1.5 rounded-full bg-gray-100 group-hover:bg-${colorClass}/10 transition-colors duration-200 self-center`}>
             <span className="text-sm font-medium text-gray-600 group-hover:text-gray-700">
               {category.productCount || 0} {category.productCount === 1 ? 'товар' : 
                (category.productCount && category.productCount >= 2 && category.productCount <= 4) ? 'товара' : 'товаров'}
@@ -89,8 +93,8 @@ export default function CategoryCard({ category }: CategoryCardProps) {
           
           {/* Hover Effect Arrow */}
           <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className={`w-8 h-8 rounded-full bg-${colorClass} flex items-center justify-center shadow-lg`}>
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className={`w-6 h-6 rounded-full bg-${colorClass} flex items-center justify-center shadow-lg`}>
+              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </div>

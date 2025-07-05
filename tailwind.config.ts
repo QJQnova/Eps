@@ -47,6 +47,7 @@ export default {
         // Цвета компании
         eps: {
           red: "#FF0000",
+          orange: "#FF6B35",
           yellow: "#FFDD00",
           white: "#FFFFFF",
         },
