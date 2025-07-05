@@ -119,7 +119,7 @@ export default function CategoryCard({ category }: CategoryCardProps) {
         <CardContent className="relative p-6 text-center h-full flex flex-col justify-between">
           <div className="flex flex-col items-center flex-1">
             {/* Category Image */}
-            <div className={`w-16 h-16 rounded-2xl overflow-hidden mx-auto mb-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-lg group-hover:shadow-xl`}>
+            <div className={`w-20 h-20 rounded-2xl overflow-hidden mx-auto mb-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-lg group-hover:shadow-xl`}>
               <img 
                 src={getCategoryImage()} 
                 alt={category.name}
