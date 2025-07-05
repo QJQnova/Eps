@@ -1,55 +1,65 @@
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Category } from "@shared/schema";
-import { 
-  Bolt, 
-  Drill, 
-  Hammer, 
-  Ruler,
-  Zap,
-  Gauge,
-  Cable,
-  Wrench,
-  Battery,
-  Disc,
-  RotateCcw,
-  Settings,
-  Flashlight,
-  HardHat,
-  Cog,
-  Scissors,
-  Lock,
-  ShoppingCart,
-} from "lucide-react";
 
 interface CategoryCardProps {
   category: Category;
 }
 
 export default function CategoryCard({ category }: CategoryCardProps) {
-  // Получаем иконку для категории
-  const getIcon = () => {
+  // Получаем фотографию для категории
+  const getCategoryImage = () => {
     const name = category.name.toLowerCase();
     
-    if (name.includes('аккумулятор') || name.includes('батарея')) return <Battery className="h-8 w-8" />;
-    if (name.includes('дрель')) return <Drill className="h-8 w-8" />;
-    if (name.includes('молоток') || name.includes('кувалда')) return <Hammer className="h-8 w-8" />;
-    if (name.includes('линейка') || name.includes('рулетка') || name.includes('измер')) return <Ruler className="h-8 w-8" />;
-    if (name.includes('электр') || name.includes('генератор')) return <Zap className="h-8 w-8" />;
-    if (name.includes('манометр') || name.includes('датчик')) return <Gauge className="h-8 w-8" />;
-    if (name.includes('кабель') || name.includes('провод')) return <Cable className="h-8 w-8" />;
-    if (name.includes('ключ') || name.includes('гаечный')) return <Wrench className="h-8 w-8" />;
-    if (name.includes('пила') || name.includes('ножовка') || name.includes('отрезн')) return <Disc className="h-8 w-8" />;
-    if (name.includes('отверт') || name.includes('шуруповерт')) return <RotateCcw className="h-8 w-8" />;
-    if (name.includes('настройк') || name.includes('регулировк')) return <Settings className="h-8 w-8" />;
-    if (name.includes('фонар') || name.includes('свет')) return <Flashlight className="h-8 w-8" />;
-    if (name.includes('каска') || name.includes('защит')) return <HardHat className="h-8 w-8" />;
-    if (name.includes('механизм') || name.includes('редуктор')) return <Cog className="h-8 w-8" />;
-    if (name.includes('ножниц') || name.includes('кусачки')) return <Scissors className="h-8 w-8" />;
-    if (name.includes('замок') || name.includes('безопасн')) return <Lock className="h-8 w-8" />;
-    if (name.includes('расходн') || name.includes('комплект')) return <ShoppingCart className="h-8 w-8" />;
+    // Возвращаем URL фотографии на основе категории
+    if (name.includes('аккумулятор') || name.includes('батарея')) {
+      return `https://images.unsplash.com/photo-1609592158064-4b76e4a4b6c8?w=400&h=400&fit=crop&crop=center`;
+    }
+    if (name.includes('дрель')) {
+      return `https://images.unsplash.com/photo-1581244236164-b0c7e7d2d5f3?w=400&h=400&fit=crop&crop=center`;
+    }
+    if (name.includes('молоток') || name.includes('кувалда')) {
+      return `https://images.unsplash.com/photo-1567621141318-c76f7ad5e6d1?w=400&h=400&fit=crop&crop=center`;
+    }
+    if (name.includes('линейка') || name.includes('рулетка') || name.includes('измер')) {
+      return `https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop&crop=center`;
+    }
+    if (name.includes('электр') || name.includes('генератор')) {
+      return `https://images.unsplash.com/photo-1606822724315-a2f8d0c5c3c4?w=400&h=400&fit=crop&crop=center`;
+    }
+    if (name.includes('пила') || name.includes('ножовка') || name.includes('отрезн')) {
+      return `https://images.unsplash.com/photo-1558618666-4c5a3e1f0c9d?w=400&h=400&fit=crop&crop=center`;
+    }
+    if (name.includes('отверт') || name.includes('шуруповерт')) {
+      return `https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&h=400&fit=crop&crop=center`;
+    }
+    if (name.includes('ключ') || name.includes('гаечный')) {
+      return `https://images.unsplash.com/photo-1609845725580-b6d5e1d1e7e7?w=400&h=400&fit=crop&crop=center`;
+    }
+    if (name.includes('кабель') || name.includes('провод')) {
+      return `https://images.unsplash.com/photo-1603145733146-ae562a55031e?w=400&h=400&fit=crop&crop=center`;
+    }
+    if (name.includes('фонар') || name.includes('свет')) {
+      return `https://images.unsplash.com/photo-1580930462213-9f2f4d1e3d5c?w=400&h=400&fit=crop&crop=center`;
+    }
+    if (name.includes('каска') || name.includes('защит')) {
+      return `https://images.unsplash.com/photo-1591984923899-d8e2b5e7d7c7?w=400&h=400&fit=crop&crop=center`;
+    }
+    if (name.includes('механизм') || name.includes('редуктор')) {
+      return `https://images.unsplash.com/photo-1609845725580-b6d5e1d1e7e7?w=400&h=400&fit=crop&crop=center`;
+    }
+    if (name.includes('ножниц') || name.includes('кусачки')) {
+      return `https://images.unsplash.com/photo-1567621141318-c76f7ad5e6d1?w=400&h=400&fit=crop&crop=center`;
+    }
+    if (name.includes('замок') || name.includes('безопасн')) {
+      return `https://images.unsplash.com/photo-1615880484746-a7d4b5c5b1c9?w=400&h=400&fit=crop&crop=center`;
+    }
+    if (name.includes('расходн') || name.includes('комплект')) {
+      return `https://images.unsplash.com/photo-1609845725580-b6d5e1d1e7e7?w=400&h=400&fit=crop&crop=center`;
+    }
     
-    return <Bolt className="h-8 w-8" />;
+    // По умолчанию - общие инструменты
+    return `https://images.unsplash.com/photo-1609845725580-b6d5e1d1e7e7?w=400&h=400&fit=crop&crop=center`;
   };
 
   // Определим цвет категории на основе ее названия
@@ -72,9 +82,18 @@ export default function CategoryCard({ category }: CategoryCardProps) {
         
         <CardContent className="relative p-6 text-center h-full flex flex-col justify-between">
           <div className="flex flex-col items-center flex-1">
-            {/* Animated Icon Container */}
-            <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br from-${colorClass}/10 to-${colorClass}/20 flex items-center justify-center mx-auto mb-4 text-${colorClass} group-hover:from-${colorClass} group-hover:to-${colorClass}/80 group-hover:text-white transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-lg group-hover:shadow-xl`}>
-              {getIcon()}
+            {/* Category Image */}
+            <div className={`w-16 h-16 rounded-2xl overflow-hidden mx-auto mb-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-lg group-hover:shadow-xl`}>
+              <img 
+                src={getCategoryImage()} 
+                alt={category.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Fallback к цветному фону если изображение не загружается
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement!.className += ` bg-gradient-to-br from-${colorClass}/10 to-${colorClass}/20`;
+                }}
+              />
             </div>
             
             {/* Category Name */}
