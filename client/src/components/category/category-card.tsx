@@ -7,59 +7,95 @@ interface CategoryCardProps {
 }
 
 export default function CategoryCard({ category }: CategoryCardProps) {
-  // Получаем фотографию для категории
+  // Получаем изображение товара для категории из нашего каталога
   const getCategoryImage = () => {
     const name = category.name.toLowerCase();
     
-    // Возвращаем URL фотографии на основе категории
+    // Используем изображения наших товаров для каждой категории
     if (name.includes('аккумулятор') || name.includes('батарея')) {
-      return `https://images.unsplash.com/photo-1609592158064-4b76e4a4b6c8?w=400&h=400&fit=crop&crop=center`;
+      return `/images/products/LB1220-1.png`; // Аккумулятор DCK
     }
     if (name.includes('дрель')) {
-      return `https://images.unsplash.com/photo-1581244236164-b0c7e7d2d5f3?w=400&h=400&fit=crop&crop=center`;
+      return `/images/products/KJZ06-13.png`; // Дрель
     }
-    if (name.includes('молоток') || name.includes('кувалда')) {
-      return `https://images.unsplash.com/photo-1567621141318-c76f7ad5e6d1?w=400&h=400&fit=crop&crop=center`;
+    if (name.includes('шуруповерт')) {
+      return `/images/products/KJZ07-13.png`; // Шуруповерт
     }
-    if (name.includes('линейка') || name.includes('рулетка') || name.includes('измер')) {
-      return `https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop&crop=center`;
+    if (name.includes('перфоратор')) {
+      return `/images/products/KJZ08-10.png`; // Перфоратор
     }
-    if (name.includes('электр') || name.includes('генератор')) {
-      return `https://images.unsplash.com/photo-1606822724315-a2f8d0c5c3c4?w=400&h=400&fit=crop&crop=center`;
+    if (name.includes('гайковерт')) {
+      return `/images/products/KJZ10-10.png`; // Гайковерт
     }
-    if (name.includes('пила') || name.includes('ножовка') || name.includes('отрезн')) {
-      return `https://images.unsplash.com/photo-1558618666-4c5a3e1f0c9d?w=400&h=400&fit=crop&crop=center`;
+    if (name.includes('шлифовальн') && name.includes('угловые')) {
+      return `/images/products/KJG04-355BS.png`; // Болгарка/УШМ
     }
-    if (name.includes('отверт') || name.includes('шуруповерт')) {
-      return `https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&h=400&fit=crop&crop=center`;
+    if (name.includes('лобзик')) {
+      return `/images/products/KJF02-30.png`; // Лобзик
     }
-    if (name.includes('ключ') || name.includes('гаечный')) {
-      return `https://images.unsplash.com/photo-1609845725580-b6d5e1d1e7e7?w=400&h=400&fit=crop&crop=center`;
+    if (name.includes('пила') && name.includes('дисков')) {
+      return `/images/products/KJX03-255.png`; // Дисковая пила
     }
-    if (name.includes('кабель') || name.includes('провод')) {
-      return `https://images.unsplash.com/photo-1603145733146-ae562a55031e?w=400&h=400&fit=crop&crop=center`;
+    if (name.includes('пила') && name.includes('сабельн')) {
+      return `/images/products/KJX06-255.png`; // Сабельная пила
     }
-    if (name.includes('фонар') || name.includes('свет')) {
-      return `https://images.unsplash.com/photo-1580930462213-9f2f4d1e3d5c?w=400&h=400&fit=crop&crop=center`;
+    if (name.includes('пила') && name.includes('цепн')) {
+      return `/images/products/KJC02-30.png`; // Цепная пила
     }
-    if (name.includes('каска') || name.includes('защит')) {
-      return `https://images.unsplash.com/photo-1591984923899-d8e2b5e7d7c7?w=400&h=400&fit=crop&crop=center`;
+    if (name.includes('миксер')) {
+      return `/images/products/KMB03-82.png`; // Миксер
     }
-    if (name.includes('механизм') || name.includes('редуктор')) {
-      return `https://images.unsplash.com/photo-1609845725580-b6d5e1d1e7e7?w=400&h=400&fit=crop&crop=center`;
+    if (name.includes('зарядн')) {
+      return `/images/products/FFBL2020.png`; // Зарядное устройство
     }
-    if (name.includes('ножниц') || name.includes('кусачки')) {
-      return `https://images.unsplash.com/photo-1567621141318-c76f7ad5e6d1?w=400&h=400&fit=crop&crop=center`;
+    if (name.includes('воздуходувк')) {
+      return `/images/products/KMB110.png`; // Воздуходувка
     }
-    if (name.includes('замок') || name.includes('безопасн')) {
-      return `https://images.unsplash.com/photo-1615880484746-a7d4b5c5b1c9?w=400&h=400&fit=crop&crop=center`;
+    if (name.includes('шлифовальн') && name.includes('ленточн')) {
+      return `/images/products/KSA02-125.png`; // Ленточная шлифмашина
     }
-    if (name.includes('расходн') || name.includes('комплект')) {
-      return `https://images.unsplash.com/photo-1609845725580-b6d5e1d1e7e7?w=400&h=400&fit=crop&crop=center`;
+    if (name.includes('шлифовальн') && name.includes('плоск')) {
+      return `/images/products/KSF02-180.png`; // Плоскошлифовальная машина
+    }
+    if (name.includes('шлифовальн') && name.includes('эксцентрик')) {
+      return `/images/products/KSB02-100.png`; // Эксцентриковая шлифмашина
+    }
+    if (name.includes('отбойн')) {
+      return `/images/products/KDPB358(TYPE FK).png`; // Отбойный молоток
+    }
+    if (name.includes('штроборез')) {
+      return `/images/products/KDZC04-24(TYPE FK).png`; // Штроборез
+    }
+    if (name.includes('рубанок')) {
+      return `/images/products/KDPL04-8(TYPE EK).png`; // Рубанок
+    }
+    if (name.includes('фрезер')) {
+      return `/images/products/KDPM50(TYPE EK).png`; // Фрезер
+    }
+    if (name.includes('фен')) {
+      return `/images/products/KMD320.png`; // Фен технический
+    }
+    if (name.includes('станок') && name.includes('сверлильн')) {
+      return `/images/products/KDSP02-180(TYPE FK).png`; // Сверлильный станок
+    }
+    if (name.includes('набор')) {
+      return `/images/products/KMY02-235.png`; // Набор инструментов
+    }
+    if (name.includes('шприц')) {
+      return `/images/products/KDMY125(TYPE FK).png`; // Шприц для смазки
+    }
+    if (name.includes('алмазн')) {
+      return `/images/products/KDSJ10(TYPE EK).png`; // Алмазная дрель
+    }
+    if (name.includes('торцовочн')) {
+      return `/images/products/KDSM03-125(TYPE FK).png`; // Торцовочная пила
+    }
+    if (name.includes('отрезн')) {
+      return `/images/products/KDSM04-125(TYPE FK).png`; // Отрезная пила
     }
     
-    // По умолчанию - общие инструменты
-    return `https://images.unsplash.com/photo-1609845725580-b6d5e1d1e7e7?w=400&h=400&fit=crop&crop=center`;
+    // По умолчанию - универсальный инструмент
+    return `/images/products/KJZ06-13K.png`;
   };
 
   // Определим цвет категории на основе ее названия
@@ -89,9 +125,15 @@ export default function CategoryCard({ category }: CategoryCardProps) {
                 alt={category.name}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  // Fallback к цветному фону если изображение не загружается
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.parentElement!.className += ` bg-gradient-to-br from-${colorClass}/10 to-${colorClass}/20`;
+                  // Попробуем загрузить универсальное изображение
+                  const target = e.currentTarget;
+                  if (!target.src.includes('KJZ06-13K.png')) {
+                    target.src = '/images/products/KJZ06-13K.png';
+                  } else {
+                    // Если и универсальное изображение не загружается, используем цветной фон
+                    target.style.display = 'none';
+                    target.parentElement!.className += ` bg-gradient-to-br from-${colorClass}/10 to-${colorClass}/20`;
+                  }
                 }}
               />
             </div>
