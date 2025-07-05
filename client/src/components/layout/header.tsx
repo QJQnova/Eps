@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -249,26 +250,28 @@ export default function Header() {
                       <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-white/95 backdrop-blur-md p-3 shadow-2xl rounded-xl border border-red-100/50 min-w-[220px] mt-2">
-                    <div className="space-y-1">
-                      {categories.map((category) => (
-                        <DropdownMenuItem key={category.id} asChild className="rounded-lg hover:bg-red-50 focus:bg-red-50 transition-colors duration-200">
-                          <Link href={`/category/${category.slug}`} className="flex items-center w-full p-3 text-gray-700 hover:text-red-600 font-medium transition-colors duration-200">
-                            <Package className="h-4 w-4 mr-3 opacity-60" />
-                            {category.name}
+                  <DropdownMenuContent className="bg-white/95 backdrop-blur-md p-3 shadow-2xl rounded-xl border border-red-100/50 min-w-[220px] mt-2 max-h-[400px]">
+                    <ScrollArea className="h-full max-h-[350px]">
+                      <div className="space-y-1">
+                        {categories.map((category) => (
+                          <DropdownMenuItem key={category.id} asChild className="rounded-lg hover:bg-red-50 focus:bg-red-50 transition-colors duration-200">
+                            <Link href={`/category/${category.slug}`} className="flex items-center w-full p-3 text-gray-700 hover:text-red-600 font-medium transition-colors duration-200">
+                              <Package className="h-4 w-4 mr-3 opacity-60" />
+                              {category.name}
+                            </Link>
+                          </DropdownMenuItem>
+                        ))}
+                        <DropdownMenuSeparator className="bg-red-100 my-2" />
+                        <DropdownMenuItem asChild className="rounded-lg hover:bg-red-50 focus:bg-red-50 transition-colors duration-200">
+                          <Link href="/products" className="flex items-center w-full p-3 text-gray-700 hover:text-red-600 font-bold transition-colors duration-200">
+                            <svg className="h-4 w-4 mr-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            Все товары
                           </Link>
                         </DropdownMenuItem>
-                      ))}
-                      <DropdownMenuSeparator className="bg-red-100 my-2" />
-                      <DropdownMenuItem asChild className="rounded-lg hover:bg-red-50 focus:bg-red-50 transition-colors duration-200">
-                        <Link href="/products" className="flex items-center w-full p-3 text-gray-700 hover:text-red-600 font-bold transition-colors duration-200">
-                          <svg className="h-4 w-4 mr-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                          </svg>
-                          Все товары
-                        </Link>
-                      </DropdownMenuItem>
-                    </div>
+                      </div>
+                    </ScrollArea>
                   </DropdownMenuContent>
                 </DropdownMenu>
 
