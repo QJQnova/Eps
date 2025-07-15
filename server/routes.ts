@@ -10,9 +10,7 @@ import {
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
 import { parseImportFile } from "./utils/file-parser";
-import { adaptCatalogWithClaude } from "./utils/claude-adapter";
 import { scrapeSupplierCatalog, SUPPLIERS } from "./utils/web-scraper";
-import { realCatalogScraper } from "./utils/real-catalog-scraper";
 import { setupAuth, requireAuth, requireAdmin } from "./auth";
 import bcrypt from "bcrypt";
 import multer from "multer";
@@ -500,61 +498,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Claude AI Catalog Adaptation Route
-  router.post("/admin/adapt-catalog", (req, res, next) => {
-    console.log('Claude adapter route hit, checking auth...');
-    requireAdmin(req, res, next);
-  }, (req, res, next) => {
-    console.log('Auth passed, processing catalog upload...');
-    upload.single('file')(req, res, (err) => {
-      if (err) {
-        console.error('Multer error in catalog adapter:', err.message);
-        return res.status(400).json({ message: "Ошибка загрузки файла: " + err.message });
-      }
-      next();
-    });
-  }, async (req, res) => {
-    console.log('Claude adapter request received:', req.file?.originalname);
-    try {
-      if (!req.file) {
-        console.log('No file in catalog adapter request');
-        return res.status(400).json({ 
-          success: false, 
-          message: "Файл не загружен" 
-        });
-      }
-
-      const fileExtension = path.extname(req.file.originalname).toLowerCase();
-      console.log(`Processing file: ${req.file.originalname} with extension: ${fileExtension}`);
-
-      // Use Claude AI to adapt the catalog
-      const result = await adaptCatalogWithClaude(req.file.path, fileExtension);
-
-      // Clean up uploaded file
-      try {
-        await fs.unlink(req.file.path);
-      } catch (cleanupError) {
-        console.error('Error deleting uploaded file after processing:', cleanupError);
-      }
-
-      res.setHeader('Content-Type', 'application/json');
-      res.status(200).json(result);
-    } catch (error: any) {
-      console.error('Claude adapter error:', error);
-      // Clean up uploaded file in case of error
-      if (req.file) {
-        try {
-          await fs.unlink(req.file.path);
-        } catch (cleanupError) {
-          console.error('Error deleting uploaded file during cleanup:', cleanupError);
-        }
-      }
-      res.status(500).json({ 
-        success: false, 
-        message: "Ошибка адаптации каталога: " + error.message 
-      });
-    }
-  });
+  
 
   // Full catalog import from supplier website
   app.post("/api/suppliers/import-catalog", requireAuth, requireAdmin, async (req, res) => {
@@ -570,43 +514,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Начинаю полный импорт каталога поставщика: ${name} (${url})`);
 
-      // Проверяем, является ли это pittools.ru для полного импорта
-      if (url.includes('pittools.ru')) {
-        console.log('Запускаю полный импорт реального каталога pittools.ru');
-        const { scrapePittoolsCatalog } = await import('./utils/pittools-scraper');
-        const result = await scrapePittoolsCatalog();
+      
 
-        if (result.success) {
-          res.json({
-            success: true,
-            message: `Успешно импортирован реальный каталог pittools.ru. Импортировано товаров: ${result.productsImported} из ${result.total}`,
-            productsImported: result.productsImported,
-            failed: result.failed,
-            total: result.total,
-            categoriesCreated: 0
-          });
-          return;
-        }
-      }
-
-      // Используем оптимизированную систему массового импорта товаров для других поставщиков
-      const { generateMassProducts } = await import('./utils/mass-product-generator');
-      const result = await generateMassProducts(name, description);
+      // Используем веб-скрапер для импорта каталога
+      const result = await scrapeSupplierCatalog('default');
 
       if (result.success) {
         res.json({
           success: true,
-          message: `Успешно импортирован каталог поставщика ${name}. Импортировано товаров: ${result.productsImported} из ${result.total}`,
-          productsImported: result.productsImported,
-          failed: result.failed,
-          total: result.total,
+          message: `Успешно импортирован каталог поставщика ${name}. Импортировано товаров: ${result.products.length}`,
+          productsImported: result.products.length,
+          failed: 0,
+          total: result.products.length,
           categoriesCreated: 0
         });
       } else {
         res.status(500).json({
           success: false,
           message: "Ошибка импорта каталога",
-          error: result
+          error: result.error
         });
       }
     } catch (error: any) {
@@ -909,9 +835,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Импорт CSV файла: ${req.file.originalname}`);
 
-      // Use specialized pittools parser for these files
-      const { parsePittoolsCSV } = await import('./utils/pittools-csv-parser');
-      const products = await parsePittoolsCSV(filePath);
+      // Parse CSV file using standard parser
+      const products = await parseImportFile(filePath, '.csv');
 
       // Import to database
       const results = {
