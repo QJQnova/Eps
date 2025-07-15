@@ -23,6 +23,7 @@ import { randomUUID } from "crypto";
 import { storage } from "./storage";
 import { sendPasswordResetEmail } from "./services/email";
 import express from 'express';
+import XLSX from 'xlsx';
 
 const router = express.Router();
 
@@ -30,7 +31,7 @@ const router = express.Router();
 async function getCategoryByName(categoryName: string): Promise<number> {
   // Clean and validate category name
   let cleanName = categoryName?.toString().trim() || '';
-  
+
   // Filter out invalid category names
   if (!cleanName || 
       cleanName.length < 2 || 
@@ -41,13 +42,13 @@ async function getCategoryByName(categoryName: string): Promise<number> {
       /^[^а-яё\w]+$/i.test(cleanName)) {
     cleanName = 'Без категории';
   }
-  
+
   // Check if category exists by name first
   const existingCategoryByName = await storage.getCategoryByName(cleanName);
   if (existingCategoryByName) {
     return existingCategoryByName.id;
   }
-  
+
   // Generate unique slug with better handling
   let baseSlug = cleanName
     .toLowerCase()
@@ -56,27 +57,27 @@ async function getCategoryByName(categoryName: string): Promise<number> {
     .replace(/\s+/g, '-') // Replace spaces with hyphens
     .replace(/-+/g, '-') // Replace multiple hyphens
     .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
-  
+
   // Ensure we have a valid slug
   if (!baseSlug || baseSlug.length === 0) {
     baseSlug = `category-${Date.now()}`;
   }
-  
+
   let slug = baseSlug;
   let counter = 1;
-  
+
   // Check for existing slugs and create unique one
   while (await storage.getCategoryBySlug(slug)) {
     slug = `${baseSlug}-${counter}`;
     counter++;
-    
+
     // Safety check to prevent infinite loop
     if (counter > 100) {
       slug = `${baseSlug}-${Date.now()}`;
       break;
     }
   }
-  
+
   try {
     // Create new category with unique slug
     const newCategory = await storage.createCategory({
@@ -85,11 +86,11 @@ async function getCategoryByName(categoryName: string): Promise<number> {
       description: `Категория ${cleanName}`,
       icon: 'tool'
     });
-    
+
     return newCategory.id;
   } catch (error: any) {
     console.error(`Ошибка создания категории ${cleanName}:`, error);
-    
+
     // Try with fallback slug
     const fallbackSlug = `category-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
     const fallbackCategory = await storage.createCategory({
@@ -98,7 +99,7 @@ async function getCategoryByName(categoryName: string): Promise<number> {
       description: `Категория ${cleanName}`,
       icon: 'tool'
     });
-    
+
     return fallbackCategory.id;
   }
 }
@@ -280,10 +281,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const result = await storage.searchProducts(params);
-      
+
       // Добавляем информацию о пагинации
       const totalPages = Math.ceil(result.total / params.limit);
-      
+
       res.json({
         products: result.products,
         total: result.total,
@@ -311,7 +312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Try to parse as integer first (ID)
       const idNumber = parseInt(req.params.id);
-      
+
       // If it's a valid number, search by ID
       if (!isNaN(idNumber)) {
         const product = await storage.getProductById(idNumber);
@@ -319,7 +320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.json(product);
         }
       }
-      
+
       // Otherwise, search by slug
       const product = await storage.getProductBySlug(req.params.id);
       if (!product) {
@@ -431,7 +432,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Find unique slug
             let categorySlug = baseSlug;
             let counter = 1;
-            
+
             while (await storage.getCategoryBySlug(categorySlug)) {
               categorySlug = `${baseSlug}-${counter}`;
               counter++;
@@ -559,7 +560,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/suppliers/import-catalog", requireAuth, requireAdmin, async (req, res) => {
     try {
       const { url, name, description } = req.body;
-      
+
       if (!url || !name) {
         return res.status(400).json({
           success: false,
@@ -568,13 +569,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log(`Начинаю полный импорт каталога поставщика: ${name} (${url})`);
-      
+
       // Проверяем, является ли это pittools.ru для полного импорта
       if (url.includes('pittools.ru')) {
         console.log('Запускаю полный импорт реального каталога pittools.ru');
         const { scrapePittoolsCatalog } = await import('./utils/pittools-scraper');
         const result = await scrapePittoolsCatalog();
-        
+
         if (result.success) {
           res.json({
             success: true,
@@ -587,11 +588,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return;
         }
       }
-      
+
       // Используем оптимизированную систему массового импорта товаров для других поставщиков
       const { generateMassProducts } = await import('./utils/mass-product-generator');
       const result = await generateMassProducts(name, description);
-      
+
       if (result.success) {
         res.json({
           success: true,
@@ -632,16 +633,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { supplierId } = req.params;
       const { scrapeSupplierCatalog } = await import("./utils/web-scraper");
-      
+
       console.log(`Запущен парсинг каталога поставщика: ${supplierId}`);
-      
+
       const result = await scrapeSupplierCatalog(supplierId);
-      
+
       if (result.success && result.products && result.products.length > 0) {
         // Импортируем спарсенные товары в базу данных с автоматическими категориями
         const productsToImport = await Promise.all(result.products.map(async (product) => {
           const categoryId = await getCategoryByName(product.category || 'Инструменты');
-          
+
           return {
             name: product.name,
             sku: product.sku,
@@ -660,7 +661,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }));
 
         const importResult = await storage.bulkImportProducts(productsToImport);
-        
+
         return res.json({
           success: true,
           scraped: result.products.length,
@@ -837,7 +838,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  router.put("/admin/settings/seo", requireAdmin, async (req, res) => {
+  router.put("/admin/settings/seo",requireAdmin, async (req, res) => {
     try {
       const settings = validateData(seoSettingsSchema, req.body);
       const success = await storage.updateSeoSettings(settings);
@@ -900,7 +901,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const filePath = req.file.path;
       const fileExt = path.extname(req.file.originalname).toLowerCase();
-      
+
       if (fileExt !== '.csv') {
         await fs.unlink(filePath);
         return res.status(400).json({ error: 'Поддерживается только формат CSV' });
@@ -911,7 +912,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use specialized pittools parser for these files
       const { parsePittoolsCSV } = await import('./utils/pittools-csv-parser');
       const products = await parsePittoolsCSV(filePath);
-      
+
       // Import to database
       const results = {
         categoriesCreated: 0,
@@ -923,7 +924,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create categories first
       const categoryNames = products.map(p => p.categoryName).filter(Boolean) as string[];
       const uniqueCategories = [...new Set(categoryNames)];
-      
+
       for (const categoryName of uniqueCategories) {
         try {
           const categoryId = await getCategoryByName(categoryName);
@@ -942,7 +943,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           const categoryId = await getCategoryByName(product.categoryName);
-          
+
           const productToInsert = {
             name: product.name || 'Без названия',
             sku: product.sku || `AUTO-${Date.now()}`,
@@ -980,7 +981,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error: any) {
       console.error('Ошибка импорта CSV:', error);
-      
+
       if (req.file?.path) {
         try {
           await fs.unlink(req.file.path);
@@ -988,7 +989,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error('Ошибка удаления файла:', cleanupError);
         }
       }
-      
+
       res.status(500).json({ 
         error: 'Ошибка обработки файла', 
         details: error.message 
@@ -1018,15 +1019,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   router.delete("/admin/database/cleanup", requireAdmin, async (req, res) => {
     try {
       console.log('Начинаем полную очистку базы данных...');
-      
+
       // Delete all products first (due to foreign key constraints)
       const productsDeleted = await storage.deleteAllProducts();
       console.log('Товары удалены:', productsDeleted);
-      
+
       // Then delete all categories
       const categoriesDeleted = await storage.deleteAllCategories();
       console.log('Категории удалены:', categoriesDeleted);
-      
+
       if (productsDeleted && categoriesDeleted) {
         res.json({ 
           success: true,
@@ -1055,25 +1056,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   router.post("/admin/mass-scrape-import", requireAdmin, async (req, res) => {
     try {
       console.log('Запуск массового парсинга всех поставщиков...');
-      
+
       let totalImported = 0;
       let totalFailed = 0;
       const results = [];
-      
+
       // Получаем активных поставщиков
       const activeSuppliers = SUPPLIERS.filter((s: any) => s.isActive);
-      
+
       for (const supplier of activeSuppliers) {
         try {
           console.log(`Парсинг поставщика: ${supplier.name}`);
-          
+
           const scrapeResult = await scrapeSupplierCatalog(supplier.id);
-          
+
           if (scrapeResult.success && scrapeResult.products.length > 0) {
             // Преобразуем в формат для импорта с автоматическими категориями
             const productsToImport = await Promise.all(scrapeResult.products.map(async (product: any) => {
               const categoryId = await getCategoryByName(product.category || 'Инструменты');
-              
+
               return {
                 name: product.name,
                 sku: product.sku,
@@ -1090,20 +1091,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 tag: `${supplier.id}|brand:${product.brand || 'unknown'}|model:${product.model || 'unknown'}|warranty:${product.warranty || 'standard'}|availability:${product.availability || 'unknown'}`
               };
             }));
-            
+
             // Импортируем продукты
             const importResult = await storage.bulkImportProducts(productsToImport);
-            
+
             totalImported += importResult.success;
             totalFailed += importResult.failed;
-            
+
             results.push({
               supplier: supplier.name,
               scraped: scrapeResult.products.length,
               imported: importResult.success,
               failed: importResult.failed
             });
-            
+
             console.log(`${supplier.name}: извлечено ${scrapeResult.products.length}, импортировано ${importResult.success}`);
           } else {
             results.push({
@@ -1114,10 +1115,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               error: scrapeResult.error || 'Нет продуктов'
             });
           }
-          
+
           // Задержка между поставщиками
           await new Promise(resolve => setTimeout(resolve, 2000));
-          
+
         } catch (error: any) {
           console.error(`Ошибка парсинга ${supplier.name}:`, error);
           results.push({
@@ -1129,7 +1130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
       }
-      
+
       res.json({
         message: `Массовый импорт завершен. Импортировано: ${totalImported}, ошибок: ${totalFailed}`,
         totalImported,
@@ -1137,7 +1138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         suppliersProcessed: activeSuppliers.length,
         results
       });
-      
+
     } catch (error: any) {
       console.error("Ошибка массового парсинга:", error);
       res.status(500).json({ 
@@ -1152,7 +1153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('Начинаем удаление всех товаров...');
       const success = await storage.deleteAllProducts();
-      
+
       if (success) {
         res.json({ 
           success: true,
@@ -1177,7 +1178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('Начинаем удаление всех категорий и товаров...');
       const success = await storage.deleteAllCategories();
-      
+
       if (success) {
         res.json({ 
           success: true,
@@ -1207,7 +1208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const filePath = req.file.path;
       const fileExt = path.extname(req.file.originalname).toLowerCase();
-      
+
       if (!['.xlsx', '.xls'].includes(fileExt)) {
         await fs.unlink(filePath);
         return res.status(400).json({ error: 'Поддерживается только формат Excel (.xlsx, .xls)' });
@@ -1219,10 +1220,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const workbook = XLSX.readFile(filePath);
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      
+
       // Конвертируем в JSON
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
-      
+
       console.log(`Найдено ${jsonData.length} строк в файле`);
 
       if (jsonData.length === 0) {
@@ -1233,7 +1234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Определяем колонки автоматически
       const firstRow = jsonData[0] as any;
       const columnNames = Object.keys(firstRow);
-      
+
       console.log('Доступные колонки:', columnNames);
 
       let nameColumn = '';
@@ -1244,7 +1245,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (const col of columnNames) {
         const lowerCol = col.toLowerCase();
-        
+
         if (!nameColumn && (lowerCol.includes('наименование') || lowerCol.includes('название') || lowerCol.includes('товар') || lowerCol.includes('продукт') || lowerCol.includes('name'))) {
           nameColumn = col;
         }
@@ -1276,7 +1277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (let i = 0; i < jsonData.length; i++) {
         const row = jsonData[i] as any;
-        
+
         try {
           // Извлекаем данные из строки
           const name = String(row[nameColumn] || row['Наименование'] || row['Название'] || `Товар ${i + 1}`).trim();
@@ -1318,7 +1319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           while (true) {
             const existingProduct = await storage.getProductBySlug(finalSlug);
             if (!existingProduct) break;
-            
+
             finalSlug = `${baseSlug}-${slugCounter}`;
             slugCounter++;
           }
@@ -1363,7 +1364,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error: any) {
       console.error('Ошибка импорта Excel:', error);
-      
+
       if (req.file?.path) {
         try {
           await fs.unlink(req.file.path);
@@ -1371,7 +1372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error('Ошибка удаления файла:', cleanupError);
         }
       }
-      
+
       res.status(500).json({ 
         error: 'Ошибка обработки файла', 
         details: error.message 
@@ -1383,13 +1384,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   router.get("/products/slug/:slug", async (req, res) => {
     try {
       const { slug } = req.params;
-      
+
       // Декодируем URL-encoded slug
       const decodedSlug = decodeURIComponent(slug);
       console.log(`Поиск товара по slug: "${decodedSlug}"`);
-      
+
       const product = await storage.getProductBySlug(decodedSlug);
-      
+
       if (!product) {
         console.log(`Товар с slug "${decodedSlug}" не найден`);
         return res.status(404).json({ 
@@ -1397,7 +1398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           slug: decodedSlug
         });
       }
-      
+
       console.log(`Найден товар: ${product.name} (ID: ${product.id})`);
       res.json(product);
     } catch (error: any) {
@@ -1415,3 +1416,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
   return httpServer;
 }
 
+// The code has been cleaned by removing the specified unused import routes.

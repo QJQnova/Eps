@@ -29,7 +29,6 @@ import PublicationsPage from "@/pages/publications";
 import AboutPage from "@/pages/about";
 import ContactsPage from "@/pages/contacts";
 import Products from "@/pages/products";
-import EmergencyDeletePage from "@/pages/emergency-delete";
 
 // Admin Pages
 import AdminDashboard from "@/pages/admin/dashboard";
@@ -45,18 +44,17 @@ import SupplierImporter from "@/pages/admin/supplier-importer";
 import CatalogAdapter from "@/pages/admin/catalog-adapter";
 import WebScraper from "@/pages/admin/web-scraper";
 import MassScraper from "@/pages/admin/mass-scraper";
-import AdminImportPage from "@/pages/admin-import-page";
 
 function Router() {
   const [location] = useLocation();
-  
+
   // Check if the current route is an admin route
   const isAdminRoute = location.startsWith("/admin");
-  
+
   return (
     <>
       {!isAdminRoute && <Header />}
-      
+
       <main className={isAdminRoute ? "bg-gray-50 min-h-screen" : ""}>
         <Switch>
           {/* Public Routes */}
@@ -73,20 +71,18 @@ function Router() {
           <Route path="/about" component={AboutPage} />
           <Route path="/contacts" component={ContactsPage} />
           <Route path="/products" component={Products} />
-          <Route path="/emergency-delete" component={EmergencyDeletePage} />
-          
+
           {/* Protected Routes (требуют авторизации) */}
           <ProtectedRoute path="/checkout" component={Checkout} />
           <ProtectedRoute path="/order-complete/:id" component={OrderComplete} />
           <ProtectedRoute path="/profile" component={Profile} />
-          
+
           {/* Admin Routes */}
           <ProtectedRoute path="/admin" component={AdminDashboard} />
           <ProtectedRoute path="/admin/products" component={ProductManagement} />
           <ProtectedRoute path="/admin/products/create" component={ProductFormPage} />
           <ProtectedRoute path="/admin/products/edit/:id" component={ProductFormPage} />
           <ProtectedRoute path="/admin/import" component={BulkImport} />
-          <ProtectedRoute path="/admin/csv-import" component={AdminImportPage} />
           <ProtectedRoute path="/admin/catalog-adapter" component={CatalogAdapter} />
           <ProtectedRoute path="/admin/web-scraper" component={WebScraper} />
           <ProtectedRoute path="/admin/mass-scraper" component={MassScraper} />
@@ -96,12 +92,12 @@ function Router() {
           <ProtectedRoute path="/admin/settings" component={SettingsManagement} />
           <ProtectedRoute path="/admin/sql-delete" component={SqlDeletePage} />
           <ProtectedRoute path="/admin/supplier-importer" component={SupplierImporter} />
-          
+
           {/* Fallback to 404 */}
           <Route component={NotFound} />
         </Switch>
       </main>
-      
+
       {!isAdminRoute && <Footer />}
     </>
   );
@@ -111,7 +107,7 @@ function App() {
   // Добавляем дату обновления для сброса кеша
   const updateVersion = "15.05.2025.13:16"; // обновленная дата и время
   console.log("ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ", updateVersion);
-  
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
