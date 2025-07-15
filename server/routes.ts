@@ -271,6 +271,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const params: any = {
         query: req.query.query as string | undefined,
         categoryId: req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined,
+        supplier: req.query.supplier as string | undefined,
         minPrice: req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined,
         maxPrice: req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined,
         sort: req.query.sort as any,

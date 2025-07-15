@@ -29,12 +29,14 @@ export default function Products() {
   const params = new URLSearchParams(location.split("?")[1] || "");
   const initialQuery = params.get("query") || "";
   const initialCategoryId = params.get("categoryId") || "";
+  const initialSupplier = params.get("supplier") || "";
   
   // Состояние для фильтров
   const [query, setQuery] = useState(initialQuery);
   const [categoryId, setCategoryId] = useState<number | undefined>(
     initialCategoryId ? parseInt(initialCategoryId) : undefined
   );
+  const [supplier, setSupplier] = useState<string | undefined>(initialSupplier || undefined);
   
   // Получение списка категорий
   const { data: categories = [] } = useQuery<Category[]>({ 
@@ -46,6 +48,7 @@ export default function Products() {
     const newParams = new URLSearchParams(location.split("?")[1] || "");
     setQuery(newParams.get("query") || "");
     setCategoryId(newParams.get("categoryId") ? parseInt(newParams.get("categoryId") || "") : undefined);
+    setSupplier(newParams.get("supplier") || undefined);
   }, [location]);
   
   // Получение названия текущей категории если выбрана
@@ -144,6 +147,7 @@ export default function Products() {
         <ProductList 
           query={query} 
           categoryId={categoryId} 
+          supplier={supplier}
           limit={12}
         />
       </div>

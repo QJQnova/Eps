@@ -12,6 +12,7 @@ export default function Home() {
   const [location] = useLocation();
   const queryParams = new URLSearchParams(location.split('?')[1] || '');
   const searchQuery = queryParams.get('query') || '';
+  const supplierParam = queryParams.get('supplier') || undefined;
   
   // Fetch categories с увеличенным временем кеширования
   const { data: categories = [] } = useQuery<Category[]>({ 
@@ -72,33 +73,18 @@ export default function Home() {
             <p className="text-lg text-gray-600">Найдите инструменты от проверенных поставщиков</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <Button 
               className="bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-eps-red text-gray-900 h-auto p-6 transition-all duration-300 group"
-              onClick={() => window.location.href = '/products?supplier=tss'}
+              onClick={() => window.location.href = '/products'}
             >
               <div className="flex flex-col items-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-eps-red to-red-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Wrench className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-gray-600 to-gray-700 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <HardHat className="w-6 h-6 text-white" />
                 </div>
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold">TSS</h3>
-                  <p className="text-sm text-gray-600">Профессиональные инструменты</p>
-                </div>
-              </div>
-            </Button>
-
-            <Button 
-              className="bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-eps-red text-gray-900 h-auto p-6 transition-all duration-300 group"
-              onClick={() => window.location.href = '/products?supplier=sturm'}
-            >
-              <div className="flex flex-col items-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Hammer className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold">STURM TOOLS</h3>
-                  <p className="text-sm text-gray-600">Инструменты для строительства</p>
+                  <h3 className="text-lg font-semibold">ВСЕ ПОСТАВЩИКИ</h3>
+                  <p className="text-sm text-gray-600">Полный каталог инструментов</p>
                 </div>
               </div>
             </Button>
@@ -114,51 +100,6 @@ export default function Home() {
                 <div className="text-center">
                   <h3 className="text-lg font-semibold">DCK TOOLS</h3>
                   <p className="text-sm text-gray-600">Электроинструменты</p>
-                </div>
-              </div>
-            </Button>
-
-            <Button 
-              className="bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-eps-red text-gray-900 h-auto p-6 transition-all duration-300 group"
-              onClick={() => window.location.href = '/products?supplier=fit24'}
-            >
-              <div className="flex flex-col items-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-purple-700 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Ruler className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold">FIT24</h3>
-                  <p className="text-sm text-gray-600">Измерительные инструменты</p>
-                </div>
-              </div>
-            </Button>
-
-            <Button 
-              className="bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-eps-red text-gray-900 h-auto p-6 transition-all duration-300 group"
-              onClick={() => window.location.href = '/products?supplier=instrument'}
-            >
-              <div className="flex flex-col items-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-600 to-orange-700 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <HardHat className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold">INSTRUMENT.RU</h3>
-                  <p className="text-sm text-gray-600">Широкий ассортимент</p>
-                </div>
-              </div>
-            </Button>
-
-            <Button 
-              className="bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-eps-red text-gray-900 h-auto p-6 transition-all duration-300 group"
-              onClick={() => window.location.href = '/products?supplier=zubr'}
-            >
-              <div className="flex flex-col items-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-eps-yellow to-amber-500 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Wrench className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold">ZUBR</h3>
-                  <p className="text-sm text-gray-600">Качественные инструменты</p>
                 </div>
               </div>
             </Button>
@@ -210,7 +151,7 @@ export default function Home() {
       {/* Products Section */}
       <section id="products" className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ProductList query={searchQuery} />
+          <ProductList query={searchQuery} supplier={supplierParam} />
         </div>
       </section>
     </div>

@@ -11,13 +11,14 @@ interface ProductListProps {
   query?: string;
   categoryId?: number;
   limit?: number;
+  supplier?: string;
 }
 
-export default function ProductList({ query, categoryId, limit = 12 }: ProductListProps) {
+export default function ProductList({ query, categoryId, limit = 12, supplier }: ProductListProps) {
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<string>("featured");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  
+
   // Build query parameters
   const queryParams = new URLSearchParams();
   if (query) queryParams.append("query", query);
@@ -25,10 +26,11 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
   queryParams.append("sort", sort);
   queryParams.append("page", page.toString());
   queryParams.append("limit", limit.toString());
-  
+  if (supplier) queryParams.append("supplier", supplier);
+
   // Параметры поиска в консоль для отладки
   console.log("Search params:", Object.fromEntries(queryParams.entries()));
-  
+
   // Fetch products с оптимизированным кешированием
   const { data, isLoading } = useQuery<{
     products: Product[],
@@ -42,12 +44,12 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
     staleTime: 60000, // 1 минута - разумное время для кеширования списка товаров
     gcTime: 300000, // 5 минут - сохраняем в памяти после исчезновения со страницы
   });
-  
+
   const handleSortChange = (value: string) => {
     setSort(value);
     setPage(1); // Reset to first page when sort changes
   };
-  
+
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
     // Scroll to products section
@@ -59,7 +61,7 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
-  
+
   return (
     <div>
       {/* Header Section with Beautiful Gradient Background */}
@@ -75,7 +77,7 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
                  (data?.total && data.total >= 2 && data.total <= 4) ? 'товара' : 'товаров'}`}
             </p>
           </div>
-          
+
           <div className="w-full md:w-auto mt-4 md:mt-0 flex items-center space-x-4">
             {/* Sort Options */}
             <div className="relative w-full md:w-auto">
@@ -92,7 +94,7 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
                 </SelectContent>
               </Select>
             </div>
-            
+
             {/* Toggle Grid/List View */}
             <div className="flex border border-white/30 rounded-lg overflow-hidden backdrop-blur-sm">
               <Button
@@ -115,7 +117,7 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
           </div>
         </div>
       </div>
-      
+
       {isLoading ? (
         // Loading skeleton
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -145,7 +147,7 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-          
+
           {/* Пагинация */}
           {data.totalPages > 1 && (
             <div className="mt-8 flex justify-center">
@@ -161,12 +163,12 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
                   <ChevronLeft className="h-4 w-4" />
                   Назад
                 </Button>
-                
+
                 {/* Номера страниц */}
                 <div className="flex items-center space-x-1">
                   {Array.from({ length: Math.min(data.totalPages, 7) }, (_, i) => {
                     let pageNum: number;
-                    
+
                     if (data.totalPages <= 7) {
                       // Если страниц мало, показываем все
                       pageNum = i + 1;
@@ -180,7 +182,7 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
                         pageNum = page - 3 + i;
                       }
                     }
-                    
+
                     // Показываем многоточие
                     if (data.totalPages > 7 && 
                         ((i === 6 && page < data.totalPages - 3) || 
@@ -191,7 +193,7 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
                         </span>
                       );
                     }
-                    
+
                     return (
                       <Button
                         key={pageNum}
@@ -209,7 +211,7 @@ export default function ProductList({ query, categoryId, limit = 12 }: ProductLi
                     );
                   })}
                 </div>
-                
+
                 {/* Следующая страница */}
                 <Button
                   variant="outline"

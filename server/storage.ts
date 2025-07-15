@@ -9,7 +9,7 @@ import {
   passwordResetTokens, InsertPasswordResetToken, PasswordResetToken
 } from "@shared/schema";
 import { z } from "zod";
-import { and, eq, like, between, desc, asc, sql, isNull, gte, lte, or, not } from "drizzle-orm";
+import { and, eq, like, between, desc, asc, sql, isNull, gte, lte, or, not, ilike } from "drizzle-orm";
 import * as crypto from "crypto";
 
 const PostgresSessionStore = connectPg(session);
@@ -48,7 +48,16 @@ export interface IStorage {
   getProductById(id: number): Promise<Product | undefined>;
   getProductBySlug(slug: string): Promise<Product | undefined>;
   getProductsByCategoryId(categoryId: number): Promise<Product[]>;
-  searchProducts(params: ProductSearchParams): Promise<{ products: Product[], total: number }>;
+  searchProducts(params: {
+    query?: string;
+    categoryId?: number;
+    supplier?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    sort?: 'featured' | 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc';
+    page?: number;
+    limit?: number;
+  }): Promise<{ products: Product[]; total: number }>;
   getFeaturedProducts(): Promise<Product[]>;
   createProduct(product: ProductInput): Promise<Product>;
   updateProduct(id: number, product: Partial<ProductInput>): Promise<Product | undefined>;
@@ -195,7 +204,7 @@ export class DatabaseStorage implements IStorage {
   async getAllCategories(): Promise<Category[]> {
     // Получаем все категории
     const allCategories = await db.select().from(categories).orderBy(categories.name);
-    
+
     // Получаем счетчики товаров для всех категорий одним запросом
     const productCounts = await db
       .select({
@@ -293,10 +302,19 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(products).where(eq(products.categoryId, categoryId));
   }
 
-  async searchProducts(params: ProductSearchParams): Promise<{ products: Product[], total: number }> {
+  async searchProducts(params: {
+    query?: string;
+    categoryId?: number;
+    supplier?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    sort?: 'featured' | 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc';
+    page?: number;
+    limit?: number;
+  }): Promise<{ products: Product[]; total: number }> {
     let baseQuery = db.select().from(products);
     let countQuery = db.select({ count: sql<number>`count(*)` }).from(products);
-    
+
     const conditions: any[] = [eq(products.isActive, true)];
 
     // Текстовый поиск
@@ -314,6 +332,11 @@ export class DatabaseStorage implements IStorage {
     // Фильтр по категории
     if (params.categoryId) {
       conditions.push(eq(products.categoryId, params.categoryId));
+    }
+
+    // Supplier filter
+    if (params.supplier) {
+       conditions.push(ilike(products.tag, `%${params.supplier}%`));
     }
 
     // Фильтр по цене
