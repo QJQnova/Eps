@@ -64,49 +64,104 @@ export default function Home() {
         <div className="absolute top-1/2 right-1/3 w-16 h-16 bg-white/5 rounded-full blur-xl animate-pulse delay-500"></div>
       </section>
       
-      {/* Features Section - Красивые карточки как в примере */}
+      {/* Supplier Selection Section */}
       <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-eps-red to-red-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Выберите поставщика</h2>
+            <p className="text-lg text-gray-600">Найдите инструменты от проверенных поставщиков</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Button 
+              className="bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-eps-red text-gray-900 h-auto p-6 transition-all duration-300 group"
+              onClick={() => window.location.href = '/products?supplier=tss'}
+            >
+              <div className="flex flex-col items-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-eps-red to-red-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Wrench className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold">TSS</h3>
+                  <p className="text-sm text-gray-600">Профессиональные инструменты</p>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Высокое качество</h3>
-              <p className="text-gray-600 leading-relaxed">Профессиональные инструменты</p>
-            </div>
-            
-            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-red-600 to-red-700 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
+            </Button>
+
+            <Button 
+              className="bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-eps-red text-gray-900 h-auto p-6 transition-all duration-300 group"
+              onClick={() => window.location.href = '/products?supplier=sturm'}
+            >
+              <div className="flex flex-col items-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Hammer className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold">STURM TOOLS</h3>
+                  <p className="text-sm text-gray-600">Инструменты для строительства</p>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Гарантия</h3>
-              <p className="text-gray-600 leading-relaxed">На все инструменты</p>
-            </div>
-            
-            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-eps-yellow to-amber-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
+            </Button>
+
+            <Button 
+              className="bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-eps-red text-gray-900 h-auto p-6 transition-all duration-300 group"
+              onClick={() => window.location.href = '/products?supplier=dck'}
+            >
+              <div className="flex flex-col items-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-green-600 to-green-700 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Drill className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold">DCK TOOLS</h3>
+                  <p className="text-sm text-gray-600">Электроинструменты</p>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Доставка</h3>
-              <p className="text-gray-600 leading-relaxed">По всей России</p>
-            </div>
-            
-            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
+            </Button>
+
+            <Button 
+              className="bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-eps-red text-gray-900 h-auto p-6 transition-all duration-300 group"
+              onClick={() => window.location.href = '/products?supplier=fit24'}
+            >
+              <div className="flex flex-col items-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-purple-700 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Ruler className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold">FIT24</h3>
+                  <p className="text-sm text-gray-600">Измерительные инструменты</p>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Консультации</h3>
-              <p className="text-gray-600 leading-relaxed">Профессиональная помощь</p>
-            </div>
+            </Button>
+
+            <Button 
+              className="bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-eps-red text-gray-900 h-auto p-6 transition-all duration-300 group"
+              onClick={() => window.location.href = '/products?supplier=instrument'}
+            >
+              <div className="flex flex-col items-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-600 to-orange-700 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <HardHat className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold">INSTRUMENT.RU</h3>
+                  <p className="text-sm text-gray-600">Широкий ассортимент</p>
+                </div>
+              </div>
+            </Button>
+
+            <Button 
+              className="bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-eps-red text-gray-900 h-auto p-6 transition-all duration-300 group"
+              onClick={() => window.location.href = '/products?supplier=zubr'}
+            >
+              <div className="flex flex-col items-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-eps-yellow to-amber-500 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Wrench className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold">ZUBR</h3>
+                  <p className="text-sm text-gray-600">Качественные инструменты</p>
+                </div>
+              </div>
+            </Button>
           </div>
         </div>
       </section>
