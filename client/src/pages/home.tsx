@@ -26,10 +26,12 @@ export default function Home() {
       if (selectedSupplier) {
         params.append('supplier', selectedSupplier);
       }
+      // Добавляем timestamp для принудительного обновления
+      params.append('t', Date.now().toString());
       return fetch(`/api/categories?${params}`).then(res => res.json());
     },
-    staleTime: 300000, // 5 минут
-    gcTime: 900000, // 15 минут кеширования в памяти
+    staleTime: 0, // Принудительное обновление
+    gcTime: 0, // Не кешировать
   });
   
   return (
