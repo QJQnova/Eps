@@ -36,6 +36,7 @@ export interface IStorage {
 
   // Category operations
   getAllCategories(): Promise<Category[]>;
+  getCategoriesBySupplier(supplier?: string): Promise<Category[]>;
   getCategoryById(id: number): Promise<Category | undefined>;
   getCategoryBySlug(slug: string): Promise<Category | undefined>;
   createCategory(category: InsertCategory): Promise<Category>;
@@ -226,6 +227,39 @@ export class DatabaseStorage implements IStorage {
       ...category,
       productCount: countMap.get(category.id) || 0
     })) as Category[];
+  }
+
+  async getCategoriesBySupplier(supplier?: string): Promise<Category[]> {
+    // Получаем все категории
+    const allCategories = await db.select().from(categories).orderBy(categories.name);
+
+    // Фильтруем товары по поставщику если указан
+    let productQuery = db
+      .select({
+        categoryId: products.categoryId,
+        count: sql<number>`count(*)`.as('count')
+      })
+      .from(products)
+      .where(eq(products.isActive, true));
+
+    if (supplier) {
+      productQuery = productQuery.where(eq(products.tag, supplier));
+    }
+
+    const productCounts = await productQuery.groupBy(products.categoryId);
+
+    // Создаем Map для быстрого поиска счетчиков
+    const countMap = new Map(
+      productCounts.map(pc => [pc.categoryId, Number(pc.count)])
+    );
+
+    // Объединяем данные и фильтруем только категории с товарами
+    return allCategories
+      .map(category => ({
+        ...category,
+        productCount: countMap.get(category.id) || 0
+      }))
+      .filter(category => category.productCount > 0) as Category[];
   }
 
   async getCategoryById(id: number): Promise<Category | undefined> {

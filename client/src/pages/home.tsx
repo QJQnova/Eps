@@ -18,9 +18,16 @@ export default function Home() {
   // Состояние для выбранного поставщика
   const [selectedSupplier, setSelectedSupplier] = useState<string | undefined>(supplierParam);
   
-  // Fetch categories с увеличенным временем кеширования
+  // Fetch categories с учетом выбранного поставщика
   const { data: categories = [] } = useQuery<Category[]>({ 
-    queryKey: ["/api/categories"],
+    queryKey: ["/api/categories", selectedSupplier],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (selectedSupplier) {
+        params.append('supplier', selectedSupplier);
+      }
+      return fetch(`/api/categories?${params}`).then(res => res.json());
+    },
     staleTime: 300000, // 5 минут
     gcTime: 900000, // 15 минут кеширования в памяти
   });

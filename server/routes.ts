@@ -207,7 +207,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Category Routes
   router.get("/categories", async (req, res) => {
     try {
-      const categories = await storage.getAllCategories();
+      const supplier = req.query.supplier as string | undefined;
+      const categories = supplier 
+        ? await storage.getCategoriesBySupplier(supplier)
+        : await storage.getAllCategories();
       res.json(categories);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
