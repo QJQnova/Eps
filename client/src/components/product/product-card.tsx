@@ -141,16 +141,23 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Цена и кнопка в корзину */}
         <div className="flex items-end justify-between mt-auto pt-4 border-t border-gray-100">
-          <div className="flex flex-col">
-            {product.originalPrice && Number(product.originalPrice) > Number(product.price) ? (
-              <>
-                <span className="text-xl font-bold text-eps-red">{formatPrice(product.price)}</span>
-                <span className="text-sm text-gray-500 line-through">{formatPrice(product.originalPrice)}</span>
-              </>
-            ) : (
-              <span className="text-xl font-bold text-gray-900">{formatPrice(product.price)}</span>
-            )}
-          </div>
+          {/* Показываем цену только если она больше 0 */}
+          {Number(product.price) > 0 ? (
+            <div className="flex flex-col">
+              {product.originalPrice && Number(product.originalPrice) > Number(product.price) ? (
+                <>
+                  <span className="text-xl font-bold text-eps-red">{formatPrice(product.price)}</span>
+                  <span className="text-sm text-gray-500 line-through">{formatPrice(product.originalPrice)}</span>
+                </>
+              ) : (
+                <span className="text-xl font-bold text-gray-900">{formatPrice(product.price)}</span>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col">
+              <span className="text-sm text-gray-500">Цена по запросу</span>
+            </div>
+          )}
 
           <Button 
             className="bg-gradient-to-r from-eps-red to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-2 rounded-lg font-medium"

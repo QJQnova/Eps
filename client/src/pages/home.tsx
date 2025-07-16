@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
-import { Drill, Hammer, Ruler, HardHat, Wrench } from "lucide-react";
+import { Drill, Hammer, Ruler, HardHat, Wrench, Settings } from "lucide-react";
 import CategoryCard from "@/components/category/category-card";
 import ProductList from "@/components/product/product-list";
 import AppInstallBanner from "@/components/pwa/AppInstallBanner";
@@ -77,7 +77,7 @@ export default function Home() {
             <p className="text-lg text-gray-600">Найдите инструменты от проверенных поставщиков</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             <Button 
               className={`${
                 selectedSupplier === undefined 
@@ -128,6 +128,33 @@ export default function Home() {
                   <p className={`text-sm ${
                     selectedSupplier === 'dck' ? "text-white/90" : "text-gray-600"
                   }`}>Электроинструменты</p>
+                </div>
+              </div>
+            </Button>
+
+            <Button 
+              className={`${
+                selectedSupplier === 'tss' 
+                  ? "bg-eps-red text-white border-eps-red" 
+                  : "bg-white text-gray-900 border-gray-200"
+              } hover:bg-gray-50 border-2 hover:border-eps-red h-auto p-6 transition-all duration-300 group`}
+              onClick={() => setSelectedSupplier('tss')}
+            >
+              <div className="flex flex-col items-center space-y-3">
+                <div className={`w-12 h-12 rounded-full ${
+                  selectedSupplier === 'tss' 
+                    ? "bg-white/20" 
+                    : "bg-gradient-to-r from-blue-600 to-blue-700"
+                } flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                  <Settings className={`w-6 h-6 ${
+                    selectedSupplier === 'tss' ? "text-white" : "text-white"
+                  }`} />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold">TSS.RU</h3>
+                  <p className={`text-sm ${
+                    selectedSupplier === 'tss' ? "text-white/90" : "text-gray-600"
+                  }`}>Промышленное оборудование</p>
                 </div>
               </div>
             </Button>
