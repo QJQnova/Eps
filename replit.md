@@ -30,14 +30,17 @@ This is a comprehensive e-commerce system for selling professional tools and equ
 ## 1. Product Management System
 - Advanced product catalog with categories, variants, and specifications
 - Bulk import functionality from CSV files and web scraping
-- Image management with local storage and CDN support
+- Image management with local storage and CDN support (99.3% TSS products have images)
 - SEO-optimized product pages with slugs and metadata
+- **Supplier-based filtering** showing relevant categories and products per supplier
+- **Zero-price product handling** with "Add to Cart" buttons for quote requests
 
 ## 2. AI-Powered Catalog Parser
 - **Universal Parser** (`PARSER_SPECIFICATION.md`) for extracting product data from supplier websites
 - **Claude AI Integration** for intelligent HTML analysis and data extraction
-- **Multi-supplier support** for various Russian tool suppliers (P.I.T Tools, TSS, STURM, etc.)
+- **Multi-supplier support** for various Russian tool suppliers (TSS.RU with 2585 products, DCK TOOLS with 145 products)
 - **Automated categorization** and data validation
+- **Supplier-specific filtering** with category display based on selected supplier
 
 ## 3. User Management & Authentication
 - Role-based access control (admin, user)
@@ -116,6 +119,7 @@ Admin Login → Dashboard Access → Product/User Management → Bulk Operations
 - CDN integration for static assets
 
 # Changelog
+- July 16, 2025. Completed TSS.RU supplier integration with full product catalog and category filtering
 - July 01, 2025. Initial setup
 
 # User Preferences
