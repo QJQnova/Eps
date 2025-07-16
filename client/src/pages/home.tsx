@@ -114,26 +114,26 @@ export default function Home() {
 
             <Button 
               className={`${
-                selectedSupplier === 'dck' 
+                selectedSupplier === 'DCK' 
                   ? "bg-eps-red text-white border-eps-red" 
                   : "bg-white text-gray-900 border-gray-200"
               } hover:bg-gray-50 border-2 hover:border-eps-red h-auto p-6 transition-all duration-300 group`}
-              onClick={() => setSelectedSupplier('dck')}
+              onClick={() => setSelectedSupplier('DCK')}
             >
               <div className="flex flex-col items-center space-y-3">
                 <div className={`w-12 h-12 rounded-full ${
-                  selectedSupplier === 'dck' 
+                  selectedSupplier === 'DCK' 
                     ? "bg-white/20" 
                     : "bg-gradient-to-r from-green-600 to-green-700"
                 } flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                   <Drill className={`w-6 h-6 ${
-                    selectedSupplier === 'dck' ? "text-white" : "text-white"
+                    selectedSupplier === 'DCK' ? "text-white" : "text-white"
                   }`} />
                 </div>
                 <div className="text-center">
                   <h3 className="text-lg font-semibold">DCK TOOLS</h3>
                   <p className={`text-sm ${
-                    selectedSupplier === 'dck' ? "text-white/90" : "text-gray-600"
+                    selectedSupplier === 'DCK' ? "text-white/90" : "text-gray-600"
                   }`}>Электроинструменты</p>
                 </div>
               </div>
