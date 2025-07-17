@@ -36,6 +36,49 @@ export default function CategoryCard({ category }: CategoryCardProps) {
     if (name.includes('лобзик')) {
       return `/images/products/KDMQ85(TYPEFK).png`; // Лобзик DCK
     }
+    if (name.includes('перфоратор')) {
+      return `/images/products/KRH20V-26(TYPEH2KKIT).png`; // Перфоратор DCK
+    }
+    if (name.includes('пил')) {
+      return `/images/products/KDMY02-185(TYPEBM).png`; // Пила DCK
+    }
+    if (name.includes('шлифовальн')) {
+      return `/images/products/KDSM03-125(TYPEFK).png`; // Шлифмашина DCK
+    }
+    if (name.includes('болгарк')) {
+      return `/images/products/KDSM03-125(TYPEFK).png`; // Болгарка DCK
+    }
+    if (name.includes('рубанок')) {
+      return `/images/products/KDPL04-8(TYPEEK).png`; // Рубанок DCK
+    }
+    if (name.includes('фрезер')) {
+      return `/images/products/KDPM50(TYPEEK).png`; // Фрезер DCK
+    }
+    if (name.includes('электролобзик')) {
+      return `/images/products/KDSJ10(TYPEEK).png`; // Электролобзик DCK
+    }
+    if (name.includes('генератор')) {
+      return `/images/products/KDGG500(TYPEDM).svg`; // Генератор DCK
+    }
+    if (name.includes('компрессор')) {
+      return `/images/products/KJC02-30.png`; // Компрессор DCK
+    }
+    if (name.includes('промышленн')) {
+      return `/images/products/KDPB998(TYPEH2K).png`; // Промышленное оборудование
+    }
+    if (name.includes('сварочн')) {
+      return `/images/products/KMB03-82.png`; // Сварочное оборудование
+    }
+    if (name.includes('набор') || name.includes('комплект')) {
+      return `/images/products/KDKIT25(TYPEEK).svg`; // Наборы инструментов
+    }
+    if (name.includes('молоток')) {
+      return `/images/products/KRH20V-28(TYPEH2K).png`; // Молоток DCK
+    }
+    
+    // Фоллбэк изображения по умолчанию
+    return `/images/products/KJZ06-13K.png`;g`; // Лобзик DCK
+    }
     if (name.includes('шлифовальные ленточн')) {
       return `/images/products/KSA125.png`; // Ленточная шлифмашина (использую имеющееся изображение)
     }
@@ -139,9 +182,10 @@ export default function CategoryCard({ category }: CategoryCardProps) {
                   if (!target.src.includes('KJZ06-13K.png')) {
                     target.src = '/images/products/KJZ06-13K.png';
                   } else {
-                    // Если и универсальное изображение не загружается, используем цветной фон
+                    // Если и универсальное изображение не загружается, скрываем изображение
                     target.style.display = 'none';
-                    target.parentElement!.className += ` bg-gradient-to-br from-${colorClass}/10 to-${colorClass}/20`;
+                  }
+                }}get.parentElement!.className += ` bg-gradient-to-br from-${colorClass}/10 to-${colorClass}/20`;
                   }
                 }}
               />
