@@ -76,9 +76,6 @@ export default function CategoryCard({ category }: CategoryCardProps) {
       return `/images/products/KRH20V-28(TYPEH2K).png`; // Молоток DCK
     }
     
-    // Фоллбэк изображения по умолчанию
-    return `/images/products/KJZ06-13K.png`;g`; // Лобзик DCK
-    }
     if (name.includes('шлифовальные ленточн')) {
       return `/images/products/KSA125.png`; // Ленточная шлифмашина (использую имеющееся изображение)
     }
@@ -184,8 +181,6 @@ export default function CategoryCard({ category }: CategoryCardProps) {
                   } else {
                     // Если и универсальное изображение не загружается, скрываем изображение
                     target.style.display = 'none';
-                  }
-                }}get.parentElement!.className += ` bg-gradient-to-br from-${colorClass}/10 to-${colorClass}/20`;
                   }
                 }}
               />
