@@ -72,7 +72,7 @@ export default function CategoryCard({ category }: CategoryCardProps) {
       return `/images/products/KDSJ10(TYPEEK).png`;
     }
     if (name.includes('генератор')) {
-      return `/images/products/KDGG500(TYPEDM).svg`;
+      return `https://tss.ru/upload/iblock/5a6/qbpfq6fmv4t8s67jfvlot6cel2julqvv.jpg`;
     }
     if (name.includes('компрессор')) {
       return `/images/products/KJC02-30.png`;
