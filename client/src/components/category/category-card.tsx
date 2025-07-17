@@ -78,10 +78,10 @@ export default function CategoryCard({ category }: CategoryCardProps) {
       return `/images/products/KJC02-30.png`;
     }
     if (name.includes('промышленн')) {
-      return `/images/products/KDPB998(TYPEH2K).png`;
+      return `https://tss.ru/upload/iblock/ee2/20ai2zipw762r17jz934zoilpep9xv8l.jpg`;
     }
     if (name.includes('сварочн')) {
-      return `/images/products/KMB03-82.png`;
+      return `https://tss.ru/upload/iblock/2bc/wv3k6v83glz5b1psrq0kq9obielayuhs.jpg`;
     }
     if (name.includes('набор') || name.includes('комплект')) {
       return `/images/products/KDKIT25(TYPEEK).svg`;
