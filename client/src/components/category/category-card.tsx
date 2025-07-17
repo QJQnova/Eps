@@ -1,149 +1,96 @@
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import { Category } from "@shared/schema";
+import { Category, Product } from "@shared/schema";
 
 interface CategoryCardProps {
   category: Category;
 }
 
 export default function CategoryCard({ category }: CategoryCardProps) {
-  // Получаем реальное изображение товара из конкретной категории
+  // Получаем первый товар из категории для изображения
+  const { data: products = [] } = useQuery<{ products: Product[] }>({
+    queryKey: [`/api/products?categoryId=${category.id}&limit=1`],
+    staleTime: 300000, // 5 минут кеш
+    enabled: !!category.id,
+  });
+
+  // Получаем изображение первого товара из категории или fallback
   const getCategoryImage = () => {
+    // Сначала пробуем получить изображение из первого товара категории
+    if (products.length > 0 && products[0].imageUrl) {
+      return products[0].imageUrl;
+    }
+
+    // Если нет товаров или изображений, используем fallback на основе названия категории
     const name = category.name.toLowerCase();
     
     // Используем реальные изображения товаров из каждой категории
     if (name.includes('аккумулятор')) {
-      return `/images/products/FFBL2020.png`; // Аккумулятор DCK FFBL2020
+      return `/images/products/FFBL2020.png`;
     }
     if (name.includes('воздуходувк')) {
-      return `/images/products/KDQF32(TYPEBM).png`; // Воздуходувка DCK
+      return `/images/products/KDQF32(TYPEBM).png`;
     }
     if (name.includes('гайковерт')) {
-      return `/images/products/KDPB04-10(TYPEEK).png`; // Гайковерт DCK
+      return `/images/products/KDPB04-10(TYPEEK).png`;
     }
     if (name === 'дрели') {
-      return `/images/products/KJZ03-16B.png`; // Дрель DCK
+      return `/images/products/KJZ03-16B.png`;
     }
     if (name.includes('дрели алмазн')) {
-      return `/images/products/KZZ02-160.png`; // Дрель алмазная DCK
+      return `/images/products/KZZ02-160.png`;
     }
     if (name.includes('зарядн')) {
-      return `/images/products/FFBL2020.png`; // Зарядное устройство (показываем аккумулятор)
+      return `/images/products/FFBL2020.png`;
     }
     if (name.includes('инструменты универсальн')) {
-      return `/images/products/KDMD12(TYPEEK).png`; // Многофункциональный инструмент DCK
+      return `/images/products/KDMD12(TYPEEK).png`;
     }
     if (name.includes('лобзик')) {
-      return `/images/products/KDMQ85(TYPEFK).png`; // Лобзик DCK
+      return `/images/products/KDMQ85(TYPEFK).png`;
     }
     if (name.includes('перфоратор')) {
-      return `/images/products/KRH20V-26(TYPEH2KKIT).png`; // Перфоратор DCK
+      return `/images/products/KRH20V-26(TYPEH2KKIT).png`;
     }
     if (name.includes('пил')) {
-      return `/images/products/KDMY02-185(TYPEBM).png`; // Пила DCK
+      return `/images/products/KDMY02-185(TYPEBM).png`;
     }
     if (name.includes('шлифовальн')) {
-      return `/images/products/KDSM03-125(TYPEFK).png`; // Шлифмашина DCK
+      return `/images/products/KDSM03-125(TYPEFK).png`;
     }
     if (name.includes('болгарк')) {
-      return `/images/products/KDSM03-125(TYPEFK).png`; // Болгарка DCK
+      return `/images/products/KDSM03-125(TYPEFK).png`;
     }
     if (name.includes('рубанок')) {
-      return `/images/products/KDPL04-8(TYPEEK).png`; // Рубанок DCK
+      return `/images/products/KDPL04-8(TYPEEK).png`;
     }
     if (name.includes('фрезер')) {
-      return `/images/products/KDPM50(TYPEEK).png`; // Фрезер DCK
+      return `/images/products/KDPM50(TYPEEK).png`;
     }
     if (name.includes('электролобзик')) {
-      return `/images/products/KDSJ10(TYPEEK).png`; // Электролобзик DCK
+      return `/images/products/KDSJ10(TYPEEK).png`;
     }
     if (name.includes('генератор')) {
-      return `/images/products/KDGG500(TYPEDM).svg`; // Генератор DCK
+      return `/images/products/KDGG500(TYPEDM).svg`;
     }
     if (name.includes('компрессор')) {
-      return `/images/products/KJC02-30.png`; // Компрессор DCK
+      return `/images/products/KJC02-30.png`;
     }
     if (name.includes('промышленн')) {
-      return `/images/products/KDPB998(TYPEH2K).png`; // Промышленное оборудование
+      return `/images/products/KDPB998(TYPEH2K).png`;
     }
     if (name.includes('сварочн')) {
-      return `/images/products/KMB03-82.png`; // Сварочное оборудование
+      return `/images/products/KMB03-82.png`;
     }
     if (name.includes('набор') || name.includes('комплект')) {
-      return `/images/products/KDKIT25(TYPEEK).svg`; // Наборы инструментов
+      return `/images/products/KDKIT25(TYPEEK).svg`;
     }
     if (name.includes('молоток')) {
-      return `/images/products/KRH20V-28(TYPEH2K).png`; // Молоток DCK
+      return `/images/products/KRH20V-28(TYPEH2K).png`;
     }
     
-    if (name.includes('шлифовальные ленточн')) {
-      return `/images/products/KSA125.png`; // Ленточная шлифмашина (использую имеющееся изображение)
-    }
-    if (name.includes('шлифовальные плоск')) {
-      return `/images/products/KSB02-100.png`; // Плоская шлифмашина DCK
-    }
-    if (name.includes('шлифовальные прям')) {
-      return `/images/products/KSA125.png`; // Прямая шлифмашина (использую имеющееся изображение)
-    }
-    if (name.includes('шлифовальные угловые') && !name.includes('полировальн')) {
-      return `/images/products/KDSM03-125(TYPEFK).png`; // УШМ DCK
-    }
-    if (name.includes('шлифовальные угловые полировальн')) {
-      return `/images/products/KDSP02-180(TYPEFK).png`; // Полировальная машина
-    }
-    if (name.includes('шлифовальные эксцентрик')) {
-      return `/images/products/KSA02-125.png`; // Эксцентриковая шлифмашина DCK
-    }
-    if (name.includes('миксер')) {
-      return `/images/products/KMB03-82.png`; // Миксер DCK (использую имеющееся изображение)
-    }
-    if (name.includes('набор')) {
-      return `/images/products/KMY02-235.png`; // Набор инструментов
-    }
-    if (name.includes('отбойн')) {
-      return `/images/products/KZG02-15.png`; // Отбойный молоток DCK
-    }
-    if (name.includes('перфоратор')) {
-      return `/images/products/KDZC04-24(TYPEFK).png`; // Перфоратор DCK
-    }
-    if (name.includes('пила отрезн')) {
-      return `/images/products/KJG04-355BS.png`; // Отрезная пила DCK
-    }
-    if (name.includes('пилы дисков')) {
-      return `/images/products/KDMY02-185(TYPEBM).png`; // Дисковая пила DCK
-    }
-    if (name.includes('пилы сабельн')) {
-      return `/images/products/KDJF22(TYPEDM).jpg`; // Сабельная пила DCK
-    }
-    if (name.includes('пилы торцовочн')) {
-      return `/images/products/KJX03-255.png`; // Торцовочная пила DCK
-    }
-    if (name.includes('пилы цепн')) {
-      return `/images/products/KJC02-30.png`; // Цепная пила DCK
-    }
-    if (name.includes('рубанок')) {
-      return `/images/products/KMB03-82.png`; // Рубанок DCK
-    }
-    if (name.includes('станки сверлильн')) {
-      return `/images/products/KJC02-30.png`; // Сверлильный станок DCK
-    }
-    if (name.includes('фен')) {
-      return `/images/products/KQB03-2000.png`; // Фен технический DCK
-    }
-    if (name.includes('фрезер')) {
-      return `/images/products/KMP04-6B.png`; // Фрезер DCK
-    }
-    if (name.includes('шприц')) {
-      return `/images/products/KDMY125(TYPEFK).png`; // Шприц для смазки
-    }
-    if (name.includes('штроборез')) {
-      return `/images/products/KZR02-150.png`; // Штроборез DCK
-    }
-    if (name.includes('шуруповерт')) {
-      return `/images/products/KDJZ03-13(TYPEEM).png`; // Шуруповерт DCK
-    }
-    
-    // По умолчанию - универсальный инструмент
+    // По умолчанию
     return `/images/products/KJZ06-13K.png`;
   };
 
@@ -174,12 +121,10 @@ export default function CategoryCard({ category }: CategoryCardProps) {
                 alt={category.name}
                 className="w-full h-full object-contain"
                 onError={(e) => {
-                  // Попробуем загрузить универсальное изображение
                   const target = e.currentTarget;
                   if (!target.src.includes('KJZ06-13K.png')) {
                     target.src = '/images/products/KJZ06-13K.png';
                   } else {
-                    // Если и универсальное изображение не загружается, скрываем изображение
                     target.style.display = 'none';
                   }
                 }}
