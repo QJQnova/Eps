@@ -153,11 +153,13 @@ export default function Home() {
                 <div className={`w-12 h-12 rounded-full ${
                   selectedSupplier === 'tss' 
                     ? "bg-white/20" 
-                    : "bg-gradient-to-r from-blue-600 to-blue-700"
-                } flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                  <Settings className={`w-6 h-6 ${
-                    selectedSupplier === 'tss' ? "text-white" : "text-white"
-                  }`} />
+                    : "bg-white"
+                } flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
+                  <img 
+                    src="https://tss.ru/bitrix/templates/tss_store_tpl/images/logo4.svg" 
+                    alt="TSS Logo"
+                    className="w-8 h-8 object-contain"
+                  />
                 </div>
                 <div className="text-center">
                   <p className={`text-sm ${
