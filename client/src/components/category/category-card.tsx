@@ -9,17 +9,23 @@ interface CategoryCardProps {
 
 export default function CategoryCard({ category }: CategoryCardProps) {
   // Получаем первый товар из категории для изображения
-  const { data: products = [] } = useQuery<{ products: Product[] }>({
+  const { data: productsResponse } = useQuery<{ products: Product[] }>({
     queryKey: [`/api/products?categoryId=${category.id}&limit=1`],
     staleTime: 300000, // 5 минут кеш
     enabled: !!category.id,
   });
 
+  const products = productsResponse?.products || [];
+
   // Получаем изображение первого товара из категории
   const getCategoryImage = () => {
     // Используем только изображение из товаров данной категории
     if (products.length > 0 && products[0].imageUrl) {
-      return products[0].imageUrl;
+      // Проверяем, что imageUrl не пустой
+      const imageUrl = products[0].imageUrl.trim();
+      if (imageUrl && imageUrl !== '') {
+        return imageUrl;
+      }
     }
 
     // Если в категории нет товаров с изображениями, показываем placeholder
