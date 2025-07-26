@@ -5,7 +5,7 @@ import { useCart } from "@/lib/cart";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, User, ShoppingCart, Menu, X, ChevronDown, Package, LogIn, LogOut } from "lucide-react";
+import { Search, User, ShoppingCart, Menu, X, Package, Building, MapPin, LogIn, LogOut, ChevronDown, ScrollArea } from "lucide-react";
 import { Category } from "@shared/schema";
 import {
   DropdownMenu,
@@ -14,7 +14,6 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -221,26 +220,6 @@ export default function Header() {
                   <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
                 </Link>
 
-                {/* Услуги */}
-                <Link href="/services" className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105">
-                  <span className="relative z-10">Услуги</span>
-                  <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
-                </Link>
-
-                {/* Акции */}
-                <Link href="/promotions" className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105">
-                  <span className="relative z-10">Акции</span>
-                  <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
-                  {/* Индикатор "горячих" акций */}
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse shadow-lg"></div>
-                </Link>
-
-                {/* Новости */}
-                <Link href="/publications" className="group relative flex items-center px-4 py-3 text-white font-medium text-sm tracking-wide transition-all duration-300 hover:bg-white/15 rounded-lg hover:shadow-lg hover:scale-105">
-                  <span className="relative z-10">Новости</span>
-                  <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center"></div>
-                </Link>
-
                 {/* Выпадающий список категорий с улучшенным дизайном */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -387,14 +366,6 @@ export default function Header() {
                 </Link>
               </div>
             </div>
-
-            <Link href="/services" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-red-50 hover:text-eps-red rounded-lg transition-colors">
-              Услуги
-            </Link>
-
-            <Link href="/promotions" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-red-50 hover:text-eps-red rounded-lg transition-colors">
-              Акции
-            </Link>
 
             <Link href="/publications" className="block px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-red-50 hover:text-eps-red rounded-lg transition-colors">
               Новости
