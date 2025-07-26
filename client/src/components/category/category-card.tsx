@@ -15,83 +15,15 @@ export default function CategoryCard({ category }: CategoryCardProps) {
     enabled: !!category.id,
   });
 
-  // Получаем изображение первого товара из категории или fallback
+  // Получаем изображение первого товара из категории
   const getCategoryImage = () => {
-    // Сначала пробуем получить изображение из первого товара категории
+    // Используем только изображение из товаров данной категории
     if (products.length > 0 && products[0].imageUrl) {
       return products[0].imageUrl;
     }
 
-    // Если нет товаров или изображений, используем fallback на основе названия категории
-    const name = category.name.toLowerCase();
-    
-    // Используем реальные изображения товаров из каждой категории
-    if (name.includes('аккумулятор')) {
-      return `/images/products/FFBL2020.png`;
-    }
-    if (name.includes('воздуходувк')) {
-      return `/images/products/KDQF32(TYPEBM).png`;
-    }
-    if (name.includes('гайковерт')) {
-      return `/images/products/KDPB04-10(TYPEEK).png`;
-    }
-    if (name === 'дрели') {
-      return `/images/products/KJZ03-16B.png`;
-    }
-    if (name.includes('дрели алмазн')) {
-      return `/images/products/KZZ02-160.png`;
-    }
-    if (name.includes('зарядн')) {
-      return `/images/products/FFBL2020.png`;
-    }
-    if (name.includes('инструменты универсальн')) {
-      return `/images/products/KDMD12(TYPEEK).png`;
-    }
-    if (name.includes('лобзик')) {
-      return `/images/products/KDMQ85(TYPEFK).png`;
-    }
-    if (name.includes('перфоратор')) {
-      return `/images/products/KRH20V-26(TYPEH2KKIT).png`;
-    }
-    if (name.includes('пил')) {
-      return `/images/products/KDMY02-185(TYPEBM).png`;
-    }
-    if (name.includes('шлифовальн')) {
-      return `/images/products/KDSM03-125(TYPEFK).png`;
-    }
-    if (name.includes('болгарк')) {
-      return `/images/products/KDSM03-125(TYPEFK).png`;
-    }
-    if (name.includes('рубанок')) {
-      return `/images/products/KDPL04-8(TYPEEK).png`;
-    }
-    if (name.includes('фрезер')) {
-      return `/images/products/KDPM50(TYPEEK).png`;
-    }
-    if (name.includes('электролобзик')) {
-      return `/images/products/KDSJ10(TYPEEK).png`;
-    }
-    if (name.includes('генератор')) {
-      return `https://tss.ru/upload/iblock/5a6/qbpfq6fmv4t8s67jfvlot6cel2julqvv.jpg`;
-    }
-    if (name.includes('компрессор')) {
-      return `/images/products/KJC02-30.png`;
-    }
-    if (name.includes('промышленн')) {
-      return `https://tss.ru/upload/iblock/ee2/20ai2zipw762r17jz934zoilpep9xv8l.jpg`;
-    }
-    if (name.includes('сварочн')) {
-      return `https://tss.ru/upload/iblock/2bc/wv3k6v83glz5b1psrq0kq9obielayuhs.jpg`;
-    }
-    if (name.includes('набор') || name.includes('комплект')) {
-      return `/images/products/KDKIT25(TYPEEK).svg`;
-    }
-    if (name.includes('молоток')) {
-      return `/images/products/KRH20V-28(TYPEH2K).png`;
-    }
-    
-    // По умолчанию
-    return `/images/products/KJZ06-13K.png`;
+    // Если в категории нет товаров с изображениями, показываем placeholder
+    return `/placeholder-product.svg`;
   };
 
   // Определим цвет категории на основе ее названия
@@ -122,10 +54,8 @@ export default function CategoryCard({ category }: CategoryCardProps) {
                 className="w-full h-full object-contain"
                 onError={(e) => {
                   const target = e.currentTarget;
-                  if (!target.src.includes('KJZ06-13K.png')) {
-                    target.src = '/images/products/KJZ06-13K.png';
-                  } else {
-                    target.style.display = 'none';
+                  if (!target.src.includes('placeholder-product.svg')) {
+                    target.src = '/placeholder-product.svg';
                   }
                 }}
               />
