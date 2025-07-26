@@ -125,6 +125,9 @@ export default function Publications() {
     </div>
   );
 }
+
+// Имитация данных для страницы
+const ARTICLES = [
   {
     id: 1,
     title: "Как выбрать дрель для домашнего использования",
