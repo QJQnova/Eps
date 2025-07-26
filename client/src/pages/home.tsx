@@ -156,7 +156,7 @@ export default function Home() {
                     : "bg-white"
                 } flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
                   <img 
-                    src="https://tss.ru/bitrix/templates/tss_store_tpl/images/logo4.svg" 
+                    src="https://gigamarket.by/upload/iblock/bed/uraa243d5ayfwvu1y4vnn64z5qy34hb8/CD.jpg" 
                     alt="TSS Logo"
                     className="w-8 h-8 object-contain"
                   />
