@@ -234,19 +234,19 @@ export class DatabaseStorage implements IStorage {
     const allCategories = await db.select().from(categories).orderBy(categories.name);
 
     // Фильтруем товары по поставщику если указан
-    let productQuery = db
+    const conditions = [eq(products.isActive, true)];
+    if (supplier) {
+      conditions.push(eq(products.tag, supplier));
+    }
+
+    const productCounts = await db
       .select({
         categoryId: products.categoryId,
         count: sql<number>`count(*)`.as('count')
       })
       .from(products)
-      .where(eq(products.isActive, true));
-
-    if (supplier) {
-      productQuery = productQuery.where(eq(products.tag, supplier));
-    }
-
-    const productCounts = await productQuery.groupBy(products.categoryId);
+      .where(and(...conditions))
+      .groupBy(products.categoryId);
 
     // Создаем Map для быстрого поиска счетчиков
     const countMap = new Map(
@@ -264,22 +264,44 @@ export class DatabaseStorage implements IStorage {
 
   async getCategoryById(id: number): Promise<Category | undefined> {
     const result = await db.select().from(categories).where(eq(categories.id, id));
-    return result.length > 0 ? result[0] : undefined;
+    if (result.length === 0) return undefined;
+    
+    const category = result[0];
+    return {
+      ...category,
+      productCount: category.productCount ?? 0
+    };
   }
 
   async getCategoryBySlug(slug: string): Promise<Category | undefined> {
     const result = await db.select().from(categories).where(eq(categories.slug, slug));
-    return result.length > 0 ? result[0] : undefined;
+    if (result.length === 0) return undefined;
+    
+    const category = result[0];
+    return {
+      ...category,
+      productCount: category.productCount ?? 0
+    };
   }
 
   async getCategoryByName(name: string): Promise<Category | undefined> {
     const result = await db.select().from(categories).where(eq(categories.name, name));
-    return result.length > 0 ? result[0] : undefined;
+    if (result.length === 0) return undefined;
+    
+    const category = result[0];
+    return {
+      ...category,
+      productCount: category.productCount ?? 0
+    };
   }
 
   async createCategory(category: InsertCategory): Promise<Category> {
     const result = await db.insert(categories).values(category).returning();
-    return result[0];
+    const newCategory = result[0];
+    return {
+      ...newCategory,
+      productCount: newCategory.productCount ?? 0
+    };
   }
 
   async updateCategory(id: number, updateData: Partial<InsertCategory>): Promise<Category | undefined> {
@@ -287,7 +309,13 @@ export class DatabaseStorage implements IStorage {
       .set(updateData)
       .where(eq(categories.id, id))
       .returning();
-    return result.length > 0 ? result[0] : undefined;
+    if (result.length === 0) return undefined;
+    
+    const category = result[0];
+    return {
+      ...category,
+      productCount: category.productCount ?? 0
+    };
   }
 
   async deleteCategory(id: number): Promise<boolean> {
@@ -394,23 +422,21 @@ export class DatabaseStorage implements IStorage {
     // Сортировка
     if (params.sort) {
       switch (params.sort) {
-        case "price-low":
+        case "price_asc":
           baseQuery = baseQuery.orderBy(asc(products.price));
           break;
-        case "price-high":
+        case "price_desc":
           baseQuery = baseQuery.orderBy(desc(products.price));
           break;
-        case "newest":
-          baseQuery = baseQuery.orderBy(desc(products.id));
+        case "name_asc":
+          baseQuery = baseQuery.orderBy(asc(products.name));
           break;
-        case "popular":
-          baseQuery = baseQuery.orderBy(desc(products.isFeatured));
-          baseQuery = baseQuery.orderBy(desc(products.id));
+        case "name_desc":
+          baseQuery = baseQuery.orderBy(desc(products.name));
           break;
         case "featured":
         default:
-          baseQuery = baseQuery.orderBy(desc(products.isFeatured));
-          baseQuery = baseQuery.orderBy(asc(products.name));
+          baseQuery = baseQuery.orderBy(desc(products.isFeatured), asc(products.name));
           break;
       }
     }
@@ -863,8 +889,7 @@ export class DatabaseStorage implements IStorage {
       if (result.length === 0) {
         // Если настроек еще нет, создаем их
         await db.insert(shopSettings).values({
-          ```text
-key: 'shop_settings',
+          key: 'shop_settings',
           value: validSettings as any,
           updatedAt: new Date()
         });

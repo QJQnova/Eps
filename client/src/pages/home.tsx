@@ -198,16 +198,12 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {categories.map((category) => {
-            console.log('Category data:', category); // Отладка
-            return (
-              <CategoryCard
-                key={category.id}
-                category={category}
-                productCount={category.productCount || 0}
-              />
-            );
-          })}
+              {categories.map((category) => (
+                <CategoryCard
+                  key={category.id}
+                  category={category}
+                />
+              ))}
             </div>
           </div>
         </section>
