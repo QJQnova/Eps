@@ -126,11 +126,13 @@ export default function Home() {
                 <div className={`w-12 h-12 rounded-full ${
                   selectedSupplier === 'DCK' 
                     ? "bg-white/20" 
-                    : "bg-gradient-to-r from-green-600 to-green-700"
-                } flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                  <Drill className={`w-6 h-6 ${
-                    selectedSupplier === 'DCK' ? "text-white" : "text-white"
-                  }`} />
+                    : "bg-white"
+                } flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
+                  <img 
+                    src="https://dcktools.ru/wp-content/themes/dck/images/logo.svg" 
+                    alt="DCK Tools Logo"
+                    className="w-8 h-8 object-contain"
+                  />
                 </div>
                 <div className="text-center">
                   <h3 className="text-lg font-semibold">DCK TOOLS</h3>
