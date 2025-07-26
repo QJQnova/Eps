@@ -14,10 +14,10 @@ export default function Home() {
   const queryParams = new URLSearchParams(location.split('?')[1] || '');
   const searchQuery = queryParams.get('query') || '';
   const supplierParam = queryParams.get('supplier') || undefined;
-
+  
   // Состояние для выбранного поставщика
   const [selectedSupplier, setSelectedSupplier] = useState<string | undefined>(supplierParam);
-
+  
   // Fetch categories с учетом выбранного поставщика
   const { data: categories = [] } = useQuery<Category[]>({ 
     queryKey: ["/api/categories", selectedSupplier],
@@ -33,7 +33,7 @@ export default function Home() {
     staleTime: 0, // Принудительное обновление
     gcTime: 0, // Не кешировать
   });
-
+  
   return (
     <div>
       <Helmet>
@@ -41,7 +41,7 @@ export default function Home() {
         <meta name="description" content="Профессиональные инструменты и оборудование от компании ЭПС. Широкий ассортимент по выгодным ценам." />
       </Helmet>
       {/* Hero Section - Центрированный дизайн */}
-      <section className="relative bg-gradient-to-r from-eps-blue to-eps-purple text-gray-900 overflow-hidden min-h-[80vh]">
+      <section className="relative bg-gradient-to-r from-eps-red via-red-500 to-eps-yellow text-white overflow-hidden min-h-[80vh]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-10">
           <div className="text-center hero-slide-up">
             <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-8 leading-tight">
@@ -55,7 +55,7 @@ export default function Home() {
             <div className="flex flex-wrap gap-6 justify-center">
               <Button 
                 size="lg"
-                className="bg-eps-red text-white hover:bg-red-600 transition-all font-semibold px-10 py-5 text-lg rounded-full shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="bg-white text-eps-red hover:bg-gray-50 transition-all font-semibold px-10 py-5 text-lg rounded-full shadow-lg hover:shadow-xl transform hover:scale-105"
                 asChild
               >
                 <Link href="#products">Купить сейчас</Link>
@@ -63,7 +63,7 @@ export default function Home() {
               <Button 
                 variant="outline"
                 size="lg"
-                className="bg-transparent hover:bg-gray-100 border-2 border-eps-red text-eps-red font-semibold px-10 py-5 text-lg rounded-full hover:scale-105 transition-all"
+                className="bg-transparent hover:bg-white/20 border-2 border-white text-white font-semibold px-10 py-5 text-lg rounded-full hover:scale-105 transition-all"
                 asChild
               >
                 <Link href="#categories">Посмотреть категории</Link>
@@ -71,21 +71,21 @@ export default function Home() {
             </div>
           </div>
         </div>
-
+        
         {/* Декоративные элементы */}
         <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-yellow-300/20 rounded-full blur-2xl animate-pulse delay-1000"></div>
         <div className="absolute top-1/2 right-1/3 w-16 h-16 bg-white/5 rounded-full blur-xl animate-pulse delay-500"></div>
       </section>
-
+      
       {/* Supplier Selection Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Выберите поставщика</h2>
             <p className="text-lg text-gray-600">Найдите инструменты от проверенных поставщиков</p>
           </div>
-
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             <Button 
               className={`${
@@ -128,11 +128,9 @@ export default function Home() {
                     ? "bg-white/20" 
                     : "bg-gradient-to-r from-green-600 to-green-700"
                 } flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                  <img 
-                    src="https://dcktools.ru/wp-content/themes/dck/images/logo.svg" 
-                    alt="DCK Tools Logo"
-                    className="w-8 h-8 object-contain"
-                  />
+                  <Drill className={`w-6 h-6 ${
+                    selectedSupplier === 'DCK' ? "text-white" : "text-white"
+                  }`} />
                 </div>
                 <div className="text-center">
                   <h3 className="text-lg font-semibold">DCK TOOLS</h3>
@@ -172,16 +170,16 @@ export default function Home() {
           </div>
         </div>
       </section>
-
+      
       {/* Categories Section */}
       {!searchQuery && (
-        <section id="categories" className="py-20 bg-white relative overflow-hidden">
+        <section id="categories" className="py-20 bg-gradient-to-br from-slate-50 via-blue-50/30 to-red-50/30 relative overflow-hidden">
           {/* Decorative Background Elements */}
           <div className="absolute inset-0">
             <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-br from-eps-orange/5 to-transparent rounded-full blur-3xl"></div>
             <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-eps-red/5 to-transparent rounded-full blur-3xl"></div>
           </div>
-
+          
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Beautiful Header with Icon */}
             <div className="text-center mb-12">
@@ -197,7 +195,7 @@ export default function Home() {
                 Выберите подходящую категорию инструментов для вашей работы
               </p>
             </div>
-
+            
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {categories.map((category) => (
                 <CategoryCard key={category.id} category={category} />
@@ -206,14 +204,14 @@ export default function Home() {
           </div>
         </section>
       )}
-
+      
       {/* Баннер установки приложения */}
       <section className="py-6 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AppInstallBanner />
         </div>
       </section>
-
+      
       {/* Products Section */}
       <section id="products" className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
