@@ -863,7 +863,8 @@ export class DatabaseStorage implements IStorage {
       if (result.length === 0) {
         // Если настроек еще нет, создаем их
         await db.insert(shopSettings).values({
-          key: 'shop_settings',
+          ```text
+key: 'shop_settings',
           value: validSettings as any,
           updatedAt: new Date()
         });
@@ -998,6 +999,34 @@ export class DatabaseStorage implements IStorage {
   async getCategoriesCount(): Promise<number> {
     const result = await db.select({ count: sql`count(*)` }).from(categories);
     return Number(result[0]?.count || 0);
+  }
+
+  
+  async getAllCategories(): Promise<Category[]> {
+    // Получаем все категории
+    const allCategories = await db.select().from(categories).orderBy(categories.name);
+
+    // Получаем счетчики товаров для всех категорий одним запросом
+    const productCounts = await db
+      .select({
+        categoryId: products.categoryId,
+        count: sql<number>`count(case when ${products.id} is not null then 1 end)`.as('count')
+      })
+      .from(products)
+      .leftJoin(categories, eq(products.categoryId, categories.id))
+      .where(eq(products.isActive, true))
+      .groupBy(products.categoryId);
+
+    // Создаем Map для быстрого поиска счетчиков
+    const countMap = new Map(
+      productCounts.map(pc => [pc.categoryId, Number(pc.count)])
+    );
+
+    // Объединяем данные
+    return allCategories.map(category => ({
+      ...category,
+      productCount: countMap.get(category.id) || 0
+    })) as Category[];
   }
 }
 
