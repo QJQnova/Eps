@@ -1,11 +1,4 @@
-` tags.
 
-```text
-Modified about page based on user request to change mission statement and remove order pick up points and remove the sections "Services" and "Promotions".
-```
-
-```
-<replit_final_file>
 import { Helmet } from "react-helmet";
 import { MapPin, Phone, Clock } from "lucide-react";
 
@@ -163,8 +156,8 @@ export default function AboutPage() {
           </div>
 
           <div className="bg-white rounded-lg p-6 shadow-md border border-gray-100">
-              {/* Блок временно пуст */}
-            </div>
+            {/* Блок временно пуст */}
+          </div>
         </div>
       </div>
 
