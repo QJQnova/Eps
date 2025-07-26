@@ -1,3 +1,11 @@
+` tags.
+
+```text
+Modified about page based on user request to change mission statement and remove order pick up points and remove the sections "Services" and "Promotions".
+```
+
+```
+<replit_final_file>
 import { Helmet } from "react-helmet";
 import { MapPin, Phone, Clock } from "lucide-react";
 
@@ -48,10 +56,10 @@ export default function AboutPage() {
 
       <div className="mb-10">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">О компании ЭПС</h1>
-        
+
         <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
           <div className="p-8">
-            <h2 className="text-2xl font-semibold mb-4 text-eps-red">Наша миссия</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-eps-red">Наша цель</h2>
             <p className="text-gray-700 mb-6 leading-relaxed">
               Компания «ЭПС» специализируется на поставках профессионального инструмента и оборудования для строительных, ремонтных и промышленных работ. Мы предлагаем широкий ассортимент качественной продукции от ведущих производителей по конкурентоспособным ценам.
             </p>
@@ -59,7 +67,7 @@ export default function AboutPage() {
               Наша цель — обеспечить профессионалов надежным инструментом, который позволит выполнять работу максимально эффективно и качественно. Мы стремимся к долгосрочным партнерским отношениям с нашими клиентами, предоставляя им лучшее обслуживание и техническую поддержку.
             </p>
             <p className="text-gray-700 leading-relaxed">
-              Компания «ЭПС» постоянно расширяет свое присутствие по всей стране, открывая новые филиалы и пункты выдачи заказов, чтобы быть ближе к своим партнерам.
+              Компания «ЭПС» постоянно расширяет свое присутствие по всей стране, открывая новые филиалы, чтобы быть ближе к своим партнерам.
             </p>
           </div>
         </div>
@@ -67,7 +75,7 @@ export default function AboutPage() {
 
       <div className="mb-10">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Наши филиалы</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {locations.map((location, index) => (
             <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow duration-300">
@@ -102,7 +110,7 @@ export default function AboutPage() {
 
       <div className="mb-10">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Преимущества сотрудничества с ЭПС</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-white rounded-lg p-6 shadow-md border border-gray-100">
             <div className="rounded-full bg-eps-red/10 w-12 h-12 flex items-center justify-center mb-4">
@@ -113,7 +121,7 @@ export default function AboutPage() {
             <h3 className="text-lg font-semibold mb-2">Гарантия качества</h3>
             <p className="text-gray-600">Мы предлагаем только сертифицированную продукцию от проверенных производителей с официальной гарантией.</p>
           </div>
-          
+
           <div className="bg-white rounded-lg p-6 shadow-md border border-gray-100">
             <div className="rounded-full bg-eps-red/10 w-12 h-12 flex items-center justify-center mb-4">
               <svg className="w-6 h-6 text-eps-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -123,7 +131,7 @@ export default function AboutPage() {
             <h3 className="text-lg font-semibold mb-2">Конкурентные цены</h3>
             <p className="text-gray-600">Благодаря прямым поставкам и оптимизации логистики мы поддерживаем доступные цены на весь ассортимент.</p>
           </div>
-          
+
           <div className="bg-white rounded-lg p-6 shadow-md border border-gray-100">
             <div className="rounded-full bg-eps-red/10 w-12 h-12 flex items-center justify-center mb-4">
               <svg className="w-6 h-6 text-eps-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -133,7 +141,7 @@ export default function AboutPage() {
             <h3 className="text-lg font-semibold mb-2">Быстрая доставка</h3>
             <p className="text-gray-600">Оперативная доставка по всей России с собственными пунктами выдачи в крупных городах.</p>
           </div>
-          
+
           <div className="bg-white rounded-lg p-6 shadow-md border border-gray-100">
             <div className="rounded-full bg-eps-red/10 w-12 h-12 flex items-center justify-center mb-4">
               <svg className="w-6 h-6 text-eps-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -143,7 +151,7 @@ export default function AboutPage() {
             <h3 className="text-lg font-semibold mb-2">Техническая поддержка</h3>
             <p className="text-gray-600">Наши специалисты всегда готовы предоставить консультацию по подбору и использованию оборудования.</p>
           </div>
-          
+
           <div className="bg-white rounded-lg p-6 shadow-md border border-gray-100">
             <div className="rounded-full bg-eps-red/10 w-12 h-12 flex items-center justify-center mb-4">
               <svg className="w-6 h-6 text-eps-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -153,19 +161,13 @@ export default function AboutPage() {
             <h3 className="text-lg font-semibold mb-2">Широкий ассортимент</h3>
             <p className="text-gray-600">Более 1000 наименований инструментов и оборудования для любых профессиональных задач.</p>
           </div>
-          
+
           <div className="bg-white rounded-lg p-6 shadow-md border border-gray-100">
-            <div className="rounded-full bg-eps-red/10 w-12 h-12 flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-eps-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              {/* Блок временно пуст */}
             </div>
-            <h3 className="text-lg font-semibold mb-2">Удобные способы оплаты</h3>
-            <p className="text-gray-600">Принимаем наличные, банковские карты, электронные платежи и безналичные переводы для юридических лиц.</p>
-          </div>
         </div>
       </div>
-      
+
       <div className="bg-gray-50 rounded-xl p-8 mb-10">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">О нас в цифрах</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
