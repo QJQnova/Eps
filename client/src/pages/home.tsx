@@ -106,7 +106,6 @@ export default function Home() {
                   }`} />
                 </div>
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold">ВСЕ ПОСТАВЩИКИ</h3>
                   <p className={`text-sm ${
                     selectedSupplier === undefined ? "text-white/90" : "text-gray-600"
                   }`}>Полный каталог инструментов</p>
@@ -135,7 +134,6 @@ export default function Home() {
                   />
                 </div>
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold">DCK TOOLS</h3>
                   <p className={`text-sm ${
                     selectedSupplier === 'DCK' ? "text-white/90" : "text-gray-600"
                   }`}>Электроинструменты</p>
@@ -162,7 +160,6 @@ export default function Home() {
                   }`} />
                 </div>
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold">TSS.RU</h3>
                   <p className={`text-sm ${
                     selectedSupplier === 'tss' ? "text-white/90" : "text-gray-600"
                   }`}>Промышленное оборудование</p>
