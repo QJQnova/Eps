@@ -4,6 +4,127 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Calendar, User, Clock, Bookmark, ChevronRight, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+export default function Publications() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [publications, setPublications] = useState([]);
+
+  const mockPublications = [
+    {
+      id: 1,
+      title: "Новые технологии в буровых работах",
+      excerpt: "Обзор современных технологий и оборудования для буровых работ...",
+      date: "2024-01-15",
+      author: "Инженер Петров",
+      readTime: "5 мин",
+      category: "Технологии"
+    },
+    {
+      id: 2,
+      title: "Безопасность на буровых площадках",
+      excerpt: "Важные аспекты обеспечения безопасности при проведении буровых работ...",
+      date: "2024-01-10",
+      author: "Специалист Иванов",
+      readTime: "8 мин",
+      category: "Безопасность"
+    }
+  ];
+
+  useEffect(() => {
+    setPublications(mockPublications);
+  }, []);
+
+  const filteredPublications = publications.filter(pub =>
+    pub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pub.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Публикации - Каталог буровых инструментов</title>
+        <meta name="description" content="Статьи и публикации о буровых инструментах и технологиях" />
+      </Helmet>
+
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4">Публикации</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Статьи, обзоры и новости о буровых инструментах и технологиях
+          </p>
+        </div>
+
+        {/* Search */}
+        <div className="max-w-md mx-auto mb-8">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Поиск публикаций..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        {/* Publications Grid */}
+        <ScrollArea className="h-[600px]">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredPublications.map((publication) => (
+              <div key={publication.id} className="bg-card rounded-lg border p-6 hover:shadow-lg transition-shadow">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                    {publication.category}
+                  </span>
+                </div>
+                
+                <h3 className="text-xl font-semibold mb-3 line-clamp-2">
+                  {publication.title}
+                </h3>
+                
+                <p className="text-muted-foreground mb-4 line-clamp-3">
+                  {publication.excerpt}
+                </p>
+                
+                <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1">
+                      <User className="h-4 w-4" />
+                      <span>{publication.author}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      <span>{publication.readTime}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    <span>{new Date(publication.date).toLocaleDateString('ru-RU')}</span>
+                  </div>
+                  
+                  <Button variant="ghost" size="sm" className="group">
+                    Читать
+                    <ChevronRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+
+        {filteredPublications.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Публикации не найдены</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}ut";
 
 // Имитация данных для страницы
 const ARTICLES = [
