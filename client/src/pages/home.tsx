@@ -41,21 +41,21 @@ export default function Home() {
         <meta name="description" content="Профессиональные инструменты и оборудование от компании ЭПС. Широкий ассортимент по выгодным ценам." />
       </Helmet>
       {/* Hero Section - Центрированный дизайн */}
-      <section className="relative bg-white text-gray-900 overflow-hidden min-h-[80vh]">
+      <section className="relative bg-gradient-to-r from-eps-red via-red-500 to-eps-yellow text-white overflow-hidden min-h-[80vh]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-10">
           <div className="text-center hero-slide-up">
             <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-8 leading-tight">
-              <span className="block text-gray-900">Коллекция</span>
-              <span className="block text-gray-900">профессиональных</span>
-              <span className="block text-gray-900">инструментов</span>
+              <span className="block text-white">Коллекция</span>
+              <span className="block text-white">профессиональных</span>
+              <span className="block text-white">инструментов</span>
             </h1>
-            <p className="text-lg md:text-xl lg:text-2xl mb-12 text-gray-700 max-w-4xl mx-auto">
+            <p className="text-lg md:text-xl lg:text-2xl mb-12 text-white/95 max-w-4xl mx-auto">
               Высококачественные инструменты для профессионалов и любителей. Создавайте с лучшим оборудованием.
             </p>
             <div className="flex flex-wrap gap-6 justify-center">
               <Button 
                 size="lg"
-                className="bg-eps-red text-white hover:bg-red-600 transition-all font-semibold px-10 py-5 text-lg rounded-full shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="bg-white text-eps-red hover:bg-gray-50 transition-all font-semibold px-10 py-5 text-lg rounded-full shadow-lg hover:shadow-xl transform hover:scale-105"
                 asChild
               >
                 <Link href="#products">Купить сейчас</Link>
@@ -63,7 +63,7 @@ export default function Home() {
               <Button 
                 variant="outline"
                 size="lg"
-                className="bg-transparent hover:bg-gray-100 border-2 border-eps-red text-eps-red font-semibold px-10 py-5 text-lg rounded-full hover:scale-105 transition-all"
+                className="bg-transparent hover:bg-white/20 border-2 border-white text-white font-semibold px-10 py-5 text-lg rounded-full hover:scale-105 transition-all"
                 asChild
               >
                 <Link href="#categories">Посмотреть категории</Link>
@@ -79,7 +79,7 @@ export default function Home() {
       </section>
       
       {/* Supplier Selection Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Выберите поставщика</h2>
@@ -175,7 +175,7 @@ export default function Home() {
       
       {/* Categories Section */}
       {!searchQuery && (
-        <section id="categories" className="py-20 bg-white relative overflow-hidden">
+        <section id="categories" className="py-20 bg-gradient-to-br from-slate-50 via-blue-50/30 to-red-50/30 relative overflow-hidden">
           {/* Decorative Background Elements */}
           <div className="absolute inset-0">
             <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-br from-eps-orange/5 to-transparent rounded-full blur-3xl"></div>
