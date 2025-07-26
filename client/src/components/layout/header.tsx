@@ -5,7 +5,8 @@ import { useCart } from "@/lib/cart";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, User, ShoppingCart, Menu, X, Package, Building, MapPin, LogIn, LogOut, ChevronDown, ScrollArea } from "lucide-react";
+import { Search, User, ShoppingCart, Menu, X, Package, Building, MapPin, LogIn, LogOut, ChevronDown } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Category } from "@shared/schema";
 import {
   DropdownMenu,
