@@ -86,7 +86,7 @@ export default function Home() {
             <p className="text-lg text-gray-600">Найдите инструменты от проверенных поставщиков</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             <Button 
               className={`${
                 selectedSupplier === undefined 
@@ -165,6 +165,34 @@ export default function Home() {
                   <p className={`text-sm ${
                     selectedSupplier === 'tss' ? "text-white/90" : "text-gray-600"
                   }`}>Промышленное оборудование</p>
+                </div>
+              </div>
+            </Button>
+
+            <Button 
+              className={`${
+                selectedSupplier === 'HUGONGWELD' 
+                  ? "bg-eps-red text-white border-eps-red" 
+                  : "bg-white text-gray-900 border-gray-200"
+              } hover:bg-gray-50 border-2 hover:border-eps-red h-auto p-6 transition-all duration-300 group`}
+              onClick={() => setSelectedSupplier('HUGONGWELD')}
+            >
+              <div className="flex flex-col items-center space-y-3">
+                <div className={`w-12 h-12 rounded-full ${
+                  selectedSupplier === 'HUGONGWELD' 
+                    ? "bg-white/20" 
+                    : "bg-gradient-to-r from-orange-400 to-red-500"
+                } flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
+                  <svg className={`w-6 h-6 ${
+                    selectedSupplier === 'HUGONGWELD' ? "text-white" : "text-white"
+                  }`} fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L13.09 8.26L16.74 6.85L15.91 11.14L20.35 12L15.91 12.86L16.74 17.15L13.09 15.74L12 22L10.91 15.74L7.26 17.15L8.09 12.86L3.65 12L8.09 11.14L7.26 6.85L10.91 8.26L12 2Z"/>
+                  </svg>
+                </div>
+                <div className="text-center">
+                  <p className={`text-sm ${
+                    selectedSupplier === 'HUGONGWELD' ? "text-white/90" : "text-gray-600"
+                  }`}>Сварочное оборудование</p>
                 </div>
               </div>
             </Button>

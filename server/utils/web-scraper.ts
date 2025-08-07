@@ -267,6 +267,17 @@ export const SUPPLIERS: SupplierConfig[] = [
     ],
     updateInterval: 12,
     isActive: true
+  },
+  {
+    id: 'hugongweld',
+    name: 'HUGONGWELD',
+    baseUrl: 'https://hugongweld.ru',
+    catalogUrls: [
+      'https://hugongweld.ru/',
+      'https://hugongweld.ru/catalog/'
+    ],
+    updateInterval: 24,
+    isActive: true
   }
 ];
 
